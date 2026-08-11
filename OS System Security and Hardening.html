@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OS Attacks & Hardening Masterclass</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --bg-elevated: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-primary: #06b6d4; /* Cyan */
+            --accent-secondary: #3b82f6; /* Blue */
+            --accent-danger: #ef4444; /* Red */
+            --accent-warning: #f59e0b; /* Amber */
+            --accent-success: #10b981; /* Emerald */
+            --border-color: #334155;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; overflow: hidden; scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Background Effects */
+        .bg-mesh {
+            position: fixed; inset: 0; z-index: 0;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 40%);
+            pointer-events: none;
+        }
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: 0;
+            background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+
+        /* Slide Container */
+        .slide-container {
+            position: relative; z-index: 1; height: 100%; width: 100%;
+            display: flex; flex-direction: column;
+        }
+
+        .slide {
+            display: none; 
+            flex-direction: column; 
+            height: 100%; 
+            width: 100%;
+            padding: 2rem 3rem;
+            overflow-y: auto;
+            animation: fadeIn 0.4s ease-out;
+        }
+        
+        .slide.active { display: flex; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Navigation */
+        .nav-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border-color);
+            padding: 0.75rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px;
+            color: var(--text-primary); padding: 0.5rem 1.5rem; cursor: pointer;
+            transition: all 0.2s; font-family: 'Space Grotesk', sans-serif; font-weight: 500;
+        }
+        .nav-btn:hover { background: var(--accent-primary); color: var(--bg-primary); border-color: var(--accent-primary); }
+        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; background: var(--bg-card); color: var(--text-secondary); border-color: var(--border-color); }
+        .nav-btn:focus { outline: 2px solid var(--accent-secondary); outline-offset: 2px; }
+
+        .progress-track { width: 200px; height: 4px; background: var(--bg-primary); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent-secondary), var(--accent-primary)); transition: width 0.3s; }
+
+        /* Typography */
+        .section-tag { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-primary); font-weight: 600; margin-bottom: 0.5rem; display: inline-block; background: rgba(6,182,212,0.1); padding: 0.25rem 0.75rem; border-radius: 9999px; }
+        .slide-title { font-size: clamp(1.5rem, 4vw, 2.5rem); font-weight: 700; margin-bottom: 0.5rem; line-height: 1.2; background: linear-gradient(135deg, #fff 0%, #94a3b8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .slide-subtitle { font-size: 1rem; color: var(--text-secondary); margin-bottom: 2rem; font-weight: 400; }
+
+        /* Cards & UI Elements */
+        .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; transition: all 0.2s; }
+        .card:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-2px); }
+        
+        .danger { border-left: 3px solid var(--accent-danger); }
+        .success { border-left: 3px solid var(--accent-success); }
+        .warning { border-left: 3px solid var(--accent-warning); }
+        .info { border-left: 3px solid var(--accent-secondary); }
+        
+        .win { border-left-color: #0078d4; }
+        .linux { border-left-color: #fcc624; }
+        .mac { border-left-color: #a2aaad; }
+        .android { border-left-color: #3ddc84; }
+        .ios { border-left-color: #007aff; }
+
+        /* Code & Terminal */
+        .code-block { background: #0f172a; border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; white-space: pre-wrap; color: #e2e8f0; position: relative; }
+        .terminal { background: #000; border-radius: 6px; border: 1px solid #333; overflow: hidden; }
+        .terminal-header { background: #1e1e1e; padding: 0.5rem; display: flex; gap: 0.5rem; border-bottom: 1px solid #333; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+        .terminal-body { padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #d4d4d4; min-height: 150px; }
+        
+        /* Specific styling helpers */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+        
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .slide { padding: 1rem; }
+            .nav-bar { padding: 0.5rem 1rem; }
+        }
+
+        /* Diagrams */
+        svg text { font-family: 'Space Grotesk', sans-serif; }
+        .dfd-box { fill: rgba(30, 41, 59, 0.5); stroke: var(--text-muted); stroke-width: 1; rx: 4; }
+        .dfd-process { fill: rgba(59, 130, 246, 0.1); stroke: var(--accent-secondary); }
+        .dfd-trust { fill: none; stroke: var(--accent-primary); stroke-dasharray: 5 5; rx: 8; }
+        .dfd-attack { fill: var(--accent-danger); }
+    </style>
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+<div class="grid-overlay"></div>
+
+<div class="slide-container" id="slideContainer">
+    <!-- Slides will be injected here by JS -->
+</div>
+
+<nav class="nav-bar">
+    <div style="min-width: 100px;"><span class="mono text-sm text-gray-400" id="counter">1 / 45</span></div>
+    <div class="progress-track"><div class="progress-fill" id="progress" style="width: 0%"></div></div>
+    <div style="display: flex; gap: 0.5rem;">
+        <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">Prev</button>
+        <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next</button>
+    </div>
+</nav>
+
+<script>
+    // --- Data & Content Generation ---
+    const slidesData = [
+        // --- SECTION 1: INTRODUCTION ---
+        { id: 1, section: "Welcome", title: "Operating System Security", subtitle: "Attacks, Architectures, and Hardening Techniques", type: "title", content: `
+            <div class="flex flex-col items-center justify-center h-full text-center">
+                <svg class="mb-8" width="120" height="120" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="#06b6d4" stroke-width="2" opacity="0.3"/>
+                    <path d="M50 5 L50 95 M5 50 L95 50 M20 20 L80 80 M80 20 L20 80" stroke="#06b6d4" stroke-width="1" opacity="0.5"/>
+                    <circle cx="50" cy="50" r="10" fill="#06b6d4"/>
+                </svg>
+                <p class="text-gray-400 text-lg mb-4">Comprehensive Cybersecurity Training</p>
+                <div class="flex flex-wrap justify-center gap-3 text-xs">
+                    <span class="px-3 py-1 bg-cyan-900/50 border border-cyan-700 rounded-full text-cyan-300">Desktop OS</span>
+                    <span class="px-3 py-1 bg-blue-900/50 border border-blue-700 rounded-full text-blue-300">Server OS</span>
+                    <span class="px-3 py-1 bg-green-900/50 border border-green-700 rounded-full text-green-300">Mobile OS</span>
+                    <span class="px-3 py-1 bg-orange-900/50 border border-orange-700 rounded-full text-orange-300">IoT/Embedded</span>
+                    <span class="px-3 py-1 bg-purple-900/50 border border-purple-700 rounded-full text-purple-300">Cloud/Container</span>
+                </div>
+            </div>
+        ` },
+        { id: 2, section: "Introduction", title: "The Role of Operating Systems in Security", subtitle: "The foundation of trust and the target of exploitation", type: "content", content: `
+            <div class="grid-2 h-full">
+                <div class="flex flex-col justify-center">
+                    <div class="card info mb-4">
+                        <h3 class="font-bold text-blue-400 mb-2">Primary Functions</h3>
+                        <ul class="list-disc list-inside text-sm text-gray-300 space-y-1">
+                            <li><strong>Resource Management:</strong> CPU, Memory, I/O</li>
+                            <li><strong>Process Isolation:</strong> Preventing unauthorized access</li>
+                            <li><strong>Access Control:</strong> Authentication & Authorization</li>
+                            <li><strong>Abstraction Layer:</strong> Hardware interface</li>
+                        </ul>
+                    </div>
+                    <div class="card danger">
+                        <h3 class="font-bold text-red-400 mb-2">Why Target the OS?</h3>
+                        <p class="text-sm text-gray-300">Compromising the OS grants an attacker <strong>total control</strong> over all hosted applications and data. It is the ultimate persistence mechanism.</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center">
+                    <svg viewBox="0 0 300 300" class="w-full max-w-sm">
+                        <!-- Layers -->
+                        <rect x="10" y="10" width="280" height="40" rx="5" fill="#334155" stroke="#64748b"/>
+                        <text x="150" y="35" text-anchor="middle" fill="#f1f5f9" font-size="12">User Applications</text>
+                        
+                        <rect x="10" y="60" width="280" height="40" rx="5" fill="#334155" stroke="#64748b"/>
+                        <text x="150" y="85" text-anchor="middle" fill="#f1f5f9" font-size="12">System Libraries</text>
+                        
+                        <rect x="10" y="110" width="280" height="60" rx="5" fill="#1e293b" stroke="#06b6d4" stroke-width="2"/>
+                        <text x="150" y="140" text-anchor="middle" fill="#06b6d4" font-size="14" font-weight="bold">OPERATING SYSTEM KERNEL</text>
+                        
+                        <rect x="10" y="180" width="280" height="40" rx="5" fill="#0f172a" stroke="#64748b"/>
+                        <text x="150" y="205" text-anchor="middle" fill="#f1f5f9" font-size="12">Hardware (CPU/RAM/Disk)</text>
+
+                        <!-- Attack Arrow -->
+                        <path d="M300 30 L300 140 L295 140" stroke="#ef4444" stroke-width="2" marker-end="url(#arrow)"/>
+                        <text x="285" y="90" fill="#ef4444" font-size="10" transform="rotate(90, 285, 90)">Attack Vector</text>
+                        <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#ef4444"/></marker></defs>
+                    </svg>
+                </div>
+            </div>
+        ` },
+        { id: 3, section: "Security Principles", title: "CIA Triad & Security Principles", subtitle: "Core pillars of information security in OS context", type: "content", content: `
+            <div class="grid-2">
+                <div class="flex items-center justify-center">
+                    <svg viewBox="0 0 300 280" class="w-full max-w-xs">
+                        <polygon points="150,20 280,250 20,250" fill="none" stroke="#06b6d4" stroke-width="2"/>
+                        <circle cx="150" cy="20" r="20" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
+                        <text x="150" y="25" text-anchor="middle" fill="#3b82f6" font-size="10" font-weight="bold">Confidentiality</text>
+                        
+                        <circle cx="20" cy="250" r="20" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+                        <text x="20" y="255" text-anchor="middle" fill="#10b981" font-size="10" font-weight="bold">Integrity</text>
+                        
+                        <circle cx="280" cy="250" r="20" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+                        <text x="280" y="255" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="bold">Availability</text>
+                    </svg>
+                </div>
+                <div class="space-y-4">
+                    <div class="card info">
+                        <h3 class="font-bold text-blue-400">Confidentiality</h3>
+                        <p class="text-xs text-gray-400 mt-1">Ensuring data is accessible only to authorized parties.</p>
+                        <p class="text-xs text-gray-500 mt-2"><strong>OS Mechanisms:</strong> Permissions (ACLs), Encryption (BitLocker), DAC/MAC.</p>
+                    </div>
+                    <div class="card success">
+                        <h3 class="font-bold text-emerald-400">Integrity</h3>
+                        <p class="text-xs text-gray-400 mt-1">Maintaining accuracy and completeness of data.</p>
+                        <p class="text-xs text-gray-500 mt-2"><strong>OS Mechanisms:</strong> Code Signing, Secure Boot, Checksums.</p>
+                    </div>
+                    <div class="card warning">
+                        <h3 class="font-bold text-amber-400">Availability</h3>
+                        <p class="text-xs text-gray-400 mt-1">Ensuring systems are available when needed.</p>
+                        <p class="text-xs text-gray-500 mt-2"><strong>OS Mechanisms:</strong> Process Scheduling, Watchdogs, Clustering.</p>
+                    </div>
+                </div>
+            </div>
+        ` },
+        { id: 4, section: "Architecture", title: "Kernel Mode vs User Mode", subtitle: "Protection Rings and Privilege Separation", type: "content", content: `
+            <div class="grid-2 items-center">
+                <div>
+                    <svg viewBox="0 0 300 300" class="w-full max-w-sm">
+                        <!-- Rings -->
+                        <circle cx="150" cy="150" r="140" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+                        <text x="150" y="20" text-anchor="middle" fill="#94a3b8" font-size="10">Ring 3 (User Mode)</text>
+                        
+                        <circle cx="150" cy="150" r="100" fill="#0f172a" stroke="#f59e0b" stroke-width="2" stroke-dasharray="5 5"/>
+                        <text x="150" y="65" text-anchor="middle" fill="#f59e0b" font-size="10">Ring 1/2 (Drivers)</text>
+                        
+                        <circle cx="150" cy="150" r="60" fill="#0f172a" stroke="#ef4444" stroke-width="2"/>
+                        <text x="150" y="140" text-anchor="middle" fill="#ef4444" font-size="11" font-weight="bold">Ring 0</text>
+                        <text x="150" y="155" text-anchor="middle" fill="#ef4444" font-size="10">Kernel</text>
+                    </svg>
+                </div>
+                <div class="space-y-4">
+                    <div class="card danger">
+                        <h3 class="font-bold text-red-400">Kernel Mode (Ring 0)</h3>
+                        <p class="text-sm text-gray-400 mt-1">Unrestricted access to hardware and memory. A crash here is a system crash (BSOD/Kernel Panic).</p>
+                        <p class="text-xs text-gray-500 mt-2">Target for Rootkits.</p>
+                    </div>
+                    <div class="card info">
+                        <h3 class="font-bold text-blue-400">User Mode (Ring 3)</h3>
+                        <p class="text-sm text-gray-400 mt-1">Restricted access. Must use System Calls (syscalls) to request kernel services.</p>
+                        <p class="text-xs text-gray-500 mt-2">Where applications run.</p>
+                    </div>
+                    <div class="code-block text-xs">
+<span class="text-gray-500">// Transition mechanism</span>
+<span class="text-blue-400">User App</span> -> <span class="text-yellow-400">Syscall</span> -> <span class="text-red-400">Kernel</span> -> <span class="text-blue-400">User App</span>
+                    </div>
+                </div>
+            </div>
+        ` },
+        { id: 5, section: "Architecture", title: "Defense in Depth Strategy", subtitle: "Layered security approach for robust protection", type: "content", content: `
+            <div class="flex flex-col h-full justify-center">
+                <svg viewBox="0 0 600 250" class="w-full max-w-2xl mx-auto">
+                    <rect x="10" y="10" width="580" height="40" rx="5" fill="#1e293b" stroke="#ef4444"/>
+                    <text x="300" y="35" text-anchor="middle" fill="#ef4444" font-size="12">Physical Security (Secure Boot, TPM)</text>
+                    
+                    <rect x="40" y="60" width="520" height="40" rx="5" fill="#1e293b" stroke="#f59e0b"/>
+                    <text x="300" y="85" text-anchor="middle" fill="#f59e0b" font-size="12">Network Security (Firewalls, IDS/IPS)</text>
+                    
+                    <rect x="70" y="110" width="460" height="40" rx="5" fill="#1e293b" stroke="#3b82f6"/>
+                    <text x="300" y="135" text-anchor="middle" fill="#3b82f6" font-size="12">Host/OS Security (Patching, EDR, Permissions)</text>
+                    
+                    <rect x="100" y="160" width="400" height="40" rx="5" fill="#1e293b" stroke="#06b6d4"/>
+                    <text x="300" y="185" text-anchor="middle" fill="#06b6d4" font-size="12">Application Security (Sandboxing, WAF)</text>
+                    
+                    <rect x="130" y="210" width="340" height="30" rx="5" fill="#1e293b" stroke="#10b981"/>
+                    <text x="300" y="230" text-anchor="middle" fill="#10b981" font-size="12">Data Security (Encryption, Classification)</text>
+                </svg>
+            </div>
+        ` },
+
+        // --- SECTION 2: OS TYPES ---
+        { id: 6, section: "OS Classification", title: "Operating System Taxonomy", subtitle: "Understanding the diverse landscape of modern operating systems", type: "content", content: `
+            <div class="grid-3 gap-4 h-full items-center">
+                <div class="card win"><h3 class="font-bold text-blue-400 text-sm">Desktop OS</h3><p class="text-xs text-gray-400 mt-1">Windows, macOS, Linux Distros</p></div>
+                <div class="card linux"><h3 class="font-bold text-yellow-400 text-sm">Server OS</h3><p class="text-xs text-gray-400 mt-1">RHEL, Windows Server, Ubuntu Server</p></div>
+                <div class="card android"><h3 class="font-bold text-green-400 text-sm">Mobile OS</h3><p class="text-xs text-gray-400 mt-1">Android, iOS</p></div>
+                <div class="card warning"><h3 class="font-bold text-amber-400 text-sm">Embedded/IoT</h3><p class="text-xs text-gray-400 mt-1">RTOS, Firmware, VxWorks</p></div>
+                <div class="card info"><h3 class="font-bold text-purple-400 text-sm">Cloud OS</h3><p class="text-xs text-gray-400 mt-1">Hypervisors, Containers (Docker)</p></div>
+                <div class="card danger"><h3 class="font-bold text-red-400 text-sm">Specialized</h3><p class="text-xs text-gray-400 mt-1">Cisco IOS, SCADA, SCADA</p></div>
+            </div>
+        ` },
+
+        // --- DESKTOP OS SECTION ---
+        { id: 7, section: "Desktop OS", title: "Windows Security Architecture", subtitle: "Hybrid kernel, Registry, and Security Subsystem", type: "content", content: `
+            <div class="grid-2">
+                <div class="terminal">
+                    <div class="terminal-header">
+                        <div class="dot" style="background:#ef4444"></div><div class="dot" style="background:#f59e0b"></div><div class="dot" style="background:#10b981"></div>
+                    </div>
+                    <div class="terminal-body">
+<span style="color:#3b82f6">C:\\Windows\\System32></span> <span style="color:#f1f5f9">whoami /priv</span>
+<span style="color:#94a3b8">Privilege Name               Description</span>
+==========================================
+SeDebugPrivilege             Debug programs
+SeTakeOwnershipPrivilege     Take ownership
+SeLoadDriverPrivilege        Load/Unload drivers
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="card win text-sm">
+                        <strong class="text-blue-400">Key Components:</strong>
+                        <ul class="list-disc list-inside text-xs text-gray-400 mt-1">
+                            <li>NT Kernel (ntoskrnl.exe)</li>
+                            <li>Hardware Abstraction Layer (HAL)</li>
+                            <li>Registry (SAM, System, Software hives)</li>
+                            <li>LSASS (Local Security Authority)</li>
+                        </ul>
+                    </div>
+                    <div class="card danger text-sm">
+                        <strong class="text-red-400">Attack Surfaces:</strong>
+                        <ul class="list-disc list-inside text-xs text-gray-400 mt-1">
+                            <li>SMB (EternalBlue)</li>
+                            <li>Print Spooler (PrintNightmare)</li>
+                            <li>Registry Persistence</li>
+                            <li>Powershell/LOLBins</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        ` },
+        { id: 8, section: "Desktop OS", title: "Linux Security Architecture", subtitle: "Monolithic kernel, Modules, and DAC/MAC", type: "content", content: `
+            <div class="grid-2">
+                <div class="terminal">
+                    <div class="terminal-header">
+                        <div class="dot" style="background:#ef4444"></div><div class="dot" style="background:#f59e0b"></div><div class="dot" style="background:#10b981"></div>
+                    </div>
+                    <div class="terminal-body">
+<span style="color:#10b981">root@linux:~#</span> <span style="color:#f1f5f9">find / -perm -4000 2>/dev/null</span>
+/usr/bin/passwd
+/usr/bin/sudo
+/usr/bin/newgrp
+<span style="color:#10b981">root@linux:~#</span> <span style="color:#f1f5f9">getenforce</span>
+Enforcing
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="card linux text-sm">
+                        <strong class="text-yellow-400">Key Components:</strong>
+                        <ul class="list-disc list-inside text-xs text-gray-400 mt-1">
+                            <li>Kernel + Loadable Kernel Modules (LKM)</li>
+                            <li>Init System (systemd)</li>
+                            <li>Package Manager (apt/yum/dnf)</li>
+                            <li>Discretionary Access Control (DAC)</li>
+                        </ul>
+                    </div>
+                    <div class="card success text-sm">
+                        <strong class="text-emerald-400">Hardening:</strong>
+                        <ul class="list-disc list-inside text-xs text-gray-400 mt-1">
+                            <li>SELinux / AppArmor (MAC)</li>
+                            <li>Namespaces & Cgroups</li>
+                            <li>iptables / nftables</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        ` },
+        { id: 9, section: "Desktop OS", title: "macOS Security Architecture", subtitle: "Darwin kernel, SIP, and the Apple Ecosystem", type: "content", content: `
+            <div class="grid-2">
+                <div class="flex flex-col justify-center">
+                    <svg viewBox="0 0 300 250" class="w-full">
+                        <rect x="20" y="20" width="260" height="30" rx="4" fill="#334155" stroke="#64748b"/>
+                        <text x="150" y="40" text-anchor="middle" fill="#fff" font-size="12">Cocoa / UI Frameworks</text>
+                        <rect x="20" y="55" width="260" height="30" rx="4" fill="#334155" stroke="#64748b"/>
+                        <text x="150" y="75" text-anchor="middle" fill="#fff" font-size="12">Application Services</text>
+                        <rect x="20" y="90" width="260" height="30" rx="4" fill="#06b6d4" opacity="0.2" stroke="#06b6d4"/>
+                        <text x="150" y="110" text-anchor="middle" fill="#06b6d4" font-size="12" font-weight="bold">XNU Kernel (Mach + BSD)</text>
+                        <rect x="20" y="125" width="260" height="25" rx="4" fill="#1e293b" stroke="#10b981"/>
+                        <text x="150" y="142" text-anchor="middle" fill="#10b981" font-size="10">Secure Enclave Processor (SEP)</text>
+                    </svg>
+                </div>
+                <div class="space-y-2">
+                    <div class="card mac text-sm">
+                        <strong class="text-gray-300">System Integrity Protection (SIP)</strong>
+                        <p class="text-xs text-gray-400 mt-1">Protects system files even from root user. "Rootless" mode.</p>
+                    </div>
+                    <div class="card info text-sm">
+                        <strong class="text-blue-400">Gatekeeper</strong>
+                        <p class="text-xs text-gray-400 mt-1">Ensures only trusted software runs. Checks Developer ID and Notarization.</p>
+                    </div>
+                    <div class="card danger text-sm">
+                        <strong class="text-red-400">Attacks:</strong>
+                        <p class="text-xs text-gray-400 mt-1">XCSSET, Shlayer (macOS Malware), SIP Bypasses.</p>
+                    </div>
+                </div>
+            </div>
+        ` },
+
+        // --- SERVER OS SECTION ---
+        { id: 10, section: "Server OS", title: "Windows Server & Active Directory", subtitle: "The backbone of enterprise identity and infrastructure", type: "content", content: `
+            <div class="grid-2">
+                <div class="card info">
+                    <h3 class="font-bold text-blue-400 mb-2">Active Directory (AD)</h3>
+                    <p class="text-xs text-gray-400">Centralized authentication and authorization. Uses Kerberos, LDAP, DNS.</p>
+                    <div class="mt-2 p-2 bg-gray-800 rounded text-xs">
+                        <span class="text-red-400 font-bold">Golden Ticket Attack:</span>
+                        <span class="text-gray-300"> Compromise KRBTGT hash to create persistent admin tickets.</span>
+                    </div>
+                </div>
+                <div class="card linux">
+                    <h3 class="font-bold text-yellow-400 mb-2">Linux Servers</h3>
+                    <p class="text-xs text-gray-400">Power web servers, databases, and cloud backends.</p>
+                    <div class="mt-2 p-2 bg-gray-800 rounded text-xs">
+                        <span class="text-red-400 font-bold">SSH Attacks:</span>
+                        <span class="text-gray-300"> Brute force, Key theft, Agent forwarding abuse.</span>
+                    </div>
+                </div>
+                <div class="card danger col-span-2 mt-2">
+                    <h3 class="font-bold text-red-400 mb-2">Critical Vulnerability Examples</h3>
+                    <div class="grid-2 gap-2 text-xs">
+                        <div><strong>ZeroLogon (CVE-2020-1472):</strong> Elevation of privilege in AD.</div>
+                        <div><strong>Shellshock:</strong> Bash remote code execution via environment variables.</div>
+                    </div>
+                </div>
+            </div>
+        ` },
+
+        // --- MOBILE OS SECTION ---
+        { id: 11, section: "Mobile OS", title: "Android Security Model", subtitle: "Linux foundation with Java/Application framework", type: "content", content: `
+            <div class="grid-2">
+                <div class="flex justify-center items-center">
+                    <svg viewBox="0 0 300 300" class="w-48">
+                        <rect x="30" y="30" width="240" height="30" fill="#1e293b" stroke="#3ddc84"/>
+                        <text x="150" y="50" text-anchor="middle" fill="#3ddc84" font-size="10">System Apps</text>
+                        <rect x="30" y="65" width="240" height="30" fill="#1e293b" stroke="#3ddc84"/>
+                        <text x="150" y="85" text-anchor="middle" fill="#fff" font-size="10">Java API Framework</text>
+                        <rect x="30" y="100" width="240" height="30" fill="#1e293b" stroke="#3ddc84"/>
+                        <text x="150" y="120" text-anchor="middle" fill="#fff" font-size="10">Native Libraries / ART</text>
+                        <rect x="30" y="135" width="240" height="40" fill="#0f172a" stroke="#f59e0b"/>
+                        <text x="150" y="160" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="bold">HAL (Hardware Abstraction)</text>
+                        <rect x="30" y="180" width="240" height="40" fill="#0f172a" stroke="#ef4444"/>
+                        <text x="150" y="205" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="bold">Linux Kernel</text>
+                    </svg>
+                </div>
+                <div class="space-y-2">
+                    <div class="card android">
+                        <h3 class="font-bold text-green-400">Sandboxing</h3>
+                        <p class="text-xs text-gray-400">Each app runs as unique UID. Permissions defined at install/runtime.</p>
+                    </div>
+                    <div class="card danger">
+                        <h3 class="font-bold text-red-400">Attack Vectors</h3>
+                        <ul class="list-disc list-inside text-xs text-gray-400 mt-1">
+                            <li>APK Repackaging (Tampering)</li>
+                            <li>Rooting Exploits</li>
+                            <li>Intent Sniffing/Injection</li>
+                            <li>Malware via 3rd Party Stores</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        ` },
+        { id: 12, section: "Mobile OS", title: "iOS Security Model", subtitle: "Walled garden, secure enclave, and strict isolation", type: "content", content: `
+            <div class="grid-2">
+                <div class="space-y-2">
+                    <div class="card ios">
+                        <h3 class="font-bold text-blue-400">Secure Enclave</h3>
+                        <p class="text-xs text-gray-400">Hardware-based key manager for Touch ID, Face ID, and encryption keys. Isolated from main processor.</p>
+                    </div>
+                    <div class="card success">
+                        <h3 class="font-bold text-emerald-400">App Store Review</h3>
+                        <p class="text-xs text-gray-400">Strict vetting process. Code signing mandatory. No side-loading (except enterprise certs).</p>
+                    </div>
+                    <div class="card danger">
+                        <h3 class="font-bold text-red-400">Exploits</h3>
+                        <p class="text-xs text-gray-400 mt-1">Checkra1n (Bootrom exploit), Pegasus (Zero-click iMessage exploit).</p>
+                    </div>
+                </div>
+                <div class="flex justify-center items-center">
+                     <svg viewBox="0 0 300 300" class="w-48">
+                        <rect x="40" y="40" width="220" height="220" rx="20" fill="none" stroke="#334155" stroke-width="2"/>
+                        <text x="150" y="80" text-anchor="middle" fill="#64748b" font-size="12">Hardware</text>
+                        <rect x="60" y="100" width="180" height="140" rx="10" fill="none" stroke="#007aff" stroke-width="2"/>
+                        <text x="150" y="130" text-anchor="middle" fill="#007aff" font-size="12">Secure Enclave</text>
+                        <rect x="80" y="150" width="140" height="70" rx="5" fill="none" stroke="#10b981" stroke-width="2"/>
+                        <text x="150" y="190" text-anchor="middle" fill="#10b981" font-size="12">iOS Kernel</text>
+                    </svg>
+                </div>
+            </div>
+        ` },
+
+        // --- IoT & EMBEDDED ---
+        { id: 13, section: "IoT/Embedded", title: "Embedded Systems & IoT", subtitle: "Security constraints in resource-constrained environments", type: "content", content: `
+            <div class="grid-2">
+                <div class="card warning">
+                    <h3 class="font-bold text-amber-400">Characteristics</h3>
+                    <ul class="list-disc list-inside text-xs text-gray-400 mt-2">
+                        <li>Real-Time Operating Systems (RTOS)</li>
+                        <li>Monolithic Firmware (No MMU)</li>
+                        <li>Long deployment lifecycle (10-20 yrs)</li>
+                        <li>Infrequent/No patching mechanism</li>
+                        <li>Hardcoded credentials common</li>
+                    </ul>
+                </div>
+                <div class="card danger">
+                    <h3 class="font-bold text-red-400">Major Risks</h3>
+                    <ul class="list-disc list-inside text-xs text-gray-400 mt-2">
+                        <li>No ASLR/DEP protections</li>
+                        <li>Physically accessible interfaces (JTAG/UART)</li>
+                        <li>Unencrypted updates</li>
+                        <li>Botnet recruitment (Mirai)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-4 p-4 bg-gray-800 rounded-lg">
+                <strong class="text-red-400">Case Study: Mirai Botnet</strong>
+                <p class="text-xs text-gray-400 mt-1">Infected routers/cameras via default Telnet credentials. Used for massive DDoS attacks (1 Tbps+).</p>
+            </div>
+        ` },
+        { id: 14, section: "Specialized OS", title: "ICS/SCADA & Network OS", subtitle: "Securing critical infrastructure", type: "content", content: `
+            <div class="grid-2">
+                <div class="card danger">
+                    <h3 class="font-bold text-red-400">ICS/SCADA (Industrial Control)</h3>
+                    <p class="text-xs text-gray-400 mt-2">Systems controlling power grids, water plants, factories.</p>
+                    <ul class="list-disc list-inside text-xs text-gray-400 mt-2">
+                        <li><strong>Protocols:</strong> Modbus, DNP3, IEC 61850 (Often cleartext)</li>
+                        <li><strong>OS:</strong> Custom embedded or Windows XP/7 based HMIs.</li>
+                        <li><strong>Threat:</strong> Stuxnet (targeted centrifuges), Triton (Safety systems).</li>
+                    </ul>
+                </div>
+                <div class="card info">
+                    <h3 class="font-bold text-blue-400">Network OS (Cisco IOS, JunOS)</h3>
+                    <p class="text-xs text-gray-400 mt-2">Operating systems for routers and switches.</p>
+                    <ul class="list-disc list-inside text-xs text-gray-400 mt-2">
+                        <li><strong>Architecture:</strong> Proprietary monolithic kernel.</li>
+                        <li><strong>Management:</strong> SSH, SNMP, Console.</li>
+                        <li><strong>Threat:</strong> SNMP community string brute force, Cisco IKEv1 vulnerability.</li>
+                    </ul>
+                </div>
+            </div>
+        ` },
+
+        // --- CLOUD & CONTAINERS ---
+        { id: 15, section: "Cloud/Container", title: "Hypervisors & Virtualization", subtitle: "Security in virtualized environments", type: "content", content: `
+            <div class="grid-2 items-center">
+                <div>
+                    <svg viewBox="0 0 400 300" class="w-full">
+                        <rect x="10" y="260" width="380" height="30" fill="#10b981" opacity="0.2" stroke="#10b981"/>
+                        <text x="200" y="280" text-anchor="middle" fill="#10b981" font-size="12">Hardware</text>
+                        
+                        <!-- Type 1 -->
+                        <rect x="10" y="180" width="185" height="70" fill="#ef4444" opacity="0.2" stroke="#ef4444"/>
+                        <text x="102" y="200" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="bold">Hypervisor (Type 1)</text>
+                        <rect x="20" y="210" width="50" height="30" fill="#1e293b" stroke="#fff"/>
+                        <text x="45" y="230" text-anchor="middle" fill="#fff" font-size="8">VM</text>
+                        <rect x="80" y="210" width="50" height="30" fill="#1e293b" stroke="#fff"/>
+                        <text x="105" y="230" text-anchor="middle" fill="#fff" font-size="8">VM</text>
+                        
+                        <!-- Type 2 -->
+                        <rect x="205" y="180" width="185" height="70" fill="#3b82f6" opacity="0.2" stroke="#3b82f6"/>
+                        <text x="297" y="200" text-anchor="middle" fill="#3b82f6" font-size="10" font-weight="bold">Host OS</text>
+                        <rect x="215" y="210" width="165" height="30" fill="#f59e0b" opacity="0.2" stroke="#f59e0b"/>
+                        <text x="297" y="230" text-anchor="middle" fill="#f59e0b" font-size="10">Hypervisor (Type 2)</text>
+                    </svg>
+                </div>
+                <div class="space-y-2">
+                    <div class="card danger text-sm">
+                        <strong class="text-red-400">Type 1 (Bare Metal)</strong>
+                        <p class="text-xs text-gray-400 mt-1">ESXi, Hyper-V, Xen. Runs directly on hardware. Smaller attack surface.</p>
+                    </div>
+                    <div class="card info text-sm">
+                        <strong class="text-blue-400">Type 2 (Hosted)</strong>
+                        <p class="text-xs text-gray-400 mt-1">VirtualBox, VMware Workstation. Runs on top of Host OS. Larger attack surface.</p>
+                    </div>
+                    <div class="card warning text-sm">
+                        <strong class="text-amber-400">Threat: VM Escape</strong>
+                        <p class="text-xs text-gray-400 mt-1">Breaking out of a guest VM to execute code on the host/hypervisor (e.g., VENOM vulnerability).</p>
+                    </div>
+                </div>
+            </div>
+        ` },
+        { id: 16, section: "Cloud/Container", title: "Container Security (Docker/K8s)", subtitle: "Isolation via OS virtualization", type: "content", content: `
+            <div class="grid-2">
+                <div class="terminal">
+                    <div class="terminal-header"><div class="dot" style="background:#ef4444"></div><div class="dot" style="background:#f59e0b"></div><div class="dot" style="background:#10b981"></div></div>
+                    <div class="terminal-body">
+<span style="color:#10b981">$</span> docker run --privileged -it alpine sh
+<span style="color:#f59e0b">Warning:</span> Running privileged container.
+<span style="color:#10b981">/ #</span> fdisk -l
+<span style="color:#ef4444">Disk /dev/sda: 50 GiB</span> ...
+<span style="color:#94a3b8"># Host disk visible inside container!</span>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="card info text-sm">
+                        <strong class="text-blue-400">Namespaces</strong>
+                        <p class="text-xs text-gray-400 mt-1">Isolates process view (PID, NET, MNT, UTS).</p>
+                    </div>
+                    <div class="card info text-sm">
+                        <strong class="text-blue-400">Cgroups</strong>
+                        <p class="text-xs text-gray-400 mt-1">Limits resource usage (CPU, RAM).</p>
+                    </div>
+                    <div class="card danger text-sm">
+                        <strong class="text-red-400">Container Escape</strong>
+                        <p class="text-xs text-gray-400 mt-1">Running as root or --privileged allows access to host resources. Exploiting runc, Dirty Pipe.</p>
+                    </div>
+                </div>
+            </div>
+        ` },
+
+        // --- SECTION 3: ATTACK LANDSCAPE ---
+        { id: 17, section: "Attack Landscape", title: "The OS Attack Lifecycle", subtitle: "How adversaries compromise operating systems", type: "content", content: `
+            <div class="flex flex-col justify-center h-full">
+                <div class="flex justify-between items-center text-center text-xs">
+                    <div class="flex flex-col items-center"><div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center font-bold text-gray-300">1</div><span class="mt-1 text-gray-400">Recon</span></div>
+                    <svg width="50" height="10"><path d="M0 5 L40 5" stroke="#ef4444" stroke-width="2" marker-end="url(#arrRed)"/></svg>
+                    <div class="flex flex-col items-center"><div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center font-bold text-gray-300">2</div><span class="mt-1 text-gray-400">Exploit</span></div>
+                    <svg width="50" height="10"><path d="M0 5 L40 5" stroke="#ef4444" stroke-width="2" marker-end="url(#arrRed)"/></svg>
+                    <div class="flex flex-col items-center"><div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center font-bold text-gray-300">3</div><span class="mt-1 text-gray-400">Persistence</span></div>
+                    <svg width="50" height="10"><path d="M0 5 L40 5" stroke="#ef4444" stroke-width="2" marker-end="url(#arrRed)"/></svg>
+                    <div class="flex flex-col items-center"><div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center font-bold text-gray-300">4</div><span class="mt-1 text-gray-400">PrivEsc</span></div>
+                    <svg width="50" height="10"><path d="M0 5 L40 5" stroke="#ef4444" stroke-width="2" marker-end="url(#arrRed)"/></svg>
+                    <div class="flex flex-col items-center"><div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center font-bold text-gray-300">5</div><span class="mt-1 text-gray-400">Lateral</span></div>
+                </div>
+                <defs><marker id="arrRed" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#ef4444"/></marker></defs>
+                
+                <div class="grid-3 mt-8 gap-4">
+                    <div class="card danger text-xs"><strong>Malware</strong><br/>Ransomware, Spyware, Rootkits</div>
+                    <div class="card danger text-xs"><strong>Exploits</strong><br/>Buffer Overflow, Zero-Days</div>
+                    <div class="card danger text-xs"><strong>Living off the Land</strong><br/>Powershell, WMI, Bash</div>
+                </div>
+            </div>
+        ` },
+        { id: 18, section: "Attack Types", title: "Privilege Escalation", subtitle: "Moving from User to SYSTEM/root", type: "content", content: `
+            <div class="grid-2">
+                <div class="card win">
+                    <h3 class="font-bold text-blue-400 mb-2">Windows Vertical Escalation</h3>
+                    <ul class="text-xs text-gray-400 space-y-1">
+                        <li><strong>Unquoted Service Paths:</strong> "C:\\Program Files\\App..."</li>
+                        <li><strong>Service Permissions:</strong> Weak ACL on service binary</li>
+                        <li><strong>DLL Hijacking:</strong> Placing malicious DLL in search path</li>
+                        <li><strong>Token Impersonation:</strong> SeImpersonatePrivilege abuse (PrintSpoofer)</li>
+                    </ul>
+                </div>
+                <div class="card linux">
+                    <h3 class="font-bold text-yellow-400 mb-2">Linux Vertical Escalation</h3>
+                    <ul class="text-xs text-gray-400 space-y-1">
+                        <li><strong>SUID Binaries:</strong> Executables running with owner perms</li>
+                        <li><strong>Sudo Misconfiguration:</strong> NOPASSWD entries</li>
+                        <li><strong>Cron Jobs:</strong> Writable scripts run by root</li>
+                        <li><strong>Kernel Exploits:</strong> DirtyCow, DirtyPipe</li>
+                    </ul>
+                </div>
+            </div>
+        ` },
+        { id: 19, section: "Attack Types", title: "Memory Corruption Attacks", subtitle: "Exploiting software bugs to control execution", type: "content", content: `
+            <div class="grid-2 items-center">
+                <div class="card danger text-sm">
+                    <h3 class="font-bold text-red-400 mb-2">Buffer Overflow</h3>
+                    <p class="text-xs text-gray-400 mb-2">Writing data past the end of a buffer, overwriting return addresses or function pointers.</p>
+                    <div class="code-block text-xs">
+int main() {
+    char buffer[10];
+    strcpy(buffer, user_input); <span style="color:#ef4444">// Vulnerable!</span>
+}
+                    </div>
+                </div>
+                <div>
+                    <svg viewBox="0 0 300 200" class="w-full">
+                        <rect x="10" y="10" width="280" height="40" fill="#1e293b" stroke="#64748b"/>
+                        <text x="150" y="35" text-anchor="middle" fill="#fff" font-size="10">Local Variables</text>
+                        <rect x="10" y="55" width="280" height="40" fill="#3b82f6" opacity="0.5" stroke="#3b82f6"/>
+                        <text x="150" y="80" text-anchor="middle" fill="#fff" font-size="10">Return Address (Overwritten)</text>
+                        <rect x="10" y="100" width="280" height="40" fill="#1e293b" stroke="#64748b"/>
+                        <text x="150" y="125" text-anchor="middle" fill="#fff" font-size="10">Function Arguments</text>
+                        <path d="M300 120 L300 60 L290 60" stroke="#ef4444" stroke-width="2" fill="none"/>
+                        <text x="285" y="90" fill="#ef4444" font-size="10" transform="rotate(-90, 285, 90)">Overflow</text>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4 card success text-sm">
+                <strong class="text-emerald-400">Mitigations:</strong>
+                <span class="text-xs text-gray-400 ml-2">ASLR (Randomization), DEP/NX (Non-Executable Memory), Stack Canaries, CFG (Control Flow Guard).</span>
+            </div>
+        ` },
+        { id: 20, section: "Attack Types", title: "Rootkits & Bootkits", subtitle: "Hiding presence deep within the system", type: "content", content: `
+            <div class="grid-2">
+                <div class="card warning">
+                    <h3 class="font-bold text-amber-400">Rootkit Types</h3>
+                    <ul class="text-xs text-gray-400 mt-2 space-y-1">
+                        <li><strong>User-mode:</strong> DLL injection, API hooking. Easier to detect.</li>
+                        <li><strong>Kernel-mode:</strong> Loadable Kernel Module (LKM) or Driver. Hooks system calls directly.</li>
+                        <li><strong>Hypervisor:</strong> Runs in Ring -1. Virtually invisible to OS.</li>
+                    </ul>
+                </div>
+                <div class="card danger">
+                    <h3 class="font-bold text-red-400">Bootkits</h3>
+                    <p class="text-xs text-gray-400 mt-2">Infects Master Boot Record (MBR) or UEFI bootloader. Loads before the OS kernel, compromising Secure Boot chain.</p>
+                </div>
+            </div>
+            <div class="mt-4 p-3 bg-gray-800 rounded text-xs">
+                <strong>Detection:</strong> Integrity checking, Cross-view detection (comparing internal API results with raw disk scans), TPM-based measured boot.
+            </div>
+        ` },
+
+        // --- SECTION 4: ATTACK VECTORS ---
+        { id: 21, section: "Attack Vectors", title: "Common Attack Vectors", subtitle: "Entry points into the operating system", type: "content", content: `
+            <div class="grid-2 gap-4">
+                <div class="card danger">
+                    <h3 class="font-bold text-red-400 text-sm">Network Services</h3>
+                    <p class="text-xs text-gray-400 mt-1">Open ports (RDP, SMB, SSH). Exploited via remote code execution (RCE) vulnerabilities.</p>
+                </div>
+                <div class="card warning">
+                    <h3 class="font-bold text-amber-400 text-sm">Phishing & Social Engineering</h3>
+                    <p class="text-xs text-gray-400 mt-1">Tricking users into executing malicious code or revealing credentials.</p>
+                </div>
+                <div class="card info">
+                    <h3 class="font-bold text-blue-400 text-sm">Supply Chain</h3>
+                    <p class="text-xs text-gray-400 mt-1">Compromised updates (SolarWinds), malicious dependencies (NPM), or pre-installed malware.</p>
+                </div>
+                <div class="card danger">
+                    <h3 class="font-bold text-red-400 text-sm">Physical Access</h3>
+                    <p class="text-xs text-gray-400 mt-1">Live CD/USB booting, DMA attacks (Thunderbolt/PCMCIA), Hardware implanting.</p>
+                </div>
+            </div>
+        ` },
+
+        // --- SECTION 5: SIMULATIONS ---
+        { id: 22, section: "Simulation", title: "Simulation: Windows Privilege Escalation", subtitle: "Scenario: Weak Service Permissions", type: "simulation", content: `
+            <div class="grid-2 h-full">
+                <div class="terminal">
+                    <div class="terminal-header"><div class="dot" style="background:#ef4444"></div><div class="dot" style="background:#f59e0b"></div><div class="dot" style="background:#10b981"></div></div>
+                    <div class="terminal-body" id="win_sim_term">
+<span style="color:#10b981">C:\\Users\\Guest></span> whoami
+my-pc\\guest
+                    </div>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 mb-2">Scenario: The "VulnService" runs as SYSTEM and allows "Everyone" to modify the binary path.</p>
+                    <button id="sim_step1" onclick="simWinStep1()" class="nav-btn w-full text-xs mb-2">Step 1: Check Service Config</button>
+                    <button id="sim_step2" onclick="simWinStep2()" class="nav-btn w-full text-xs mb-2" disabled>Step 2: Modify Service</button>
+                    <button id="sim_step3" onclick="simWinStep3()" class="nav-btn w-full text-xs" disabled>Step 3: Start Service</button>
+                </div>
+            </div>
+        ` },
+        { id: 23, section: "Simulation", title: "Simulation: Linux Container Escape", subtitle: "Scenario: Privileged Container Abuse", type: "simulation", content: `
+             <div class="grid-2 h-full">
+                <div class="terminal">
+                    <div class="terminal-header"><div class="dot" style="background:#ef4444"></div><div class="dot" style="background:#f59e0b"></div><div class="dot" style="background:#10b981"></div></div>
+                    <div class="terminal-body" id="linux_sim_term">
+<span style="color:#10b981">root@container:/#</span> id
+uid=0(root) gid=0(root)
+                    </div>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 mb-2">Scenario: We are root inside a container started with --privileged. We can access host devices.</p>
+                    <button id="sim_l1" onclick="simLinuxStep1()" class="nav-btn w-full text-xs mb-2">Step 1: Check Mounts</button>
+                    <button id="sim_l2" onclick="simLinuxStep2()" class="nav-btn w-full text-xs mb-2" disabled>Step 2: Chroot to Host</button>
+                </div>
+            </div>
+        ` },
+
+        // --- SECTION 6: DFDS ---
+        { id: 24, section: "Data Flow", title: "DFD: Desktop Environment", subtitle: "Trust boundaries and attack surfaces", type: "content", content: `
+             <svg viewBox="0 0 600 300" class="w-full h-full p-4">
+                <!-- Trust Boundary -->
+                <rect x="50" y="50" width="400" height="200" class="dfd-trust"/>
+                <text x="250" y="40" fill="#06b6d4" font-size="12" text-anchor="middle">System Boundary (Ring 0/3)</text>
+
+                <!-- External Entity -->
+                <rect x="500" y="100" width="80" height="40" fill="#334155" stroke="#64748b"/>
+                <text x="540" y="125" text-anchor="middle" fill="#fff" font-size="10">Network</text>
+
+                <!-- Process: User App -->
+                <rect x="70" y="100" width="100" height="50" class="dfd-process"/>
+                <text x="120" y="130" text-anchor="middle" fill="#fff" font-size="10">User App</text>
+                
+                <!-- Process: Kernel -->
+                <rect x="200" y="100" width="100" height="50" fill="#ef4444" opacity="0.2" stroke="#ef4444"/>
+                <text x="250" y="130" text-anchor="middle" fill="#ef4444" font-size="10">Kernel</text>
+
+                <!-- Process: FS -->
+                <rect x="330" y="100" width="100" height="50" class="dfd-process"/>
+                <text x="380" y="130" text-anchor="middle" fill="#fff" font-size="10">File System</text>
+
+                <!-- Data Store -->
+                <div style="width:100px; height:30px; border:1px solid #64748b; display:flex; align-items:center; justify-content:center" class="dfd-box" x="200" y="200"><text fill="#fff" font-size="10">Data Store</text></div>
+
+                <!-- Flows -->
+                <path d="M170 125 L200 125" stroke="#06b6d4" marker-end="url(#arrowCyan)"/>
+                <path d="M300 125 L330 125" stroke="#06b6d4" marker-end="url(#arrowCyan)"/>
+                
+                <!-- Attack Point -->
+                <circle cx="185" cy="125" r="5" fill="#ef4444"/>
+                <text x="185" y="115" fill="#ef4444" font-size="8" text-anchor="middle">Syscall Hook</text>
+                
+                <circle cx="540" cy="200" r="5" fill="#ef4444"/>
+                <path d="M500 120 L400 120" stroke="#ef4444" stroke-dasharray="5 5"/>
+             </svg>
+        ` },
+        { id: 25, section: "Data Flow", title: "DFD: IoT Ecosystem", subtitle: "Cloud, Edge, and Device trust boundaries", type: "content", content: `
+            <svg viewBox="0 0 600 300" class="w-full h-full p-4">
+                <rect x="10" y="10" width="580" height="280" stroke="#334155" fill="none"/>
+                <text x="300" y="30" fill="#64748b" font-size="10" text-anchor="middle">Cloud Boundary</text>
+
+                <rect x="30" y="50" width="100" height="200" fill="#1e293b" stroke="#334155"/>
+                <text x="80" y="150" fill="#fff" font-size="10" text-anchor="middle" transform="rotate(-90, 80, 150)">IoT Device</text>
+                
+                <circle cx="60" cy="100" r="20" fill="#0f172a" stroke="#3ddc84"/>
+                <text x="60" y="105" fill="#3ddc84" font-size="8" text-anchor="middle">Firmware</text>
+                
+                <rect x="200" y="100" width="100" height="50" fill="#1e293b" stroke="#3b82f6"/>
+                <text x="250" y="130" fill="#3b82f6" font-size="10" text-anchor="middle">MQTT Broker</text>
+                
+                <rect x="400" y="100" width="100" height="50" fill="#1e293b" stroke="#a855f7"/>
+                <text x="450" y="130" fill="#a855f7" font-size="10" text-anchor="middle">Cloud Logic</text>
+
+                <path d="M130 100 L200 110" stroke="#fff" marker-end="url(#arrowW)"/>
+                <path d="M300 125 L400 125" stroke="#fff" marker-end="url(#arrowW)"/>
+                
+                <circle cx="165" cy="105" r="5" fill="#ef4444"/>
+                <text x="165" y="90" fill="#ef4444" font-size="8" text-anchor="middle">No TLS</text>
+            </svg>
+        ` },
+
+        // --- SECTION 7: HARDENING ---
+        { id: 26, section: "Hardening", title: "OS Hardening Principles", subtitle: "Reducing the attack surface", type: "content", content: `
+            <div class="grid-3 gap-4">
+                <div class="card success">
+                    <h3 class="font-bold text-emerald-400 text-sm">Remove Unnecessary</h3>
+                    <p class="text-xs text-gray-400 mt-1">Uninstall unused packages, disable unused services, close ports.</p>
+                </div>
+                <div class="card info">
+                    <h3 class="font-bold text-blue-400 text-sm">Principle of Least Privilege</h3>
+                    <p class="text-xs text-gray-400 mt-1">Users and services run with minimum necessary permissions.</p>
+                </div>
+                <div class="card warning">
+                    <h3 class="font-bold text-amber-400 text-sm">Secure Configuration</h3>
+                    <p class="text-xs text-gray-400 mt-1">Change defaults, enforce strong passwords, disable weak ciphers.</p>
+                </div>
+                <div class="card info">
+                    <h3 class="font-bold text-blue-400 text-sm">Patch Management</h3>
+                    <p class="text-xs text-gray-400 mt-1">Regular updates to fix known vulnerabilities (CVEs).</p>
+                </div>
+                <div class="card success">
+                    <h3 class="font-bold text-emerald-400 text-sm">Logging & Monitoring</h3>
+                    <p class="text-xs text-gray-400 mt-1">Enable audit logs, forward to SIEM, alert on anomalies.</p>
+                </div>
+                <div class="card warning">
+                    <h3 class="font-bold text-amber-400 text-sm">Endpoint Protection</h3>
+                    <p class="text-xs text-gray-400 mt-1">EDR, Antivirus, Application Whitelisting.</p>
+                </div>
+            </div>
+        ` },
+        { id: 27, section: "Hardening", title: "Windows Hardening", subtitle: "Specific techniques for Microsoft environments", type: "content", content: `
+            <div class="grid-2">
+                <div class="code-block text-xs">
+<span style="color:#3b82f6"># Group Policy (GPO) Settings</span>
+Computer Configuration -> Windows Settings -> Security Settings
+- Account Policies (Password complexity)
+- Local Policies (Audit logon events)
+- Windows Firewall (Block inbound)
+                </div>
+                <div class="space-y-2">
+                    <div class="card win text-xs">
+                        <strong class="text-blue-400">BitLocker</strong>
+                        <p class="text-gray-400 mt-1">Full disk encryption using TPM.</p>
+                    </div>
+                    <div class="card win text-xs">
+                        <strong class="text-blue-400">Windows Defender</strong>
+                        <p class="text-gray-400 mt-1">Antimalware, Exploit Guard, Credential Guard (Virtualization Based Security).</p>
+                    </div>
+                    <div class="card danger text-xs">
+                        <strong class="text-red-400">PSExec/PowerShell</strong>
+                        <p class="text-gray-400 mt-1">Constrained Language Mode, Script Block Logging.</p>
+                    </div>
+                </div>
+            </div>
+        ` },
+        { id: 28, section: "Hardening", title: "Linux Hardening", subtitle: "Securing the open-source ecosystem", type: "content", content: `
+            <div class="grid-2">
+                <div class="terminal">
+                    <div class="terminal-header"><div class="dot" style="background:#ef4444"></div><div class="dot" style="background:#f59e0b"></div><div class="dot" style="background:#10b981"></div></div>
+                    <div class="terminal-body text-xs">
+<span style="color:#10b981"># SSH Hardening (/etc/ssh/sshd_config)</span>
+PermitRootLogin no
+PasswordAuthentication no
+Port 2222
+
+<span style="color:#10b981"># Firewall (UFW)</span>
+sudo ufw default deny incoming
+sudo ufw allow 2222/tcp
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="card linux text-xs">
+                        <strong class="text-yellow-400">SELinux/AppArmor</strong>
+                        <p class="text-gray-400 mt-1">Mandatory Access Control (MAC). Confine processes to specific resources.</p>
+                    </div>
+                    <div class="card linux text-xs">
+                        <strong class="text-yellow-400">Auditd</strong>
+                        <p class="text-gray-400 mt-1">System for auditing system calls and file access.</p>
+                    </div>
+                </div>
+            </div>
+        ` },
+        { id: 29, section: "Hardening", title: "Mobile & IoT Hardening", subtitle: "Securing the edge", type: "content", content: `
+            <div class="grid-2">
+                <div class="card android">
+                    <h3 class="font-bold text-green-400 mb-2">Mobile (Android/iOS)</h3>
+                    <ul class="text-xs text-gray-400 space-y-1">
+                        <li><strong>MDM (Mobile Device Management):</strong> Remote policy enforcement.</li>
+                        <li><strong>Encryption:</strong> File-based encryption (FBE) mandatory.</li>
+                        <li><strong>Permissions:</strong> Runtime permission model.</li>
+                        <li><strong>Root Detection:</strong> Apps should detect compromised devices.</li>
+                    </ul>
+                </div>
+                <div class="card warning">
+                    <h3 class="font-bold text-amber-400 mb-2">IoT Hardening</h3>
+                    <ul class="text-xs text-gray-400 space-y-1">
+                        <li><strong>Firmware Signing:</strong> Only run signed code.</li>
+                        <li><strong>Secure Boot:</strong> Verify boot chain integrity.</li>
+                        <li><strong>Disable Debug:</strong> Remove JTAG/UART access in production.</li>
+                        <li><strong>Auto Updates:</strong> OTA update mechanism.</li>
+                    </ul>
+                </div>
+            </div>
+        ` },
+        { id: 30, section: "Hardening", title: "Cloud & Container Hardening", subtitle: "Isolation and orchestration security", type: "content", content: `
+            <div class="grid-2">
+                <div class="card info">
+                    <h3 class="font-bold text-blue-400 mb-2">Container Best Practices</h3>
+                    <ul class="text-xs text-gray-400 space-y-1">
+                        <li>Run as non-root user inside container.</li>
+                        <li>Use read-only filesystem where possible.</li>
+                        <li>Scan images for vulnerabilities (Trivy, Snyk).</li>
+                        <li>Avoid <code>--privileged</code> flag.</li>
+                    </ul>
+                </div>
+                <div class="card linux">
+                    <h3 class="font-bold text-yellow-400 mb-2">Kubernetes Hardening</h3>
+                    <ul class="text-xs text-gray-400 space-y-1">
+                        <li><strong>RBAC:</strong> Role Based Access Control.</li>
+                        <li><strong>Network Policies:</strong> Restrict pod-to-pod traffic.</li>
+                        <li><strong>Pod Security Policies:</strong> Limit capabilities.</li>
+                        <li><strong>Secrets Management:</strong> Use external secret stores.</li>
+                    </ul>
+                </div>
+            </div>
+        ` },
+
+        // --- SECTION 8: TOOLS & STANDARDS ---
+        { id: 31, section: "Tools", title: "Security Tools & Frameworks", subtitle: "The defenders toolkit", type: "content", content: `
+            <div class="grid-3 gap-4">
+                <div class="card info">
+                    <h3 class="font-bold text-blue-400 text-sm">Vulnerability Scanning</h3>
+                    <p class="text-xs text-gray-400 mt-1">Nessus, OpenVAS, Qualys. Automate detection of missing patches and misconfigs.</p>
+                </div>
+                <div class="card success">
+                    <h3 class="font-bold text-emerald-400 text-sm">EDR / XDR</h3>
+                    <p class="text-xs text-gray-400 mt-1">CrowdStrike, SentinelOne, Defender for Endpoint. Behavioral analysis and response.</p>
+                </div>
+                <div class="card warning">
+                    <h3 class="font-bold text-amber-400 text-sm">SIEM</h3>
+                    <p class="text-xs text-gray-400 mt-1">Splunk, Elastic, Sentinel. Centralized log collection and correlation.</p>
+                </div>
+                <div class="card danger">
+                    <h3 class="font-bold text-red-400 text-sm">Attack Simulation</h3>
+                    <p class="text-xs text-gray-400 mt-1">Atomic Red Team, Caldera. Validate defenses against known techniques.</p>
+                </div>
+            </div>
+        ` },
+        { id: 32, section: "Standards", title: "Compliance & Standards", subtitle: "Frameworks guiding OS security", type: "content", content: `
+            <div class="grid-2">
+                <div class="card info">
+                    <h3 class="font-bold text-blue-400">CIS Benchmarks</h3>
+                    <p class="text-xs text-gray-400 mt-1">Detailed, prescriptive configuration guidelines for Windows, Linux, Cloud, etc. "Gold standard" for hardening.</p>
+                </div>
+                <div class="card success">
+                    <h3 class="font-bold text-emerald-400">NIST SP 800-53 / CSF</h3>
+                    <p class="text-xs text-gray-400 mt-1">Comprehensive controls framework (AC-3 Access Control, SI-4 System Monitoring).</p>
+                </div>
+                <div class="card warning">
+                    <h3 class="font-bold text-amber-400">ISO 27001</h3>
+                    <p class="text-xs text-gray-400 mt-1">International standard for Information Security Management Systems (ISMS).</p>
+                </div>
+                <div class="card linux">
+                    <h3 class="font-bold text-yellow-400">STIGs</h3>
+                    <p class="text-xs text-gray-400 mt-1">Security Technical Implementation Guides (DoD). Highly specific settings.</p>
+                </div>
+            </div>
+        ` },
+
+        // --- QUIZ ---
+        { id: 33, section: "Quiz", title: "Knowledge Check: Question 1", subtitle: "Test your understanding", type: "quiz", content: `
+            <div class="card mb-4">
+                <p class="font-bold">Which Windows feature prevents unauthorized code execution in memory regions?</p>
+            </div>
+            <div class="grid-2 gap-2">
+                <button onclick="alert('Incorrect. This manages user permissions.')" class="card text-left hover:bg-gray-700 text-sm">A. User Account Control (UAC)</button>
+                <button onclick="alert('Correct! DEP prevents code execution from non-executable memory regions.')" class="card text-left hover:bg-gray-700 text-sm">B. Data Execution Prevention (DEP)</button>
+                <button onclick="alert('Incorrect. This randomizes memory addresses.')" class="card text-left hover:bg-gray-700 text-sm">C. Address Space Layout Randomization (ASLR)</button>
+                <button onclick="alert('Incorrect. This is a disk encryption feature.')" class="card text-left hover:bg-gray-700 text-sm">D. BitLocker</button>
+            </div>
+        ` },
+        { id: 34, section: "Quiz", title: "Knowledge Check: Question 2", subtitle: "Test your understanding", type: "quiz", content: `
+            <div class="card mb-4">
+                <p class="font-bold">What is the primary function of SELinux on Linux systems?</p>
+            </div>
+            <div class="grid-2 gap-2">
+                <button onclick="alert('Incorrect. This is typically iptables/nftables.')" class="card text-left hover:bg-gray-700 text-sm">A. Packet Filtering</button>
+                <button onclick="alert('Correct! SELinux provides Mandatory Access Control (MAC).')" class="card text-left hover:bg-gray-700 text-sm">B. Mandatory Access Control (MAC)</button>
+                <button onclick="alert('Incorrect. Disk encryption is usually LUKS.')" class="card text-left hover:bg-gray-700 text-sm">C. Disk Encryption</button>
+                <button onclick="alert('Incorrect. This is managed by Package Managers.')" class="card text-left hover:bg-gray-700 text-sm">D. Software Updates</button>
+            </div>
+        ` },
+        
+        // --- CASE STUDIES ---
+        { id: 35, section: "Case Study", title: "Case Study: WannaCry Ransomware", subtitle: "The global impact of an OS vulnerability", type: "content", content: `
+            <div class="grid-2">
+                <div class="card danger">
+                    <h3 class="font-bold text-red-400">The Attack</h3>
+                    <p class="text-xs text-gray-400 mt-1">
+                        <strong>Vulnerability:</strong> EternalBlue (CVE-2017-0144) exploited a bug in the SMBv1 protocol on Windows.
+                        <br/><br/>
+                        <strong>Impact:</strong> Ransomware encrypted files on 200,000+ computers across 150 countries. Caused $4-8 billion in damages.
+                        <br/><br/>
+                        <strong>Persistence:</strong> Spread automatically via internet (worm).
+                    </p>
+                </div>
+                <div class="card success">
+                    <h3 class="font-bold text-emerald-400">The Defense</h3>
+                    <p class="text-xs text-gray-400 mt-1">
+                        <strong>Patching:</strong> MS17-010 patch was available 2 months prior. Failure to patch was the root cause.
+                        <br/><br/>
+                        <strong>Network Segmentation:</strong> Blocking SMB port 445 at firewalls prevented spread.
+                        <br/><br/>
+                        <strong>Kill Switch:</strong> A security researcher found a hardcoded domain check; registering it stopped the spread.
+                    </p>
+                </div>
+            </div>
+        ` },
+        { id: 36, section: "Case Study", title: "Case Study: SolarWinds Supply Chain", subtitle: "The danger of trusted updates", type: "content", content: `
+            <div class="grid-2">
+                <div class="card warning">
+                    <h3 class="font-bold text-amber-400">Supply Chain Attack</h3>
+                    <p class="text-xs text-gray-400 mt-1">
+                        Attackers compromised the SolarWinds build system. They injected a backdoor (Sunburst) into the Orion software updates.
+                        <br/><br/>
+                        <strong>Victims:</strong> US Government agencies (Treasury, Commerce), Fortune 500 companies.
+                        <br/><br/>
+                        <strong>OS Level:</strong> Backdoor ran with high privileges on victim servers, beaconing to C2 infrastructure.
+                    </p>
+                </div>
+                <div class="card info">
+                    <h3 class="font-bold text-blue-400">Lessons Learned</h3>
+                    <p class="text-xs text-gray-400 mt-1">
+                        <strong>Trust:</strong> We implicitly trust software updates. This trust was abused.
+                        <br/><br/>
+                        <strong>Detection:</strong> Traditional AV failed because the binary was signed by a trusted certificate.
+                        <br/><br/>
+                        <strong>Hardening:</strong> Network segmentation and least privilege limited lateral movement for some victims.
+                    </p>
+                </div>
+            </div>
+        ` },
+        
+        // --- ADVANCED TOPICS ---
+        { id: 37, section: "Advanced", title: "Side-Channel Attacks", subtitle: "Inferring secrets from physical implementation", type: "content", content: `
+            <div class="card danger mb-4">
+                <h3 class="font-bold text-red-400">Spectre & Meltdown</h3>
+                <p class="text-xs text-gray-400 mt-1">Hardware vulnerabilities affecting modern CPUs. Exploiting speculative execution to read kernel memory from user space.</p>
+            </div>
+            <div class="grid-2 gap-4">
+                <div class="card warning">
+                    <h3 class="font-bold text-amber-400 text-sm">Timing Attacks</h3>
+                    <p class="text-xs text-gray-400 mt-1">Measuring the time operations take to infer data (e.g., password comparison timing).</p>
+                </div>
+                <div class="card info">
+                    <h3 class="font-bold text-blue-400 text-sm">Rowhammer</h3>
+                    <p class="text-xs text-gray-400 mt-1">Repeatedly accessing rows in DRAM to cause bit flips in adjacent rows, breaking isolation.</p>
+                </div>
+            </div>
+        ` },
+        { id: 38, section: "Advanced", title: "Zero-Day Vulnerabilities", subtitle: "The unknown unknowns", type: "content", content: `
+            <div class="flex items-center justify-center h-full">
+                <div class="text-center">
+                    <svg class="mx-auto mb-4" width="100" height="100" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="10 5"/>
+                        <text x="50" y="55" fill="#ef4444" font-size="20" font-weight="bold" text-anchor="middle">0</text>
+                    </svg>
+                    <p class="text-lg font-bold text-gray-300">A vulnerability unknown to the vendor.</p>
+                    <p class="text-sm text-gray-400 mt-2 max-w-md">No patch exists. Detection relies on behavioral analysis (EDR) and IOCs (Indicators of Compromise), not signatures.</p>
+                    <div class="mt-4 p-2 bg-red-900/20 rounded border border-red-900/50 text-xs text-red-300">
+                        Mitigation: Defense in Depth. Assume breach. Application allow-listing.
+                    </div>
+                </div>
+            </div>
+        ` },
+        
+        // --- SUMMARY & END ---
+        { id: 39, section: "Summary", title: "Summary of Key Concepts", subtitle: "Reviewing the essentials", type: "content", content: `
+            <div class="grid-2 gap-4 text-sm">
+                <div class="card info"><strong>Architecture:</strong> Understanding Ring 0 vs Ring 3 is crucial to understanding exploitation.</div>
+                <div class="card danger"><strong>Attack Surfaces:</strong> Every interface (Network, Physical, API) is a potential entry point.</div>
+                <div class="card success"><strong>Hardening:</strong> It's not a one-time task. Continuous patching, monitoring, and least privilege.</div>
+                <div class="card warning"><strong>Ecosystem:</strong> Security depends on the supply chain and human factors, not just the OS code.</div>
+            </div>
+        ` },
+        { id: 40, section: "Resources", title: "Resources & Further Reading", subtitle: "Expand your knowledge", type: "content", content: `
+            <div class="space-y-3">
+                <div class="card"><a href="#" class="text-blue-400 underline">CIS Benchmarks (cisecurity.org)</a> - Configuration guides.</div>
+                <div class="card"><a href="#" class="text-blue-400 underline">MITRE ATT&CK (attack.mitre.org)</a> - Adversary tactics and techniques.</div>
+                <div class="card"><a href="#" class="text-blue-400 underline">NIST NVD (nvd.nist.gov)</a> - Vulnerability database.</div>
+                <div class="card"><a href="#" class="text-blue-400 underline">GTFOBins (gtfobins.github.io)</a> - Unix binaries abuse.</div>
+                <div class="card"><a href="#" class="text-blue-400 underline">LOLBAS (lolbas-project.github.io)</a> - Windows binaries abuse.</div>
+            </div>
+        ` },
+        { id: 41, section: "End", title: "Thank You", subtitle: "Questions?", type: "title", content: `
+             <div class="flex flex-col items-center justify-center h-full text-center">
+                <p class="text-xl text-gray-400">Operating System Security Masterclass</p>
+                <p class="mt-4 text-gray-500 text-sm">Stay vigilant. Harden your systems.</p>
+            </div>
+        ` }
+    ];
+    
+    let currentSlide = 1;
+    const totalSlides = slidesData.length;
+    const container = document.getElementById('slideContainer');
+    const progress = document.getElementById('progress');
+    const counter = document.getElementById('counter');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function initSlides() {
+        slidesData.forEach(slide => {
+            const slideEl = document.createElement('div');
+            slideEl.className = 'slide';
+            slideEl.id = `slide-${slide.id}`;
+            
+            let html = '';
+            
+            // Header
+            if (slide.type !== 'title') {
+                html += `<div class="mb-4"><span class="section-tag">${slide.section}</span><h1 class="slide-title">${slide.title}</h1><p class="slide-subtitle">${slide.subtitle}</p></div>`;
+            }
+
+            // Content
+            html += `<div class="flex-1 overflow-y-auto">${slide.content}</div>`;
+            
+            slideEl.innerHTML = html;
+            container.appendChild(slideEl);
+        });
+        updateView();
+    }
+
+    function changeSlide(direction) {
+        currentSlide += direction;
+        if (currentSlide < 1) currentSlide = 1;
+        if (currentSlide > totalSlides) currentSlide = totalSlides;
+        updateView();
+    }
+
+    function updateView() {
+        // Update visibility
+        document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+        const active = document.getElementById(`slide-${currentSlide}`);
+        if (active) active.classList.add('active');
+
+        // Update Nav
+        const percent = (currentSlide / totalSlides) * 100;
+        progress.style.width = `${percent}%`;
+        counter.innerText = `${currentSlide} / ${totalSlides}`;
+        prevBtn.disabled = currentSlide === 1;
+        nextBtn.disabled = currentSlide === totalSlides;
+    }
+
+    // Keyboard Navigation
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') changeSlide(1);
+        if (e.key === 'ArrowLeft') changeSlide(-1);
+    });
+
+    // Simulation Logic
+    function simWinStep1() {
+        const term = document.getElementById('win_sim_term');
+        term.innerHTML += `\n<span style="color:#10b981">C:\\Users\\Guest></span> sc qc VulnService\n[SC] QueryServiceConfig SUCCESS\nBINARY_PATH_NAME   : C:\\Program Files\\VulnApp\\service.exe\nSERVICE_START_NAME : LocalSystem`;
+        document.getElementById('sim_step1').disabled = true;
+        document.getElementById('sim_step2').disabled = false;
+    }
+    function simWinStep2() {
+        const term = document.getElementById('win_sim_term');
+        term.innerHTML += `\n<span style="color:#10b981">C:\\Users\\Guest></span> icacls "C:\\Program Files\\VulnApp\\service.exe"\nEveryone:(I)(F) <span style="color:#ef4444">--> Vulnerability Found!</span>`;
+        document.getElementById('sim_step2').disabled = true;
+        document.getElementById('sim_step3').disabled = false;
+    }
+    function simWinStep3() {
+        const term = document.getElementById('win_sim_term');
+        term.innerHTML += `\n<span style="color:#10b981">C:\\Users\\Guest></span> sc start VulnService\n[SC] StartService SUCCESS\n\n<span style="color:#ef4444">[SYSTEM SHELL SPAWNED]</span>`;
+        document.getElementById('sim_step3').disabled = true;
+    }
+
+    function simLinuxStep1() {
+        const term = document.getElementById('linux_sim_term');
+        term.innerHTML += `\n<span style="color:#10b981">root@container:/#</span> fdisk -l\nDisk /dev/sda: 50 GiB, 53687091200 bytes\n<mark style="background:rgba(239,68,68,0.3)">Host Disk Visible!</mark>`;
+        document.getElementById('sim_l1').disabled = true;
+        document.getElementById('sim_l2').disabled = false;
+    }
+    function simLinuxStep2() {
+        const term = document.getElementById('linux_sim_term');
+        term.innerHTML += `\n<span style="color:#10b981">root@container:/#</span> mkdir /mnt/host; mount /dev/sda1 /mnt/host\n<span style="color:#10b981">root@container:/#</span> chroot /mnt/host sh\n<span style="color:#ef4444">root@host:/#</span> cat /etc/shadow`;
+        document.getElementById('sim_l2').disabled = true;
+    }
+
+    // Initialize
+    initSlides();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Cloud Security Course: Academic & Industry</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --secondary: #2563eb;
+            --accent: #f59e0b;
+            --bg: #f8fafc;
+            --text: #334155;
+            --border: #cbd5e1;
+            --white: #ffffff;
+            --success: #10b981;
+            --danger: #ef4444;
+            --font: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: var(--font);
+            background-color: var(--primary);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            color: var(--text);
+        }
+
+        /* --- Sidebar Navigation --- */
+        aside {
+            width: 300px;
+            background-color: #1e293b;
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #334155;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            padding: 20px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            background: rgba(0,0,0,0.3);
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-scroller {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+        }
+
+        .module-header {
+            padding: 10px 20px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #94a3b8;
+            font-weight: 700;
+            margin-top: 10px;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .nav-item:hover { background-color: rgba(255,255,255,0.1); }
+        .nav-item.active {
+            background-color: var(--secondary);
+            border-left-color: var(--accent);
+            color: white;
+        }
+        
+        .level-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .bg-green { background-color: var(--success); }
+        .bg-blue { background-color: var(--secondary); }
+        .bg-red { background-color: var(--danger); }
+
+        /* --- Main Content Area --- */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #e2e8f0;
+            position: relative;
+        }
+
+        .slide-deck {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .slide {
+            position: absolute;
+            width: 95%;
+            height: 95%;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            overflow: hidden;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .slide.active { display: flex; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Slide Header & Layout --- */
+        .slide-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+        }
+
+        .slide-title { font-size: 1.5rem; color: var(--primary); font-weight: 700; }
+        
+        .badges { display: flex; gap: 10px; }
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-beg { background: #dcfce7; color: #166534; }
+        .badge-int { background: #dbeafe; color: #1e40af; }
+        .badge-adv { background: #fee2e2; color: #991b1b; }
+
+        .slide-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Tabs System --- */
+        .tabs { display: flex; background: #f1f5f9; border-bottom: 1px solid var(--border); }
+        .tab-btn {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 2px solid transparent;
+            transition: 0.2s;
+        }
+        .tab-btn:hover { color: var(--primary); background: rgba(0,0,0,0.05); }
+        .tab-btn.active { color: var(--secondary); border-bottom-color: var(--secondary); background: white; }
+
+        .tab-content-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+        }
+
+        .tab-pane { display: none; animation: slideIn 0.3s ease; }
+        .tab-pane.active { display: block; }
+        
+        @keyframes slideIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* --- Content Styling --- */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        h3 { color: var(--secondary); margin-bottom: 15px; font-size: 1.2rem; }
+        p { line-height: 1.7; margin-bottom: 15px; color: #475569; }
+        ul { padding-left: 20px; margin-bottom: 20px; }
+        li { margin-bottom: 8px; }
+
+        .learning-obj {
+            background: #eff6ff;
+            border-left: 4px solid var(--secondary);
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 25px;
+        }
+        .learning-obj strong { color: var(--primary); display: block; margin-bottom: 5px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* --- Code Blocks & Tables --- */
+        code { background: #1e293b; color: #e2e8f0; padding: 15px; border-radius: 6px; display: block; font-family: 'Consolas', monospace; font-size: 0.85rem; white-space: pre-wrap; margin-bottom: 20px; border: 1px solid #334155; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+        th, td { border: 1px solid var(--border); padding: 12px; text-align: left; }
+        th { background: #f8fafc; font-weight: 700; color: var(--primary); }
+        .insecure-row { background-color: #fef2f2; }
+        .secure-row { background-color: #f0fdf4; }
+
+        /* --- Case Study Box --- */
+        .case-study {
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            position: relative;
+        }
+        .case-study::before {
+            content: "📢 INDUSTRY CASE STUDY";
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: #fffbeb;
+            padding: 0 10px;
+            color: #d97706;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        /* --- Heatmap Visual --- */
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            width: 300px;
+            margin: 20px auto;
+        }
+        .heat-cell {
+            padding: 10px;
+            text-align: center;
+            color: white;
+            font-size: 0.8rem;
+            border-radius: 4px;
+        }
+
+        /* --- Quiz Section --- */
+        .quiz-section {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .quiz-q { font-weight: 600; margin-bottom: 15px; }
+        .quiz-options { display: grid; gap: 10px; }
+        .quiz-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            text-align: left;
+            transition: 0.2s;
+        }
+        .quiz-btn:hover { background: rgba(255,255,255,0.2); }
+        .quiz-btn.correct { background: var(--success); border-color: var(--success); }
+        .quiz-btn.wrong { background: var(--danger); border-color: var(--danger); }
+
+        /* --- Footer Controls --- */
+        .footer-controls {
+            height: 70px;
+            background: white;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+        }
+
+        .ctrl-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ctrl-btn:hover { background: var(--secondary); }
+        .ctrl-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+        /* --- SVG Graphics --- */
+        .svg-container { width: 100%; height: 100%; min-height: 250px; display: flex; justify-content: center; align-items: center; background: #f8fafc; border-radius: 8px; border: 1px dashed var(--border); }
+        svg { width: 90%; height: 90%; }
+        text { font-family: sans-serif; }
+
+        @media (max-width: 1024px) {
+            .content-grid { grid-template-columns: 1fr; }
+            aside { display: none; } /* Simplified for mobile */
+        }
+    </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside>
+    <div class="brand">
+        <span>🛡️</span> CloudSec Masterclass
+    </div>
+    <div class="nav-scroller" id="navMenu">
+        <!-- JS Generated -->
+    </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main>
+    <div class="slide-deck">
+        
+        <!-- SLIDE 1: Intro -->
+        <div class="slide active" id="slide-0" data-title="Course Overview" data-module="Introduction" data-level="Beginner">
+            <div class="slide-header">
+                <div class="slide-title">Advanced Cloud Security Course</div>
+                <div class="badges"><span class="badge badge-beg">Beginner</span></div>
+            </div>
+            <div class="slide-body">
+                <div class="tab-content-container" style="text-align: center; padding-top: 60px;">
+                    <h1 style="font-size: 3rem; color: var(--primary); margin-bottom: 20px;">Academic Theory Meets Industry Practice</h1>
+                    <p style="font-size: 1.2rem; max-width: 800px; margin: 0 auto;">A comprehensive journey through Cloud Security fundamentals, architecture, threat modeling, and compliance.</p>
+                    
+                    <div style="display: flex; justify-content: center; gap: 40px; margin-top: 60px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 2.5rem;">🎓</div>
+                            <h3>Bloom's Taxonomy</h3>
+                            <p>Structured learning outcomes</p>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 2.5rem;">🏗️</div>
+                            <h3>Architecture</h3>
+                            <p>Secure design patterns</p>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 2.5rem;">🚨</div>
+                            <h3>Threat Intel</h3>
+                            <p>MITRE ATT&CK & Case Studies</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-controls">
+                <div></div>
+                <button class="ctrl-btn" onclick="changeSlide(1)">Start Course →</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: Fundamentals -->
+        <div class="slide" id="slide-1" data-title="Cloud Fundamentals" data-module="1. Fundamentals" data-level="Beginner">
+            <div class="slide-header">
+                <div class="slide-title">1. Cloud Fundamentals & Architecture</div>
+                <div class="badges"><span class="badge badge-beg">Beginner</span></div>
+            </div>
+            <div class="slide-body">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="openTab(event, 's1-theory')">📚 Theory</button>
+                    <button class="tab-btn" onclick="openTab(event, 's1-industry')">🏢 Industry</button>
+                    <button class="tab-btn" onclick="openTab(event, 's1-visual')">📊 Visuals</button>
+                </div>
+                
+                <div class="tab-content-container">
+                    <!-- Theory Tab -->
+                    <div id="s1-theory" class="tab-pane active">
+                        <div class="learning-obj">
+                            <strong>Learning Objectives (Bloom's: Understand)</strong>
+                            Define NIST Service/Deployment models and articulate the Shared Responsibility Model boundaries.
+                        </div>
+                        <div class="content-grid">
+                            <div>
+                                <h3>Service Models (SPI)</h3>
+                                <ul>
+                                    <li><strong>IaaS:</strong> Infrastructure as a Service. Provider manages hardware/virtualization. User manages OS, apps, data. (e.g., AWS EC2, Azure VM).</li>
+                                    <li><strong>PaaS:</strong> Platform as a Service. Provider manages OS/Runtime. User manages Data/Apps. (e.g., Google App Engine, Azure SQL).</li>
+                                    <li><strong>SaaS:</strong> Software as a Service. Provider manages everything. User manages access/usage. (e.g., Salesforce, Office 365).</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3>Deployment Models</h3>
+                                <ul>
+                                    <li><strong>Public:</strong> Shared infrastructure, open to general public.</li>
+                                    <li><strong>Private:</strong> Exclusive use by one organization (on-prem or cloud).</li>
+                                    <li><strong>Hybrid:</strong> Composition of two or more models bound by technology.</li>
+                                    <li><strong>Multi-cloud:</strong> Using services from multiple cloud providers (e.g., AWS + Azure).</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Industry Tab -->
+                    <div id="s1-industry" class="tab-pane">
+                        <div class="case-study">
+                            <h3>Case Study: The Capital One Breach (2019)</h3>
+                            <p><strong>Scenario:</strong> A former AWS employee exploited a Server-Side Request Forgery (SSRF) vulnerability in a Web Application Firewall (WAF) misconfiguration.</p>
+                            <p><strong>Technical Failure:</strong> The WAF was allowed to query the EC2 Instance Metadata Service (IMDSv1), which exposed temporary credentials. These credentials had excessive permissions (IAM Role) allowing access to S3 buckets.</p>
+                            <p><strong>Mitigation:</strong> Migration to IMDSv2 (session-oriented), enforcing strict IAM policies, and restricting WAF outbound connectivity.</p>
+                        </div>
+                        <div class="quiz-section">
+                            <div class="quiz-q">Who is responsible for patching the Guest OS in an IaaS model?</div>
+                            <div class="quiz-options">
+                                <button class="quiz-btn" onclick="checkQuiz(this, false)">Cloud Provider</button>
+                                <button class="quiz-btn" onclick="checkQuiz(this, true)">Customer (You)</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visual Tab -->
+                    <div id="s1-visual" class="tab-pane">
+                        <div class="svg-container">
+                            <svg viewBox="0 0 400 300">
+                                <!-- Layers -->
+                                <rect x="50" y="20" width="300" height="40" fill="#ef4444" rx="5" />
+                                <text x="200" y="45" text-anchor="middle" fill="white" font-weight="bold">SaaS (App Managed by Provider)</text>
+                                
+                                <rect x="50" y="70" width="300" height="40" fill="#f59e0b" rx="5" />
+                                <text x="200" y="95" text-anchor="middle" fill="white" font-weight="bold">PaaS (Runtime Managed by Provider)</text>
+
+                                <rect x="50" y="120" width="300" height="40" fill="#3b82f6" rx="5" />
+                                <text x="200" y="145" text-anchor="middle" fill="white" font-weight="bold">IaaS (Virtualization Managed by Provider)</text>
+                                
+                                <rect x="50" y="170" width="300" height="40" fill="#334155" rx="5" />
+                                <text x="200" y="195" text-anchor="middle" fill="white" font-weight="bold">On-Premise (You manage everything)</text>
+
+                                <!-- Arrow -->
+                                <line x1="360" y1="40" x2="360" y2="190" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)" />
+                                <text x="370" y="120" font-size="12" fill="#64748b">Control Shift</text>
+                            </svg>
+                        </div>
+                        <p style="text-align:center; margin-top:10px;"><em>Figure 1: NIST Service Control Boundaries</em></p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-controls">
+                <button class="ctrl-btn" onclick="changeSlide(0)">← Prev</button>
+                <button class="ctrl-btn" onclick="changeSlide(2)">Next →</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: IAM -->
+        <div class="slide" id="slide-2" data-title="Identity & Access Mgmt" data-module="2. IAM" data-level="Intermediate">
+            <div class="slide-header">
+                <div class="slide-title">2. Identity & Access Management (IAM)</div>
+                <div class="badges"><span class="badge badge-int">Intermediate</span></div>
+            </div>
+            <div class="slide-body">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="openTab(event, 's2-theory')">📚 Theory</button>
+                    <button class="tab-btn" onclick="openTab(event, 's2-industry')">🏢 Industry</button>
+                    <button class="tab-btn" onclick="openTab(event, 's2-visual')">📊 Visuals</button>
+                </div>
+                <div class="tab-content-container">
+                    <div id="s2-theory" class="tab-pane active">
+                        <div class="learning-obj">
+                            <strong>Learning Objectives (Bloom's: Apply)</strong>
+                            Design Least Privilege policies and distinguish between Authentication and Authorization.
+                        </div>
+                        <h3>Core IAM Concepts</h3>
+                        <ul>
+                            <li><strong>Principal:</strong> An entity authenticated by AWS (User, Role, Federated User).</li>
+                            <li><strong>Request:</strong> Principals send requests to AWS services.</li>
+                            <li><strong>Authentication (AuthN):</strong> Verify identity (MFA, SSO, Federation).</li>
+                            <li><strong>Authorization (AuthZ):</strong> Verify permissions (Policy evaluation logic).</li>
+                        </ul>
+                        
+                        <h3>Policy Evaluation Logic</h3>
+                        <p>1. <strong>Default Deny:</strong> All requests are denied by default.<br>
+                        2. <strong>Explicit Allow:</strong> If any policy allows, check for explicit deny.<br>
+                        3. <strong>Explicit Deny:</strong> Overrides any allow.</p>
+                    </div>
+
+                    <div id="s2-industry" class="tab-pane">
+                        <h3>Secure vs. Insecure Code</h3>
+                        <p><strong>Scenario:</strong> An EC2 instance needs to read objects from a specific S3 bucket.</p>
+                        
+                        <p style="font-weight:bold; color:var(--danger)">❌ Insecure: Hardcoded Keys</p>
+<code>// In application code (e.g., Python)
+conn = boto3.client('s3',
+    aws_access_key_id='AKIA...',
+    aws_secret_access_key='l0ngStr1ng...'
+)</code>
+
+                        <p style="font-weight:bold; color:var(--success)">✅ Secure: IAM Role (Instance Profile)</p>
+<code>// In application code
+// No keys needed!
+conn = boto3.client('s3')
+# Permission comes from the attached IAM Role</code>
+                        
+                        <div class="quiz-section">
+                            <div class="quiz-q">What mechanism allows a compute resource (EC2/Lambda) to access S3 without keys?</div>
+                            <div class="quiz-options">
+                                <button class="quiz-btn" onclick="checkQuiz(this, false)">Access Key ID</button>
+                                <button class="quiz-btn" onclick="checkQuiz(this, true)">IAM Role / Instance Profile</button>
+                                <button class="quiz-btn" onclick="checkQuiz(this, false)">Security Group</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="s2-visual" class="tab-pane">
+                         <div class="svg-container">
+                            <svg viewBox="0 0 400 250">
+                                <!-- User -->
+                                <circle cx="50" cy="125" r="20" fill="#3b82f6"/>
+                                <text x="50" y="160" text-anchor="middle" font-size="12">User</text>
+                                
+                                <!-- Policy -->
+                                <rect x="120" y="100" width="80" height="50" fill="#f59e0b" rx="5"/>
+                                <text x="160" y="125" text-anchor="middle" fill="white" font-size="11">Policy</text>
+                                <text x="160" y="140" text-anchor="middle" fill="white" font-size="9">(JSON)</text>
+
+                                <!-- Role -->
+                                <rect x="250" y="100" width="80" height="50" fill="#10b981" rx="5"/>
+                                <text x="290" y="125" text-anchor="middle" fill="white" font-size="11">Role</text>
+
+                                <!-- Resource -->
+                                <rect x="340" y="100" width="50" height="50" fill="#64748b" rx="5"/>
+                                <text x="365" y="130" text-anchor="middle" fill="white" font-size="11">S3</text>
+
+                                <!-- Arrows -->
+                                <line x1="70" y1="125" x2="120" y2="125" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+                                <line x1="200" y1="125" x2="250" y2="125" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+                                <line x1="330" y1="125" x2="340" y2="125" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+                                
+                                <text x="160" y="90" text-anchor="middle" font-size="10" fill="#64748b">Attaches</text>
+                                <text x="290" y="90" text-anchor="middle" font-size="10" fill="#64748b">Assumes</text>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-controls">
+                <button class="ctrl-btn" onclick="changeSlide(1)">← Prev</button>
+                <button class="ctrl-btn" onclick="changeSlide(3)">Next →</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: Data Security -->
+        <div class="slide" id="slide-3" data-title="Data Security" data-module="3. Data Security" data-level="Intermediate">
+            <div class="slide-header">
+                <div class="slide-title">3. Data Security & Encryption</div>
+                <div class="badges"><span class="badge badge-int">Intermediate</span></div>
+            </div>
+            <div class="slide-body">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="openTab(event, 's3-theory')">📚 Theory</button>
+                    <button class="tab-btn" onclick="openTab(event, 's3-industry')">🏢 Industry</button>
+                </div>
+                <div class="tab-content-container">
+                    <div id="s3-theory" class="tab-pane active">
+                        <div class="learning-obj">
+                            <strong>Learning Objectives (Bloom's: Analyze)</strong>
+                            Compare Client-Side vs. Server-Side encryption and explain Key Management hierarchy.
+                        </div>
+                        <div class="content-grid">
+                            <div>
+                                <h3>Encryption States</h3>
+                                <ul>
+                                    <li><strong>At Rest:</strong> Data stored on disks (EBS, S3, RDS). Standard: AES-256.</li>
+                                    <li><strong>In Transit:</strong> Data moving over network (TLS 1.2+).</li>
+                                </ul>
+                                <h3>Key Management</h3>
+                                <ul>
+                                    <li><strong>CMEK (Customer Managed Keys):</strong> You control the key lifecycle (KMS).</li>
+                                    <li><strong>BYOK (Bring Your Own Key):</strong> Key material generated outside cloud and imported.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3>Envelope Encryption</h3>
+                                <p>Encrypting a data key with a master key. This allows performance (data key does the heavy lifting) and security (master key is stored in HSM).</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="s3-industry" class="tab-pane">
+                        <div class="case-study">
+                            <h3>Scenario: Financial Services (PCI-DSS)</h3>
+                            <p>A bank is migrating credit card data to the cloud. Compliance requires that the Cloud Provider cannot access the raw data.</p>
+                            <p><strong>Solution:</strong> Use Client-Side Encryption. The bank encrypts data locally before uploading to S3. The Cloud Provider only sees ciphertext.</p>
+                        </div>
+                        <div class="quiz-section">
+                            <div class="quiz-q">If you use "Server-Side Encryption with Customer Managed Keys (SSE-C), who supplies the key?</div>
+                            <div class="quiz-options">
+                                <button class="quiz-btn" onclick="checkQuiz(this, true)">The Customer (for each request)</button>
+                                <button class="quiz-btn" onclick="checkQuiz(this, false)">AWS KMS automatically</button>
+                                <button class="quiz-btn" onclick="checkQuiz(this, false)">The S3 Service</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-controls">
+                <button class="ctrl-btn" onclick="changeSlide(2)">← Prev</button>
+                <button class="ctrl-btn" onclick="changeSlide(4)">Next →</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: Network Security -->
+        <div class="slide" id="slide-4" data-title="Network Security" data-module="4. Network Security" data-level="Intermediate">
+            <div class="slide-header">
+                <div class="slide-title">4. Cloud Network Security</div>
+                <div class="badges"><span class="badge badge-int">Intermediate</span></div>
+            </div>
+            <div class="slide-body">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="openTab(event, 's4-theory')">📚 Theory</button>
+                    <button class="tab-btn" onclick="openTab(event, 's4-visual')">📊 Visuals</button>
+                </div>
+                <div class="tab-content-container">
+                    <div id="s4-theory" class="tab-pane active">
+                        <div class="content-grid">
+                            <div>
+                                <h3>VPC Components</h3>
+                                <ul>
+                                    <li><strong>VPC:</strong> Isolated network boundary.</li>
+                                    <li><strong>Subnet:</strong> Range of IP addresses. Public (IGW route) vs Private.</li>
+                                    <li><strong>Route Table:</strong> Maps network traffic (destinations).</li>
+                                    <li><strong>Security Group (SG):</strong> <em>Stateful</em> firewall at instance level.</li>
+                                    <li><strong>NACL:</strong> <em>Stateless</em> firewall at subnet level.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3>Secure Patterns</h3>
+                                <table>
+                                    <tr><th>Concept</th><th>Description</th></tr>
+                                    <tr class="secure-row">
+                                        <td>Bastion Host</td>
+                                        <td>Gateway for SSH/RDP into private subnets.</td>
+                                    </tr>
+                                    <tr class="secure-row">
+                                        <td>NAT Gateway</td>
+                                        <td>Allows instances in private subnet to access internet (updates) without inbound internet access.</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="quiz-section">
+                            <div class="quiz-q">Which firewall is STATEFUL (remembers return traffic)?</div>
+                            <div class="quiz-options">
+                                <button class="quiz-btn" onclick="checkQuiz(this, false)">NACL</button>
+                                <button class="quiz-btn" onclick="checkQuiz(this, true)">Security Group</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="s4-visual" class="tab-pane">
+                        <div class="svg-container">
+                            <svg viewBox="0 0 500 300">
+                                <!-- Internet -->
+                                <ellipse cx="250" cy="30" rx="40" ry="15" fill="#3b82f6" opacity="0.5"/>
+                                <text x="250" y="35" text-anchor="middle" fill="#1e3a8a" font-weight="bold">Internet</text>
+                                
+                                <!-- IGW -->
+                                <rect x="230" y="60" width="40" height="20" fill="#ef4444"/>
+                                <text x="250" y="75" text-anchor="middle" fill="white" font-size="10">IGW</text>
+
+                                <!-- VPC Container -->
+                                <rect x="50" y="100" width="400" height="180" fill="none" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,5"/>
+                                <text x="60" y="120" fill="#3b82f6" font-weight="bold">VPC (10.0.0.0/16)</text>
+
+                                <!-- Public Subnet -->
+                                <rect x="70" y="130" width="180" height="130" fill="#dbeafe" stroke="#93c5fd"/>
+                                <text x="80" y="150" fill="#1e40af" font-weight="bold" font-size="12">Public Subnet</text>
+                                
+                                <!-- Web Server -->
+                                <rect x="110" y="180" width="40" height="40" fill="#f59e0b"/>
+                                <text x="130" y="205" text-anchor="middle" fill="white" font-size="10">Web</text>
+                                
+                                <!-- Private Subnet -->
+                                <rect x="270" y="130" width="170" height="130" fill="#d1fae5" stroke="#6ee7b7"/>
+                                <text x="280" y="150" fill="#065f46" font-weight="bold" font-size="12">Private Subnet</text>
+
+                                <!-- DB -->
+                                <ellipse cx="355" cy="200" rx="30" ry="20" fill="#10b981"/>
+                                <text x="355" y="205" text-anchor="middle" fill="white" font-size="10">DB</text>
+
+                                <!-- Connections -->
+                                <line x1="250" y1="80" x2="250" y2="130" stroke="#334155" stroke-width="2"/>
+                                <line x1="250" y1="130" x2="130" y2="180" stroke="#334155" stroke-width="2"/>
+                                <line x1="130" y1="200" x2="325" y2="200" stroke="#334155" stroke-width="2"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-controls">
+                <button class="ctrl-btn" onclick="changeSlide(3)">← Prev</button>
+                <button class="ctrl-btn" onclick="changeSlide(5)">Next →</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: Threat Modeling -->
+        <div class="slide" id="slide-5" data-title="Threat Modeling" data-module="5. Advanced Threats" data-level="Advanced">
+            <div class="slide-header">
+                <div class="slide-title">5. Cloud Threat Modeling & MITRE ATT&CK</div>
+                <div class="badges"><span class="badge badge-adv">Advanced</span></div>
+            </div>
+            <div class="slide-body">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="openTab(event, 's5-theory')">📚 Theory</button>
+                    <button class="tab-btn" onclick="openTab(event, 's5-matrix')">📊 ATT&CK Matrix</button>
+                </div>
+                <div class="tab-content-container">
+                    <div id="s5-theory" class="tab-pane active">
+                        <div class="learning-obj">
+                            <strong>Learning Objectives (Bloom's: Evaluate)</strong>
+                            Apply STRIDE methodology to cloud architectures and map tactics to MITRE ATT&CK Cloud matrix.
+                        </div>
+                        
+                        <h3>STRIDE Methodology</h3>
+                        <ul>
+                            <li><strong>S</strong>poofing: Impersonating a user or process (e.g., Stolen IAM Keys).</li>
+                            <li><strong>T</strong>ampering: Modifying data (e.g., altering S3 object).</li>
+                            <li><strong>R</strong>epudiation: Denying an action (e.g., CloudTrail logging disabled).</li>
+                            <li><strong>I</strong>nformation Disclosure: Data leak (e.g., Public S3).</li>
+                            <li><strong>D</strong>enial of Service: Exhausting resources (e.g., Lambda throttling).</li>
+                            <li><strong>E</strong>levation of Privilege: Gaining higher access (e.g., IAM CreatePolicyVersion).</li>
+                        </ul>
+
+                        <div class="case-study">
+                            <h3>Attack Scenario: PrivEsc via IAM</h3>
+                            <p><strong>Tactic:</strong> Privilege Escalation (T1489 or similar). <br>
+                            <strong>Technique:</strong> An attacker creates a new version of an existing policy attached to their user, changing "Allow" to "*". They then detach the old version.</p>
+                        </div>
+                    </div>
+
+                    <div id="s5-matrix" class="tab-pane">
+                        <h3>MITRE ATT&CK Cloud (Subset)</h3>
+                        <table style="font-size: 0.8rem;">
+                            <tr>
+                                <th>Tactic</th>
+                                <th>Technique ID</th>
+                                <th>Description</th>
+                            </tr>
+                            <tr>
+                                <td>Initial Access</td>
+                                <td>T1078.004</td>
+                                <td>Valid Accounts: Cloud Accounts</td>
+                            </tr>
+                            <tr>
+                                <td>Execution</td>
+                                <td>T1648</td>
+                                <td>Serverless Execution (e.g., Lambda)</td>
+                            </tr>
+                            <tr>
+                                <td>Persistence</td>
+                                <td>T1098.003</td>
+                                <td>Additional Cloud Credentials</td>
+                            </tr>
+                            <tr>
+                                <td>Defense Evasion</td>
+                                <T1562.008</td>
+                                <td>Disable Cloud Logs (Stop CloudTrail)</td>
+                            </tr>
+                        </table>
+                         <div class="quiz-section">
+                            <div class="quiz-q">Which MITRE tactic involves stopping logging to hide activity?</div>
+                            <div class="quiz-options">
+                                <button class="quiz-btn" onclick="checkQuiz(this, false)">Persistence</button>
+                                <button class="quiz-btn" onclick="checkQuiz(this, true)">Defense Evasion</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-controls">
+                <button class="ctrl-btn" onclick="changeSlide(4)">← Prev</button>
+                <button class="ctrl-btn" onclick="changeSlide(6)">Next →</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: Governance -->
+        <div class="slide" id="slide-6" data-title="Governance & Compliance" data-module="6. Governance" data-level="Advanced">
+            <div class="slide-header">
+                <div class="slide-title">6. Governance, Risk & Compliance (GRC)</div>
+                <div class="badges"><span class="badge badge-adv">Advanced</span></div>
+            </div>
+            <div class="slide-body">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="openTab(event, 's6-theory')">📚 Frameworks</button>
+                    <button class="tab-btn" onclick="openTab(event, 's6-heatmap')">📊 Risk Heatmap</button>
+                </div>
+                <div class="tab-content-container">
+                    <div id="s6-theory" class="tab-pane active">
+                        <div class="content-grid">
+                            <div>
+                                <h3>Key Frameworks</h3>
+                                <ul>
+                                    <li><strong>NIST SP 800-53:</strong> Catalog of security controls for US Fed systems.</li>
+                                    <li><strong>ISO 27001:</strong> International standard for ISMS.</li>
+                                    <li><strong>CIS Benchmarks:</strong> Configuration guidelines (e.g., "Ensure S3 buckets are not public").</li>
+                                    <li><strong>CSA CCM:</strong> Cloud Controls Matrix.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3>Continuous Compliance</h3>
+                                <p>Manual audits are too slow. Use <strong>Configuration Rules</strong> (e.g., AWS Config, Azure Policy) to detect drift in real-time.</p>
+                                <code>
+# Example Rule: S3 Public Read Prohibited
+if s3_bucket.acl.grants == 'AllUsers' {
+  return NON_COMPLIANT
+}
+                                </code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="s6-heatmap" class="tab-pane">
+                        <h3>Risk Assessment Heatmap</h3>
+                        <div class="heatmap-grid">
+                            <!-- Row 1 -->
+                            <div class="heat-cell" style="background:#10b981">Low</div>
+                            <div class="heat-cell" style="background:#f59e0b">Med</div>
+                            <div class="heat-cell" style="background:#f97316">High</div>
+                            <div class="heat-cell" style="background:#ef4444">Crit</div>
+                            <div class="heat-cell" style="background:#ef4444">Crit</div>
+                            <!-- Row 2 -->
+                            <div class="heat-cell" style="background:#f59e0b">Med</div>
+                            <div class="heat-cell" style="background:#f59e0b">Med</div>
+                            <div class="heat-cell" style="background:#f97316">High</div>
+                            <div class="heat-cell" style="background:#ef4444">Crit</div>
+                            <div class="heat-cell" style="background:#ef4444">Crit</div>
+                             <!-- Row 3 -->
+                            <div class="heat-cell" style="background:#f97316">High</div>
+                            <div class="heat-cell" style="background:#f97316">High</div>
+                            <div class="heat-cell" style="background:#ef4444">Crit</div>
+                            <div class="heat-cell" style="background:#ef4444">Crit</div>
+                            <div class="heat-cell" style="background:#ef4444">Crit</div>
+                        </div>
+                        <p style="text-align:center">Likelihood → | Impact ↓</p>
+                        <div class="case-study">
+                            <strong>Governance Failure:</strong> Shadow IT. Developers spin up resources outside the central account structure, bypassing budget and security controls.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-controls">
+                <button class="ctrl-btn" onclick="changeSlide(5)">← Prev</button>
+                <button class="ctrl-btn" onclick="changeSlide(7)">Next →</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: Final Summary -->
+        <div class="slide" id="slide-7" data-title="Course Summary" data-module="Conclusion" data-level="Advanced">
+            <div class="slide-header">
+                <div class="slide-title">Course Completion & Path Forward</div>
+                <div class="badges"><span class="badge badge-adv">Advanced</span></div>
+            </div>
+            <div class="slide-body">
+                <div class="tab-content-container">
+                    <div style="text-align:center; padding: 40px;">
+                        <h1 style="color:var(--primary); margin-bottom:20px;">Congratulations!</h1>
+                        <p style="font-size:1.1rem; max-width:700px; margin:0 auto 40px auto;">
+                            You have completed the Cloud Security Masterclass. You now understand the theoretical foundations and practical applications of securing cloud infrastructure.
+                        </p>
+
+                        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px; text-align:left; margin-bottom:40px;">
+                            <div style="background:#f1f5f9; padding:20px; border-radius:8px;">
+                                <h3 style="color:var(--secondary)">Certifications</h3>
+                                <ul>
+                                    <li>ISC² CCSP</li>
+                                    <li>(ISC)² CISSP</li>
+                                    <li>AWS Security Specialty</li>
+                                </ul>
+                            </div>
+                            <div style="background:#f1f5f9; padding:20px; border-radius:8px;">
+                                <h3 style="color:var(--secondary)">Next Steps</h3>
+                                <ul>
+                                    <li>Build a Secure VPC Lab</li>
+                                    <li>Implement CI/CD Security Scanning</li>
+                                    <li>Study Cloud Forensics</li>
+                                </ul>
+                            </div>
+                            <div style="background:#f1f5f9; padding:20px; border-radius:8px;">
+                                <h3 style="color:var(--secondary)">Key Takeaway</h3>
+                                <p>"Security is a process, not a product. In the cloud, it is a shared responsibility."</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-controls">
+                <button class="ctrl-btn" onclick="changeSlide(6)">← Prev</button>
+                <button class="ctrl-btn" onclick="location.reload()">Restart Course ↻</button>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<!-- SVG Definitions -->
+<svg style="display: none;">
+    <defs>
+        <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,6 L9,3 z" fill="#64748b" />
+        </marker>
+    </defs>
+</svg>
+
+<script>
+    // --- Navigation Logic ---
+    const slides = document.querySelectorAll('.slide');
+    const navMenu = document.getElementById('navMenu');
+    let currentSlide = 0;
+
+    function initNav() {
+        let currentModule = "";
+        
+        slides.forEach((slide, index) => {
+            // Skip slide 0 (Title) in the detailed nav list for cleanliness, or include it
+            if (index === 0) {
+                const titleItem = document.createElement('div');
+                titleItem.className = 'nav-item active';
+                titleItem.innerHTML = `<span>Start Here</span>`;
+                titleItem.onclick = () => changeSlide(index);
+                navMenu.appendChild(titleItem);
+                return;
+            }
+
+            const module = slide.dataset.module;
+            
+            // Add Module Header if new
+            if (module !== currentModule) {
+                const header = document.createElement('div');
+                header.className = 'module-header';
+                header.textContent = module;
+                navMenu.appendChild(header);
+                currentModule = module;
+            }
+
+            // Add Slide Link
+            const item = document.createElement('div');
+            item.className = 'nav-item';
+            item.id = `nav-${index}`;
+            
+            const levelColor = slide.dataset.level === 'Beginner' ? 'bg-green' : 
+                               slide.dataset.level === 'Intermediate' ? 'bg-blue' : 'bg-red';
+            
+            item.innerHTML = `
+                <span>${slide.dataset.title}</span>
+                <span class="level-dot ${levelColor}"></span>
+            `;
+            item.onclick = () => changeSlide(index);
+            navMenu.appendChild(item);
+        });
+    }
+
+    function changeSlide(index) {
+        // Bounds check
+        if (index < 0) index = 0;
+        if (index >= slides.length) index = slides.length - 1;
+
+        // Hide all slides
+        slides.forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+        // Show current
+        slides[index].classList.add('active');
+        currentSlide = index;
+
+        // Highlight Nav
+        if(index > 0) {
+            const activeNav = document.getElementById(`nav-${index}`);
+            if(activeNav) {
+                activeNav.classList.add('active');
+                activeNav.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        } else {
+             // Special handling for title slide nav
+             navMenu.children[0].classList.add('active');
+        }
+    }
+
+    // --- Tab Logic ---
+    function openTab(evt, tabName) {
+        // Find the parent slide container
+        const slideBody = evt.target.closest('.slide-body');
+        
+        // Hide all tab panes in this slide
+        const panes = slideBody.querySelectorAll('.tab-pane');
+        panes.forEach(p => p.classList.remove('active'));
+
+        // Remove active class from buttons in this slide
+        const btns = slideBody.querySelectorAll('.tab-btn');
+        btns.forEach(b => b.classList.remove('active'));
+
+        // Show current tab and activate button
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+    }
+
+    // --- Quiz Logic ---
+    function checkQuiz(btn, isCorrect) {
+        const parent = btn.parentElement;
+        // Reset siblings
+        Array.from(parent.children).forEach(child => {
+            child.classList.remove('correct', 'wrong');
+        });
+
+        if (isCorrect) {
+            btn.classList.add('correct');
+        } else {
+            btn.classList.add('wrong');
+        }
+    }
+
+    // --- Init ---
+    initNav();
+
+    // Keyboard Support
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') changeSlide(currentSlide + 1);
+        if (e.key === 'ArrowLeft') changeSlide(currentSlide - 1);
+    });
+
+</script>
+</body>
+</html>
