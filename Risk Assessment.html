@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cybersecurity: Risk Management & Incident Handling</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-panel: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-green: #4ade80;
+            --accent-red: #f87171;
+            --accent-orange: #fb923c;
+            --border-color: #334155;
+            --font-main: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden; /* Slide deck behavior */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Header & Progress --- */
+        header {
+            height: 60px;
+            background-color: rgba(15, 23, 42, 0.95);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 100;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .progress-container {
+            flex-grow: 1;
+            margin: 0 2rem;
+            background-color: var(--bg-panel);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* --- Slide Container --- */
+        #deck-container {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 2rem 4rem;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: opacity var(--transition-speed) ease, transform var(--transition-speed) ease, visibility var(--transition-speed);
+            overflow-y: auto; /* Allow scrolling for long content */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            z-index: 10;
+        }
+
+        /* --- Typography & Layout --- */
+        h1 { font-size: 2.5rem; margin-bottom: 1rem; color: var(--text-primary); }
+        h2 { font-size: 1.8rem; margin-bottom: 1rem; color: var(--accent-blue); border-left: 4px solid var(--accent-blue); padding-left: 1rem; }
+        h3 { font-size: 1.4rem; margin: 1rem 0 0.5rem; color: var(--text-primary); }
+        p { line-height: 1.6; margin-bottom: 1rem; color: var(--text-secondary); font-size: 1.1rem; }
+        ul { margin-left: 1.5rem; margin-bottom: 1.5rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1rem;
+            height: 100%;
+        }
+
+        .card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .card.highlight { border-top: 3px solid var(--accent-orange); }
+
+        /* --- Interactive Elements --- */
+        .btn {
+            background-color: var(--accent-blue);
+            color: var(--bg-dark);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: filter 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn:hover { filter: brightness(1.1); }
+        .btn-outline { background: transparent; border: 1px solid var(--accent-blue); color: var(--accent-blue); }
+        .btn-outline:hover { background: rgba(56, 189, 248, 0.1); }
+
+        .analyst-insight {
+            background: rgba(56, 189, 248, 0.1);
+            border-left: 3px solid var(--accent-blue);
+            padding: 1rem;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+        }
+        .analyst-insight strong { color: var(--accent-blue); display: block; margin-bottom: 0.3rem; }
+
+        /* --- Visualizations (SVG) --- */
+        svg { width: 100%; height: auto; }
+        .risk-matrix-rect { transition: fill 0.3s; cursor: pointer; }
+        .risk-matrix-rect:hover { stroke: white; stroke-width: 2px; }
+        .flow-path { stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: dash 3s linear forwards; }
+        
+        @keyframes dash { to { stroke-dashoffset: 0; } }
+
+        /* --- Navigation Footer --- */
+        footer {
+            height: 70px;
+            background-color: var(--bg-panel);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 100;
+        }
+
+        .nav-controls { display: flex; gap: 1rem; }
+        .slide-counter { font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+
+        /* --- Specific Components --- */
+        /* SOC Dashboard Mockup */
+        .soc-dashboard {
+            display: grid;
+            grid-template-columns: 250px 1fr 300px;
+            grid-template-rows: 50px 1fr 1fr;
+            gap: 10px;
+            height: 400px;
+            background: #000;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
+        .soc-header { grid-column: 1 / -1; background: #111; color: var(--accent-green); display: flex; align-items: center; padding: 0 10px; border: 1px solid #333; }
+        .soc-panel { background: #111; border: 1px solid #333; padding: 10px; overflow: hidden; position: relative; }
+        .soc-alert-list div { padding: 5px 0; border-bottom: 1px solid #222; }
+        .critical { color: var(--accent-red); }
+        .warning { color: var(--accent-orange); }
+        .log-entry { font-family: 'Courier New', Courier, monospace; font-size: 0.75rem; color: #ccc; margin-bottom: 4px; }
+
+        /* Quiz */
+        .quiz-option {
+            padding: 10px;
+            margin: 5px 0;
+            background: #2a3546;
+            cursor: pointer;
+            border-radius: 4px;
+            border: 1px solid transparent;
+        }
+        .quiz-option:hover { background: #323f52; }
+        .quiz-option.correct { background: rgba(74, 222, 128, 0.2); border-color: var(--accent-green); }
+        .quiz-option.wrong { background: rgba(248, 113, 113, 0.2); border-color: var(--accent-red); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content-grid { grid-template-columns: 1fr; }
+            h1 { font-size: 1.8rem; }
+            .soc-dashboard { display: none; /* Hide complex dashboard on mobile */ }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span>CyberSec Academy</span>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="slide-counter" id="slideCounter">1 / 12</div>
+    </header>
+
+    <div id="deck-container">
+        <!-- Slide 1: Title -->
+        <div class="slide active">
+            <div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                <h1 style="font-size: 3.5rem; color: var(--accent-blue);">Risk Management &<br>Incident Handling</h1>
+                <p style="font-size: 1.5rem; max-width: 800px; margin-top: 1rem;">A comprehensive guide to identifying risks, managing threats, and responding to cybersecurity incidents.</p>
+                <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                    <span style="background: #334155; padding: 5px 15px; border-radius: 20px; font-size: 0.9rem;">GRC</span>
+                    <span style="background: #334155; padding: 5px 15px; border-radius: 20px; font-size: 0.9rem;">SOC Operations</span>
+                    <span style="background: #334155; padding: 5px 15px; border-radius: 20px; font-size: 0.9rem;">NIST Framework</span>
+                </div>
+                <div class="analyst-insight" style="max-width: 600px; margin-top: 3rem;">
+                    <strong>🎯 Learning Objective</strong>
+                    By the end of this course, you will be able to perform risk assessments, design mitigation strategies, and execute incident response playbooks.
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Module 1 Intro -->
+        <div class="slide">
+            <h2>Module 1: Introduction to Risk Management</h2>
+            <div class="content-grid">
+                <div>
+                    <h3>Core Concepts</h3>
+                    <ul>
+                        <li><strong>Risk:</strong> The potential for loss or damage when a threat exploits a vulnerability.</li>
+                        <li><strong>Threat:</strong> A danger that could potentially harm a system (e.g., Hacker, Malware).</li>
+                        <li><strong>Vulnerability:</strong> A weakness in a system that can be exploited (e.g., Unpatched software).</li>
+                        <li><strong>Impact:</strong> The magnitude of harm if the risk materializes.</li>
+                    </ul>
+                    <div class="analyst-insight">
+                        <strong>Think like an analyst:</strong>
+                        Risk is never zero. It's about business alignment. We manage risk to an acceptable level, not necessarily eliminate it entirely.
+                    </div>
+                </div>
+                <div>
+                    <h3>Risk Lifecycle</h3>
+                    <!-- SVG Diagram -->
+                    <svg viewBox="0 0 400 300" style="background: var(--bg-panel); border-radius: 8px;">
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#38bdf8" />
+                            </marker>
+                        </defs>
+                        <circle cx="200" cy="150" r="100" fill="none" stroke="#334155" stroke-width="2" />
+                        
+                        <!-- Steps -->
+                        <g transform="translate(200, 50)">
+                            <circle r="30" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                            <text y="5" text-anchor="middle" fill="#fff" font-size="10">Identify</text>
+                        </g>
+                        <g transform="translate(300, 150)">
+                            <circle r="30" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                            <text y="5" text-anchor="middle" fill="#fff" font-size="10">Assess</text>
+                        </g>
+                        <g transform="translate(200, 250)">
+                            <circle r="30" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                            <text y="5" text-anchor="middle" fill="#fff" font-size="10">Mitigate</text>
+                        </g>
+                        <g transform="translate(100, 150)">
+                            <circle r="30" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                            <text y="5" text-anchor="middle" fill="#fff" font-size="10">Monitor</text>
+                        </g>
+                        
+                        <!-- Connecting Arrows -->
+                        <path d="M200 80 L270 130" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrowhead)" class="flow-path"/>
+                        <path d="M280 180 L230 230" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrowhead)" class="flow-path"/>
+                        <path d="M170 230 L120 180" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrowhead)" class="flow-path"/>
+                        <path d="M120 120 L170 80" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrowhead)" class="flow-path"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Module 1 Case Study -->
+        <div class="slide">
+            <h2>Case Study: Real-World Impact</h2>
+            <div class="content-grid">
+                <div class="card highlight">
+                    <h3>Equifax Breach (2017)</h3>
+                    <p><strong>The Incident:</strong> Personal data of 147 million people was exposed.</p>
+                    <p><strong>The Vulnerability:</strong> Unpatched Apache Struts framework (CVE-2017-5638).</p>
+                    <p><strong>The Failure:</strong> Lack of asset visibility and patch management, despite the patch being available 2 months prior.</p>
+                </div>
+                <div>
+                    <h3>Risk Impact Breakdown</h3>
+                    <table style="width: 100%; border-collapse: collapse; color: var(--text-secondary);">
+                        <tr style="border-bottom: 1px solid #334155;">
+                            <th style="text-align: left; padding: 10px;">Type</th>
+                            <th style="text-align: left; padding: 10px;">Consequence</th>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #334155;">
+                            <td style="padding: 10px;">Financial</td>
+                            <td style="padding: 10px;">$575M - $700M settlement</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #334155;">
+                            <td style="padding: 10px;">Reputational</td>
+                            <td style="padding: 10px;">CEO resignation, stock drop</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px;">Legal</td>
+                            <td style="padding: 10px;">Massive class action lawsuits</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Module 2 - Risk Matrix -->
+        <div class="slide">
+            <h2>Module 2: Risk Assessment & Analysis</h2>
+            <div class="content-grid">
+                <div>
+                    <h3>Qualitative vs. Quantitative</h3>
+                    <ul>
+                        <li><strong>Qualitative:</strong> Subjective (High/Medium/Low). Fast, good for high-level overview. Uses a <em>Risk Matrix</em>.</li>
+                        <li><strong>Quantitative:</strong> Objective ($ value, ALE - Annualized Loss Expectancy). Uses formulas: SLE * ARO = ALE.</li>
+                    </ul>
+                    <div class="analyst-insight">
+                        <strong>Analyst Insight:</strong> In most corporate environments, we start with Qualitative to prioritize resources, then move to Quantitative for the top 5 critical risks to justify budget.
+                    </div>
+                </div>
+                <div>
+                    <h3>Interactive Risk Matrix</h3>
+                    <!-- SVG Interactive Matrix -->
+                    <svg viewBox="0 0 300 300">
+                        <!-- Axis Labels -->
+                        <text x="-150" y="20" transform="rotate(-90)" fill="#94a3b8" text-anchor="middle">Impact</text>
+                        <text x="150" y="350" fill="#94a3b8" text-anchor="middle">Likelihood</text>
+                        
+                        <!-- Cells -->
+                        <!-- Row 3 (High Impact) -->
+                        <rect x="100" y="0" width="100" height="100" fill="#fb923c" class="risk-matrix-rect" onclick="showRiskDetail('Medium')"/>
+                        <rect x="200" y="0" width="100" height="100" fill="#f87171" class="risk-matrix-rect" onclick="showRiskDetail('High')"/>
+                        <rect x="0" y="0" width="100" height="100" fill="#fbbf24" class="risk-matrix-rect" onclick="showRiskDetail('Medium')"/>
+                        
+                        <!-- Row 2 (Medium Impact) -->
+                        <rect x="100" y="100" width="100" height="100" fill="#fbbf24" class="risk-matrix-rect" onclick="showRiskDetail('Medium')"/>
+                        <rect x="200" y="100" width="100" height="100" fill="#fb923c" class="risk-matrix-rect" onclick="showRiskDetail('High')"/>
+                        <rect x="0" y="100" width="100" height="100" fill="#4ade80" class="risk-matrix-rect" onclick="showRiskDetail('Low')"/>
+                        
+                        <!-- Row 1 (Low Impact) -->
+                        <rect x="100" y="200" width="100" height="100" fill="#4ade80" class="risk-matrix-rect" onclick="showRiskDetail('Low')"/>
+                        <rect x="200" y="200" width="100" height="100" fill="#fbbf24" class="risk-matrix-rect" onclick="showRiskDetail('Medium')"/>
+                        <rect x="0" y="200" width="100" height="100" fill="#4ade80" class="risk-matrix-rect" onclick="showRiskDetail('Low')"/>
+                        
+                        <text x="150" y="290" fill="#fff" font-size="12" text-anchor="middle">High</text>
+                        <text x="20" y="290" fill="#fff" font-size="12" text-anchor="middle">Low</text>
+                    </svg>
+                    <div id="risk-feedback" style="margin-top: 10px; font-weight: bold; min-height: 1.5rem; color: var(--accent-blue);">Click a square to analyze</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Module 3 - Mitigation -->
+        <div class="slide">
+            <h2>Module 3: Risk Mitigation Strategies</h2>
+            <div class="content-grid">
+                <div>
+                    <h3>The Four Responses</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="card" style="padding: 1rem;">
+                            <strong style="color: var(--accent-red)">Avoidance</strong>
+                            <p style="font-size: 0.9rem;">Discontinue the activity causing risk.</p>
+                        </div>
+                        <div class="card" style="padding: 1rem;">
+                            <strong style="color: var(--accent-blue)">Transfer</strong>
+                            <p style="font-size: 0.9rem;">Insurance, outsourcing, SLAs.</p>
+                        </div>
+                        <div class="card" style="padding: 1rem;">
+                            <strong style="color: var(--accent-green)">Mitigate</strong>
+                            <p style="font-size: 0.9rem;">Apply controls (Firewalls, Training).</p>
+                        </div>
+                        <div class="card" style="padding: 1rem;">
+                            <strong style="color: var(--accent-orange)">Acceptance</strong>
+                            <p style="font-size: 0.9rem;">Cost of mitigation > Cost of loss.</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3>Frameworks & Controls</h3>
+                    <p>Security controls are mapped to standards like NIST SP 800-53 or ISO 27001.</p>
+                    <ul>
+                        <li><strong>Administrative:</strong> Policies, training, hiring.</li>
+                        <li><strong>Technical:</strong> Encryption, MFA, IDS/IPS.</li>
+                        <li><strong>Physical:</strong> Badges, guards, fences.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Module 4 - Incident Response -->
+        <div class="slide">
+            <h2>Module 4: Incident Response Lifecycle</h2>
+            <p style="text-align: center; margin-bottom: 2rem;">Based on NIST SP 800-61 Rev. 2</p>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <!-- Step 1 -->
+                <div style="text-align: center; width: 15%;">
+                    <div style="background: var(--accent-blue); color: #000; width: 40px; height: 40px; border-radius: 50%; line-height: 40px; margin: 0 auto; font-weight: bold;">1</div>
+                    <strong>Preparation</strong>
+                    <p style="font-size: 0.8rem">Policies, tools, training.</p>
+                </div>
+                <div style="color: #334155;">→</div>
+                <!-- Step 2 -->
+                <div style="text-align: center; width: 15%;">
+                    <div style="background: var(--accent-blue); color: #000; width: 40px; height: 40px; border-radius: 50%; line-height: 40px; margin: 0 auto; font-weight: bold;">2</div>
+                    <strong>Identification</strong>
+                    <p style="font-size: 0.8rem">Detect, log analysis.</p>
+                </div>
+                <div style="color: #334155;">→</div>
+                <!-- Step 3 -->
+                <div style="text-align: center; width: 15%;">
+                    <div style="background: var(--accent-orange); color: #000; width: 40px; height: 40px; border-radius: 50%; line-height: 40px; margin: 0 auto; font-weight: bold;">3</div>
+                    <strong>Containment</strong>
+                    <p style="font-size: 0.8rem">Short-term & long-term.</p>
+                </div>
+                <div style="color: #334155;">→</div>
+                <!-- Step 4 -->
+                <div style="text-align: center; width: 15%;">
+                    <div style="background: var(--accent-red); color: #000; width: 40px; height: 40px; border-radius: 50%; line-height: 40px; margin: 0 auto; font-weight: bold;">4</div>
+                    <strong>Eradication</strong>
+                    <p style="font-size: 0.8rem">Remove root cause.</p>
+                </div>
+                <div style="color: #334155;">→</div>
+                <!-- Step 5 -->
+                <div style="text-align: center; width: 15%;">
+                    <div style="background: var(--accent-green); color: #000; width: 40px; height: 40px; border-radius: 50%; line-height: 40px; margin: 0 auto; font-weight: bold;">5</div>
+                    <strong>Recovery</strong>
+                    <p style="font-size: 0.8rem">Restore & validate.</p>
+                </div>
+            </div>
+            
+            <div class="analyst-insight">
+                <strong>Post-Incident Activity (Lessons Learned):</strong>
+                This is the most skipped step. Documenting what went wrong and updating the Incident Response Plan (IRP) prevents history from repeating itself.
+            </div>
+        </div>
+
+        <!-- Slide 7: Module 5 - Simulation -->
+        <div class="slide">
+            <h2>Module 5: Practical Simulation (SOC)</h2>
+            <p>Scenario: A SIEM (Security Information and Event Management) tool has triggered an alert.</p>
+            
+            <div class="soc-dashboard">
+                <div class="soc-header">SOC-DEMO-01 | Threat Intel: Active</div>
+                
+                <!-- Side Panel -->
+                <div class="soc-panel" style="grid-column: 1; grid-row: 2 / -1;">
+                    <div style="color: #888; margin-bottom: 10px;">ALERT QUEUE</div>
+                    <div class="soc-alert-list">
+                        <div class="critical">[CRIT] Malware on HR-PC</div>
+                        <div class="warning">[WARN] Brute Force Auth</div>
+                        <div>[INFO] Policy Update</div>
+                    </div>
+                </div>
+
+                <!-- Main Log View -->
+                <div class="soc-panel" style="grid-column: 2; grid-row: 2 / -1;">
+                    <div style="color: #888; margin-bottom: 10px;">RAW LOGS (Splunk/Wazuh Mock)</div>
+                    <div id="log-container">
+                        <div class="log-entry">10:45:01 [INFO] User login: admin</div>
+                        <div class="log-entry">10:45:05 [INFO] User access: /dashboard</div>
+                    </div>
+                </div>
+
+                <!-- Analysis Panel -->
+                <div class="soc-panel" style="grid-column: 3; grid-row: 2 / -1; display: flex; flex-direction: column;">
+                    <div style="color: #888;">ACTION PANEL</div>
+                    <button class="btn" style="margin-top: 10px; font-size: 0.8rem;" onclick="runSimulation()">Start Incident</button>
+                    <div id="sim-status" style="margin-top: 20px; color: var(--accent-green); font-size: 0.9rem;">Waiting...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Module 6 - GRC -->
+        <div class="slide">
+            <h2>Module 6: GRC Integration</h2>
+            <div class="content-grid">
+                <div>
+                    <h3>Governance, Risk, Compliance</h3>
+                    <p>GRC ensures security aligns with business goals and legal requirements.</p>
+                    <ul>
+                        <li><strong>Policies:</strong> High-level statements of intent.</li>
+                        <li><strong>Procedures:</strong> Step-by-step instructions.</li>
+                        <li><strong>Standards:</strong> ISO 27001, NIST CSF, PCI-DSS.</li>
+                        <li><strong>Regulations:</strong> GDPR, HIPAA, CCPA.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>Quiz: Knowledge Check</h3>
+                    <div id="quiz-container">
+                        <p style="font-weight: bold; margin-bottom: 1rem;">1. Which GDPR principle relates to Risk Management?</p>
+                        <div class="quiz-option" onclick="checkAnswer(this, true)">Integrity and Confidentiality (Art. 32)</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">Right to be Forgotten</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">Data Portability</div>
+                        
+                        <p style="font-weight: bold; margin: 1.5rem 0 1rem;">2. What is the best immediate response to a live ransomware attack?</p>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">Pay the ransom</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">Restart the server</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, true)">Isolate affected systems (Containment)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Resources -->
+        <div class="slide">
+            <h2>Downloadable Resources</h2>
+            <p>Templates to help you implement what you've learned.</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 2rem;">
+                <div class="card">
+                    <h3>Risk Register</h3>
+                    <p>Excel/CSV template for tracking identified risks and their status.</p>
+                    <button class="btn btn-outline" onclick="downloadTemplate('risk_register')">Download .CSV</button>
+                </div>
+                <div class="card">
+                    <h3>IR Plan Playbook</h3>
+                    <p>Document structure for responding to Phishing and Ransomware.</p>
+                    <button class="btn btn-outline" onclick="downloadTemplate('ir_playbook')">Download .TXT</button>
+                </div>
+                <div class="card">
+                    <h3>RFP for Security Vendors</h3>
+                    <p>Request for Proposal template when selecting SIEM/EDR tools.</p>
+                    <button class="btn btn-outline" onclick="downloadTemplate('rfp_template')">Download .TXT</button>
+                </div>
+            </div>
+
+            <div style="margin-top: 3rem; text-align: center;">
+                <h3>References</h3>
+                <p style="font-size: 0.9rem;">
+                    NIST Cybersecurity Framework (CSF) | ISO/IEC 27001:2022 | MITRE ATT&CK Enterprise | SANS Incident Response Steps
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 10: Summary -->
+        <div class="slide">
+            <div style="text-align: center; margin-top: 10%;">
+                <h1 style="color: var(--accent-green);">Course Complete</h1>
+                <h3>Key Takeaways:</h3>
+                <div style="max-width: 600px; margin: 2rem auto; text-align: left;">
+                    <ul>
+                        <li>Risk Management is a continuous lifecycle, not a one-time project.</li>
+                        <li>Quantitative analysis justifies budget; Qualitative analysis guides priority.</li>
+                        <li>Incident Response relies heavily on Preparation and Lessons Learned.</li>
+                        <li>GRC bridges the gap between technical security and business objectives.</li>
+                    </ul>
+                </div>
+                <button class="btn" onclick="location.reload()">Restart Presentation</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="nav-controls">
+            <button class="btn btn-outline" onclick="prevSlide()">← Previous</button>
+            <button class="btn" onclick="nextSlide()">Next →</button>
+        </div>
+    </footer>
+
+    <script>
+        // State
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const progressBar = document.getElementById('progressBar');
+        const slideCounter = document.getElementById('slideCounter');
+
+        // Functions
+        function updateUI() {
+            // Update slides
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+
+            // Update Progress
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressBar.style.width = `${progress}%`;
+
+            // Update Counter
+            slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateUI();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateUI();
+            }
+        }
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Space') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        // Interactive: Risk Matrix
+        function showRiskDetail(level) {
+            const feedback = document.getElementById('risk-feedback');
+            let msg = "";
+            let color = "";
+
+            if (level === 'High') {
+                msg = "HIGH RISK: Immediate mitigation required within 24h. Escalate to CISO.";
+                color = "var(--accent-red)";
+            } else if (level === 'Medium') {
+                msg = "MEDIUM RISK: Schedule mitigation within 30-90 days. Monitor closely.";
+                color = "var(--accent-orange)";
+            } else {
+                msg = "LOW RISK: Accept or mitigate as part of routine maintenance.";
+                color = "var(--accent-green)";
+            }
+
+            feedback.textContent = msg;
+            feedback.style.color = color;
+        }
+
+        // Interactive: Simulation
+        function runSimulation() {
+            const logContainer = document.getElementById('log-container');
+            const statusDiv = document.getElementById('sim-status');
+            
+            statusDiv.textContent = "Analyzing...";
+            statusDiv.style.color = "var(--accent-orange)";
+
+            // Clear previous
+            logContainer.innerHTML = '';
+
+            const logs = [
+                { time: "10:45:10", type: "[WARN]", msg: "Multiple failed logins: root (IP: 192.168.1.55)" },
+                { time: "10:45:15", type: "[CRIT]", msg: "SQL Injection pattern detected in /login.php" },
+                { time: "10:45:18", type: "[CRIT]", msg: "Database dump initiated (Large outbound traffic)" },
+                { time: "10:45:20", type: "[INFO]", msg: "Firewall Rule triggered: Block IP 192.168.1.55" }
+            ];
+
+            let delay = 0;
+            logs.forEach(log => {
+                setTimeout(() => {
+                    const div = document.createElement('div');
+                    div.className = 'log-entry';
+                    let colorClass = '';
+                    if(log.type === '[CRIT]') div.style.color = 'var(--accent-red)';
+                    if(log.type === '[WARN]') div.style.color = 'var(--accent-orange)';
+                    
+                    div.innerHTML = `${log.time} <strong>${log.type}</strong> ${log.msg}`;
+                    logContainer.appendChild(div);
+                    logContainer.scrollTop = logContainer.scrollHeight; // Auto scroll
+                }, delay);
+                delay += 800;
+            });
+
+            setTimeout(() => {
+                statusDiv.textContent = "Incident Contained. Host isolated.";
+                statusDiv.style.color = "var(--accent-green)";
+            }, delay);
+        }
+
+        // Interactive: Quiz
+        function checkAnswer(element, isCorrect) {
+            // Reset siblings
+            const parent = element.parentElement;
+            const options = parent.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                opt.classList.remove('correct', 'wrong');
+                opt.style.cursor = 'default';
+            });
+
+            if (isCorrect) {
+                element.classList.add('correct');
+                element.innerHTML += " ✅";
+            } else {
+                element.classList.add('wrong');
+                element.innerHTML += " ❌";
+                // Highlight correct one
+                options.forEach(opt => {
+                    // Simple logic: if this is a question where the first option is the answer for demo, 
+                    // in real app, we'd map ID. 
+                    // For this UI demo, let's just mark the clicked one red if wrong.
+                });
+            }
+        }
+
+        // Interactive: Download
+        function downloadTemplate(type) {
+            let content = "";
+            let filename = "";
+
+            if (type === 'risk_register') {
+                content = "Risk ID,Asset,Threat,Vulnerability,Likelihood,Impact,Risk Score,Mitigation Plan\nR001,Customer DB,SQL Injection,Unpatched DB,High,High,15,Patch immediately";
+                filename = "risk_register_template.csv";
+            } else if (type === 'ir_playbook') {
+                content = "INCIDENT RESPONSE PLAN\n1. Preparation\n2. Identification\n3. Containment\n4. Eradication\n5. Recovery\n6. Lessons Learned\n\nContact List:\nCISO: 555-0101\nLegal: 555-0102";
+                filename = "ir_playbook_template.txt";
+            } else {
+                content = "RFP SECURITY VENDOR\n\n1. Scope of Work\n2. Compliance Requirements (ISO27001)\n3. Service Level Agreements (SLA)\n4. Pricing Model";
+                filename = "rfp_template.txt";
+            }
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Initialize
+        updateUI();
+    </script>
+</body>
+</html>

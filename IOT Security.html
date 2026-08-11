@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive IoT Security Training Deck</title>
+    <style>
+        /* --- RESET & VARS --- */
+        :root {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --primary: #38bdf8;   /* Sky Blue */
+            --secondary: #818cf8; /* Indigo */
+            --danger: #ef4444;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --font-stack: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+
+        body {
+            font-family: var(--font-stack);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- HEADER & NAV --- */
+        header {
+            background: rgba(15, 23, 42, 0.95);
+            border-bottom: 1px solid #334155;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .brand { font-weight: 700; font-size: 1.2rem; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+
+        .progress-area { flex: 1; margin: 0 2rem; display: flex; flex-direction: column; gap: 5px; }
+        .progress-track { height: 6px; background: #334155; border-radius: 3px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); width: 0%; transition: width 0.3s; }
+        .slide-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); }
+
+        /* --- SLIDE CONTAINER --- */
+        main {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% -20%, #1e293b 0%, #0f172a 60%);
+        }
+
+        .slide {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            padding: 2rem 4rem;
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+            pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto; /* Allow internal scroll if needed */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: all;
+            z-index: 10;
+        }
+
+        /* --- TYPOGRAPHY --- */
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--primary); letter-spacing: -1px; }
+        h2 { font-size: 1.8rem; margin-bottom: 1.5rem; border-left: 5px solid var(--secondary); padding-left: 1rem; color: white; }
+        h3 { font-size: 1.2rem; margin-bottom: 0.8rem; color: #e2e8f0; }
+        p { line-height: 1.6; color: #cbd5e1; margin-bottom: 1rem; }
+        ul { margin-left: 1.5rem; margin-bottom: 1rem; }
+        li { margin-bottom: 0.5rem; color: #cbd5e1; }
+
+        /* --- LAYOUT GRIDS --- */
+        .grid-2 { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 2rem; height: 100%; align-items: start; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+
+        /* --- CARDS & VISUALS --- */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .card:hover { transform: translateY(-3px); border-color: var(--primary); }
+
+        .infographic-box {
+            background: rgba(56, 189, 248, 0.05);
+            border: 1px dashed var(--primary);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .analyst-note {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            margin-top: 2rem;
+            font-size: 0.9rem;
+        }
+        .analyst-note strong { color: var(--warning); display: block; margin-bottom: 0.5rem; }
+
+        /* --- SVG DIAGRAMS --- */
+        .svg-wrap {
+            background: #020617;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+        svg { width: 100%; height: auto; max-height: 350px; }
+        
+        .flow-dash { stroke-dasharray: 8; animation: dash 1s linear infinite; }
+        @keyframes dash { to { stroke-dashoffset: -16; } }
+
+        /* --- INTERACTIVE ELEMENTS --- */
+        button {
+            background: var(--primary);
+            color: #0f172a;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+        button:hover { background: #7dd3fc; transform: scale(1.02); }
+        button.secondary { background: #334155; color: white; }
+        button.secondary:hover { background: #475569; }
+
+        .quiz-option {
+            display: block;
+            background: #334155;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            text-align: left;
+        }
+        .quiz-option:hover { background: #475569; }
+        .quiz-option.correct { background: rgba(34, 197, 94, 0.2); border-color: var(--success); }
+        .quiz-option.wrong { background: rgba(239, 68, 68, 0.2); border-color: var(--danger); }
+
+        .terminal {
+            background: #000;
+            color: #22c55e;
+            font-family: 'Courier New', monospace;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid #333;
+            font-size: 0.9rem;
+            min-height: 150px;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            padding: 1rem 2rem;
+            background: rgba(15, 23, 42, 0.95);
+            border-top: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-btn {
+            background: transparent;
+            border: 1px solid #475569;
+            color: #94a3b8;
+            padding: 0.5rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .nav-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 1024px) {
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .slide { padding: 1.5rem; }
+            h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="brand">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"></path><path d="M8.5 8.5v.01"></path><path d="M11.5 11.5v.01"></path><path d="M16 16v.01"></path></svg>
+        IoT Security Masterclass
+    </div>
+    <div class="progress-area">
+        <div class="slide-labels">
+            <span id="moduleDisplay">Module 1</span>
+            <span id="slideCounter">1 / 36</span>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+    </div>
+</header>
+
+<main id="mainContainer">
+
+    <!-- TITLE SLIDE -->
+    <section class="slide active" data-module="Intro">
+        <div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+            <h1 style="font-size: 4rem; margin-bottom: 0;">IoT Security</h1>
+            <h2 style="border:none; color: var(--secondary);">Architecture, Threats & Defense Strategies</h2>
+            <div style="display: flex; gap: 2rem; margin-top: 3rem;">
+                <div class="card" style="width: 200px; text-align: center;">
+                    <h3 style="color: var(--primary);">Academic</h3>
+                    <p style="font-size: 0.9rem;">7 Modules • 36 Slides</p>
+                </div>
+                <div class="card" style="width: 200px; text-align: center;">
+                    <h3 style="color: var(--success);">Professional</h3>
+                    <p style="font-size: 0.9rem;">Simulations • Real-world Cases</p>
+                </div>
+            </div>
+            <button onclick="nextSlide()" style="margin-top: 3rem; font-size: 1.2rem;">Start Training →</button>
+        </div>
+    </section>
+
+    <!-- ================================================== -->
+    <!-- MODULE 1: INTRODUCTION (5 Slides) -->
+    <!-- ================================================== -->
+
+    <section class="slide" data-module="Module 1: Intro">
+        <h2>1.1 Definition & Evolution of IoT</h2>
+        <div class="grid-2">
+            <div>
+                <h3>What is IoT?</h3>
+                <p>A network of physical objects—"things"—embedded with sensors, software, and other technologies for the purpose of connecting and exchanging data with other devices and systems over the internet.</p>
+                <h3>Timeline</h3>
+                <ul>
+                    <li><strong>1980s:</strong> Carnegie Mellon Coke Machine (First IP-connected device).</li>
+                    <li><strong>1999:</strong> Kevin Ashton coins term "Internet of Things".</li>
+                    <li><strong>2008:</strong> First "IoT" conference; IPv6 adoption.</li>
+                    <li><strong>2010s-Present:</strong> Smart Home, Smart Cities, IIoT explosion.</li>
+                </ul>
+            </div>
+            <div class="svg-wrap">
+                <!-- Evolution Infographic -->
+                <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="50" y1="250" x2="350" y2="250" stroke="#334155" stroke-width="4" />
+                    <!-- Nodes -->
+                    <circle cx="50" cy="250" r="8" fill="#38bdf8"/>
+                    <text x="50" y="270" text-anchor="middle" fill="#fff" font-size="10">RFID</text>
+                    <text x="50" y="235" text-anchor="middle" fill="#94a3b8" font-size="9">Inventory</text>
+
+                    <circle cx="150" cy="250" r="8" fill="#38bdf8"/>
+                    <text x="150" y="270" text-anchor="middle" fill="#fff" font-size="10">M2M</text>
+                    <text x="150" y="235" text-anchor="middle" fill="#94a3b8" font-size="9">Telemetry</text>
+
+                    <circle cx="250" cy="250" r="8" fill="#818cf8"/>
+                    <text x="250" y="270" text-anchor="middle" fill="#fff" font-size="10">IoT</text>
+                    <text x="250" y="235" text-anchor="middle" fill="#94a3b8" font-size="9">Smart Home</text>
+
+                    <circle cx="350" cy="250" r="8" fill="#22c55e"/>
+                    <text x="350" y="270" text-anchor="middle" fill="#fff" font-size="10">AIoT</text>
+                    <text x="350" y="235" text-anchor="middle" fill="#94a3b8" font-size="9">Intelligent</text>
+                    
+                    <text x="200" y="150" text-anchor="middle" fill="#fff" font-size="14">Complexity ↑</text>
+                    <path d="M200 160 L200 240" stroke="#fff" stroke-width="1" stroke-dasharray="4"/>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 1: Intro">
+        <h2>1.2 IoT Architecture (The 3-Layer Model)</h2>
+        <div class="svg-wrap" style="margin-bottom: 2rem;">
+            <!-- Layered DFD -->
+            <svg viewBox="0 0 600 250" xmlns="http://www.w3.org/2000/svg">
+                <rect x="200" y="10" width="200" height="50" rx="5" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                <text x="300" y="40" text-anchor="middle" fill="#38bdf8">Application Layer (Cloud/App)</text>
+                
+                <rect x="150" y="80" width="300" height="50" rx="5" fill="#1e293b" stroke="#818cf8" stroke-width="2"/>
+                <text x="300" y="110" text-anchor="middle" fill="#818cf8">Network Layer (Gateway/Transport)</text>
+                
+                <rect x="100" y="150" width="400" height="50" rx="5" fill="#1e293b" stroke="#22c55e" stroke-width="2"/>
+                <text x="300" y="180" text-anchor="middle" fill="#22c55e">Perception Layer (Sensors/Actuators)</text>
+
+                <line x1="300" y1="60" x2="300" y2="80" stroke="#fff" stroke-width="2" class="flow-dash"/>
+                <line x1="300" y1="130" x2="300" y2="150" stroke="#fff" stroke-width="2" class="flow-dash"/>
+            </svg>
+        </div>
+        <div class="grid-3">
+            <div class="card">
+                <strong>Perception:</strong>
+                <p>Sensors (Temp, GPS), Actuators, RFID tags. Collects data.</p>
+            </div>
+            <div class="card">
+                <strong>Network:</strong>
+                <p>Gateways, Routers, Protocols (MQTT, CoAP, Zigbee). Transmits data.</p>
+            </div>
+            <div class="card">
+                <strong>Application:</strong>
+                <p>Cloud Storage, Analytics, User Interface. Uses data.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 1: Intro">
+        <h2>1.3 IoT Ecosystems: Smart Home, IIoT, Healthcare</h2>
+        <div class="grid-3">
+            <div class="card" style="border-top: 4px solid var(--primary);">
+                <h3>Consumer IoT</h3>
+                <ul>
+                    <li>Smart Thermostats</li>
+                    <li>Connected Appliances</li>
+                    <li>Wearables</li>
+                    <li>Smart Speakers</li>
+                </ul>
+                <p class="infographic-box"><strong>Risk:</strong> Data privacy, weak security, scale of devices.</p>
+            </div>
+            <div class="card" style="border-top: 4px solid var(--warning);">
+                <h3>Industrial IoT (IIoT)</h3>
+                <ul>
+                    <li>Manufacturing Robots</li>
+                    <li>SCADA/PLC Integration</li>
+                    <li>Predictive Maintenance</li>
+                    <li>Supply Chain Tracking</li>
+                </ul>
+                <p class="infographic-box"><strong>Risk:</strong> Safety of life, high cost downtime, legacy protocols.</p>
+            </div>
+            <div class="card" style="border-top: 4px solid var(--danger);">
+                <h3>Healthcare IoT</h3>
+                <ul>
+                    <li>Insulin Pumps</li>
+                    <li>Patient Monitors</li>
+                    <li>Smart MRI</li>
+                    <li>Telehealth Robots</li>
+                </ul>
+                <p class="infographic-box"><strong>Risk:</strong> Patient safety (Life Critical), HIPAA data.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 1: Intro">
+        <h2>1.4 Benefits vs. Challenges</h2>
+        <div class="grid-2">
+            <div>
+                <h3 style="color: var(--success);">Benefits</h3>
+                <div class="card">
+                    <p><strong>Efficiency:</strong> Automated processes reduce labor costs.</p>
+                    <p><strong>Real-time Data:</strong> Immediate decision making.</p>
+                    <p><strong>Cost Savings:</strong> Predictive maintenance prevents failure.</p>
+                </div>
+            </div>
+            <div>
+                <h3 style="color: var(--danger);">Challenges</h3>
+                <div class="card">
+                    <p><strong>Security Fragmentation:</strong> No standard OS.</p>
+                    <p><strong>Update Mechanism:</strong> Difficult to patch.</p>
+                    <p><strong>Lifecycle:</strong> Devices outlast support.</p>
+                    <p><strong>Privacy:</strong> Surveillance capitalism.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 1: Intro">
+        <h2>1.5 Module 1 Summary & Quiz</h2>
+        <div class="card" style="max-width: 800px; margin: 0 auto;">
+            <h3>Quick Check</h3>
+            <p>Which layer is responsible for collecting raw data?</p>
+            <div class="quiz-option" onclick="checkAnswer(this, false)">Application Layer</div>
+            <div class="quiz-option" onclick="checkAnswer(this, true)">Perception Layer</div>
+            <div class="quiz-option" onclick="checkAnswer(this, false)">Network Layer</div>
+            <div id="quiz-feedback-1" style="margin-top:1rem; font-weight:bold;"></div>
+        </div>
+    </section>
+
+    <!-- ================================================== -->
+    <!-- MODULE 2: THREAT LANDSCAPE (5 Slides) -->
+    <!-- ================================================== -->
+
+    <section class="slide" data-module="Module 2: Threats">
+        <h2>2.1 Common IoT Vulnerabilities</h2>
+        <div class="grid-2">
+            <ul style="font-size: 1.1rem;">
+                <li><strong>1. Weak Authentication:</strong> Default credentials (admin/admin) remain the #1 issue.</li>
+                <li><strong>2. Insecure Network Services:</strong> Open ports (Telnet 23, HTTP 80) exposed to WAN.</li>
+                <li><strong>3. Lack of Encryption:</strong> Data transmitted in plain text.</li>
+                <li><strong>4. Lack of Update Mechanism:</strong> Firmware cannot be patched remotely.</li>
+                <li><strong>5. Physical Hardening:</strong> Debug ports (UART/JTAG) left exposed.</li>
+            </ul>
+            <div class="svg-wrap">
+                <svg viewBox="0 0 400 150" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="20" y="50" width="360" height="50" fill="#000" stroke="#ef4444" stroke-width="2"/>
+                    <text x="200" y="80" text-anchor="middle" fill="#ef4444" font-family="monospace">/etc/shadow: admin:$1$hash... (DEFAULT)</text>
+                    <circle cx="350" cy="40" r="20" fill="none" stroke="#ef4444" stroke-width="2"/>
+                    <line x1="342" y1="32" x2="358" y2="48" stroke="#ef4444" stroke-width="2"/>
+                    <line x1="358" y1="32" x2="342" y2="48" stroke="#ef4444" stroke-width="2"/>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 2: Threats">
+        <h2>2.2 Botnets: The Mirai Case Study</h2>
+        <div class="grid-2">
+            <div>
+                <h3>How Mirai Works</h3>
+                <ol>
+                    <li><strong>Scanning:</strong> Bot scans internet for IoT devices on Telnet (Port 23).</li>
+                    <li><strong>Brute Force:</strong> Tries 60 default username/password combos.</li>
+                    <li><strong>Infection:</strong> Downloads malware, wipes itself from disk (RAM-only).</li>
+                    <li><strong>Attack:</strong> C2 commands device to flood target with traffic.</li>
+                </ol>
+            </div>
+            <div class="svg-wrap">
+                <!-- Botnet Flow -->
+                <svg viewBox="0 0 400 250" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="200" cy="30" r="25" fill="#ef4444"/>
+                    <text x="200" y="35" text-anchor="middle" fill="#fff" font-size="10">Hacker</text>
+                    
+                    <rect x="150" y="80" width="100" height="40" fill="#334155" stroke="#ef4444"/>
+                    <text x="200" y="105" text-anchor="middle" fill="#fff" font-size="10">C2 Server</text>
+                    
+                    <g transform="translate(0, 150)">
+                        <circle cx="100" cy="50" r="20" fill="#64748b"/>
+                        <circle cx="200" cy="50" r="20" fill="#64748b"/>
+                        <circle cx="300" cy="50" r="20" fill="#64748b"/>
+                        <text x="200" y="90" text-anchor="middle" fill="#94a3b8" font-size="10">Zombie Devices</text>
+                    </g>
+
+                    <rect x="150" y="220" width="100" height="30" fill="#fff"/>
+                    <text x="200" y="240" text-anchor="middle" fill="#000" font-size="10">Target Server</text>
+
+                    <!-- Arrows -->
+                    <line x1="200" y1="55" x2="200" y2="80" stroke="#fff" stroke-width="2"/>
+                    <line x1="200" y1="120" x2="100" y2="150" stroke="#ef4444" stroke-width="1" stroke-dasharray="3"/>
+                    <line x1="200" y1="120" x2="200" y2="150" stroke="#ef4444" stroke-width="1" stroke-dasharray="3"/>
+                    <line x1="200" y1="120" x2="300" y2="150" stroke="#ef4444" stroke-width="1" stroke-dasharray="3"/>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 2: Threats">
+        <h2>2.3 Man-in-the-Middle (MITM) Attacks</h2>
+        <div class="grid-2">
+            <div class="svg-wrap">
+                <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="20" y="80" width="80" height="50" fill="#334155" stroke="#38bdf8"/>
+                    <text x="60" y="110" text-anchor="middle" fill="#fff">Smart Lock</text>
+                    
+                    <rect x="300" y="80" width="80" height="50" fill="#334155" stroke="#22c55e"/>
+                    <text x="340" y="110" text-anchor="middle" fill="#fff">Phone App</text>
+
+                    <circle cx="200" cy="105" r="35" fill="#ef4444" stroke="#fff"/>
+                    <text x="200" y="100" text-anchor="middle" fill="#fff" font-size="10">ATTACKER</text>
+                    <text x="200" y="115" text-anchor="middle" fill="#fff" font-size="10">(Router)</text>
+
+                    <path d="M100 105 L165 105" stroke="#38bdf8" stroke-width="2" stroke-dasharray="4"/>
+                    <path d="M235 105 L300 105" stroke="#22c55e" stroke-width="2" stroke-dasharray="4"/>
+                </svg>
+            </div>
+            <div>
+                <h3>Scenario: ARP Spoofing</h3>
+                <p>An attacker convinces the Smart Lock that the Attacker is the Router, and the Phone that the Attacker is the Lock.</p>
+                <div class="analyst-note">
+                    <strong>Defense:</strong>
+                    Use Mutual TLS (mTLS). The Device must verify the Server's certificate, and the Server must verify the Device's certificate.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 2: Threats">
+        <h2>2.4 Physical Attacks & Firmware Tampering</h2>
+        <div class="grid-2">
+            <div>
+                <h3>JTAG / UART Access</h3>
+                <p>Many devices have debugging pins exposed on the PCB. Attaching wires allows dumping the firmware to find encryption keys.</p>
+                <h3>Bus Sniffing</h3>
+                <p>Connecting to I2C or SPI buses to read sensor data in transit before encryption.</p>
+            </div>
+            <div class="svg-wrap">
+                <svg viewBox="0 0 500 150" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="50" y="20" width="400" height="100" fill="#27272a" stroke="#475569" rx="5"/>
+                    <rect x="200" y="45" width="100" height="50" fill="#000" stroke="#fff"/>
+                    <text x="250" y="75" text-anchor="middle" fill="#fff">MCU</text>
+                    <line x1="200" y1="50" x2="150" y2="50" stroke="#ef4444" stroke-width="2"/>
+                    <circle cx="150" cy="50" r="4" fill="#ef4444"/>
+                    <text x="150" y="40" text-anchor="middle" fill="#ef4444" font-size="8">JTAG</text>
+                    <line x1="300" y1="50" x2="350" y2="50" stroke="#ef4444" stroke-width="2"/>
+                    <circle cx="350" cy="50" r="4" fill="#ef4444"/>
+                    <text x="350" y="40" text-anchor="middle" fill="#ef4444" font-size="8">UART</text>
+                    <text x="250" y="110" text-anchor="middle" fill="#94a3b8">Unprotected Debug Interfaces</text>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 2: Threats">
+        <h2>2.5 Real-World Breaches</h2>
+        <div class="grid-2">
+            <div class="card">
+                <h3>Treasury Casino (2022)</h3>
+                <p>Hackers accessed smart cameras to spy on operations, gaining access to the backend database via lateral movement.</p>
+                <p><strong>Cause:</strong> Default passwords on DVRs.</p>
+            </div>
+            <div class="card">
+                <h3>St. Jude Medical Cardiac Devices</h3>
+                <p>Vulnerabilities found in pacemakers that allowed attackers to drain battery or alter pacing.</p>
+                <p><strong>Cause:</strong> Lack of proper authentication protocols.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================== -->
+    <!-- MODULE 3: SECURITY ARCHITECTURE (5 Slides) -->
+    <!-- ================================================== -->
+
+    <section class="slide" data-module="Module 3: Architecture">
+        <h2>3.1 Zero Trust Principles for IoT</h2>
+        <div class="grid-2">
+            <div>
+                <h3>The Model</h3>
+                <p><strong>"Never trust, always verify."</strong></p>
+                <ul>
+                    <li>Assume the network is hostile.</li>
+                    <li>Every device must have a unique identity.</li>
+                    <li>Least privilege access.</li>
+                </ul>
+            </div>
+            <div class="svg-wrap">
+                <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="150" cy="150" r="100" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="5"/>
+                    <text x="150" y="150" text-anchor="middle" fill="#ef4444">UNTRUSTED</text>
+                    <rect x="100" y="100" width="100" height="100" fill="#1e293b" stroke="#22c55e" stroke-width="3"/>
+                    <text x="150" y="140" text-anchor="middle" fill="#fff">SECURE</text>
+                    <text x="150" y="160" text-anchor="middle" fill="#fff">ZONE</text>
+                    <line x1="150" y1="200" x2="150" y2="230" stroke="#22c55e"/>
+                    <rect x="110" y="230" width="80" height="20" fill="#334155"/>
+                    <text x="150" y="245" text-anchor="middle" fill="#fff" font-size="8">Firewall</text>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 3: Architecture">
+        <h2>3.2 Device Identity & PKI</h2>
+        <p>How to prove a device is who it says it is?</p>
+        <div class="svg-wrap">
+            <!-- PKI Flow -->
+            <svg viewBox="0 0 600 150" xmlns="http://www.w3.org/2000/svg">
+                <rect x="20" y="50" width="100" height="50" fill="#334155" stroke="#fff"/>
+                <text x="70" y="80" text-anchor="middle" fill="#fff">Device</text>
+                <line x1="120" y1="75" x2="180" y2="75" stroke="#fff" stroke-width="2"/>
+                <text x="150" y="65" text-anchor="middle" fill="#fff" font-size="10">1. CSR</text>
+                
+                <rect x="180" y="50" width="100" height="50" fill="#38bdf8"/>
+                <text x="230" y="80" text-anchor="middle" fill="#000">CA Server</text>
+                <line x1="280" y1="75" x2="340" y2="75" stroke="#fff" stroke-width="2"/>
+                <text x="310" y="65" text-anchor="middle" fill="#fff" font-size="10">2. Sign</text>
+
+                <rect x="340" y="50" width="100" height="50" fill="#334155" stroke="#22c55e"/>
+                <text x="390" y="70" text-anchor="middle" fill="#22c55e" font-size="10">X.509</text>
+                <text x="390" y="90" text-anchor="middle" fill="#fff">Installed</text>
+
+                <line x1="440" y1="75" x2="500" y2="75" stroke="#fff" stroke-width="2"/>
+                <rect x="500" y="50" width="80" height="50" fill="#1e293b" stroke="#fff"/>
+                <text x="540" y="80" text-anchor="middle" fill="#fff">Cloud</text>
+            </svg>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 3: Architecture">
+        <h2>3.3 Secure Protocols: MQTT vs CoAP</h2>
+        <div class="grid-2">
+            <div class="card">
+                <h3 style="color: var(--primary)">MQTT (Publish/Subscribe)</h3>
+                <p><strong>Transport:</strong> TCP</p>
+                <p><strong>Best For:</strong> Unstable networks where message delivery is critical (e.g., Smart Metering).</p>
+                <p><strong>Security:</strong> TLS (Port 8883), Client Certificates.</p>
+            </div>
+            <div class="card">
+                <h3 style="color: var(--success)">CoAP (Request/Response)</h3>
+                <p><strong>Transport:</strong> UDP</p>
+                <p><strong>Best For:</strong> Constrained devices needing low latency (e.g., Light Switch).</p>
+                <p><strong>Security:</strong> DTLS (Datagram TLS).</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 3: Architecture">
+        <h2>3.4 Hardware Root of Trust (HSM/TPM)</h2>
+        <div class="grid-2">
+            <div>
+                <p>Software keys can be dumped from memory. A Hardware Security Module (HSM) or TPM (Trusted Platform Module) holds keys in hardware.</p>
+                <ul>
+                    <li><strong>Secure Boot:</strong> Verifies firmware integrity before execution.</li>
+                    <li><strong>Key Storage:</strong> Keys never leave the chip.</li>
+                </ul>
+            </div>
+            <div class="svg-wrap">
+                <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="20" y="50" width="200" height="100" fill="#27272a" stroke="#fff" rx="5"/>
+                    <text x="120" y="110" text-anchor="middle" fill="#fff">Main CPU</text>
+                    <rect x="240" y="60" width="140" height="80" fill="#38bdf8" stroke="#fff" rx="5"/>
+                    <text x="310" y="90" text-anchor="middle" fill="#000" font-weight="bold">TPM / HSM</text>
+                    <text x="310" y="110" text-anchor="middle" fill="#000" font-size="10">Key Gen</text>
+                    <line x1="220" y1="100" x2="240" y2="100" stroke="#fff" stroke-width="2"/>
+                    <text x="310" y="160" fill="#ef4444" font-size="10">⚠️ Keys cannot be extracted</text>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 3: Architecture">
+        <h2>3.5 Secure Update Mechanism</h2>
+        <div class="card">
+            <h3>Safe Firmware Update Flow</h3>
+            <ol style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem;">
+                <li style="min-width: 150px; background: #1e293b; padding: 10px; border-radius: 6px;">
+                    <strong>1. Sign</strong><br>Vendor signs firmware with Private Key.
+                </li>
+                <li style="min-width: 150px; background: #1e293b; padding: 10px; border-radius: 6px;">
+                    <strong>2. Transfer</strong><br>Encrypted transfer (HTTPS) to device.
+                </li>
+                <li style="min-width: 150px; background: #1e293b; padding: 10px; border-radius: 6px;">
+                    <strong>3. Verify</strong><br>Device uses embedded Public Key to verify signature.
+                </li>
+                <li style="min-width: 150px; background: #1e293b; padding: 10px; border-radius: 6px;">
+                    <strong>4. Flash</strong><br>If valid, update applied. If invalid, reject.
+                </li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- ================================================== -->
+    <!-- MODULE 4: RISK MANAGEMENT (5 Slides) -->
+    <!-- ================================================== -->
+
+    <section class="slide" data-module="Module 4: Risk Mgmt">
+        <h2>4.1 Asset Discovery: Shadow IoT</h2>
+        <p>You cannot secure what you cannot see.</p>
+        <div class="grid-2">
+            <div class="card">
+                <h3>Active Scanning</h3>
+                <p><strong>Tools:</strong> Nmap, Masscan.</p>
+                <p><strong>Pros:</strong> Fast, detailed.</p>
+                <p><strong>Cons:</strong> Can crash cheap devices; triggers IDS.</p>
+            </div>
+            <div class="card">
+                <h3>Passive Monitoring</h3>
+                <p><strong>Tools:</strong> Zeek, Wireshark (Mirror Port).</p>
+                <p><strong>Pros:</strong> Invisible to attacker; safe for devices.</p>
+                <p><strong>Cons:</strong> Slower; need traffic to capture.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 4: Risk Mgmt">
+        <h2>4.2 Threat Modeling: STRIDE</h2>
+        <div class="grid-3">
+            <div class="card" style="border-bottom: 4px solid #38bdf8"><strong>S</strong>poofing (Identity)</div>
+            <div class="card" style="border-bottom: 4px solid #ef4444"><strong>T</strong>ampering (Data Integrity)</div>
+            <div class="card" style="border-bottom: 4px solid #f59e0b"><strong>R</strong>epudiation (Non-repudiation)</div>
+            <div class="card" style="border-bottom: 4px solid #22c55e"><strong>I</strong>nfo Disclosure (Privacy)</div>
+            <div class="card" style="border-bottom: 4px solid #818cf8"><strong>D</strong>enial of Service (Availability)</div>
+            <div class="card" style="border-bottom: 4px solid #fff"><strong>E</strong>levation of Privilege</div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 4: Risk Mgmt">
+        <h2>4.3 Risk Matrix Simulation</h2>
+        <p>Hover over cells to see the action required.</p>
+        <div class="grid-3" style="max-width: 800px; margin: 0 auto;">
+            <div></div> <div style="text-align:center">Low Impact</div> <div style="text-align:center">High Impact</div>
+            
+            <div style="writing-mode: vertical-rl; transform: rotate(180deg); align-self: center;">High Likelihood</div>
+            <div class="risk-cell" style="height: 80px; background: #eab308; cursor: help;" onmouseover="showRisk(this)" data-msg="Medium Risk: Implement controls within 90 days.">Medium</div>
+            <div class="risk-cell" style="height: 80px; background: #ef4444; cursor: help;" onmouseover="showRisk(this)" data-msg="High Risk: Immediate remediation required.">Critical</div>
+
+            <div style="writing-mode: vertical-rl; transform: rotate(180deg); align-self: center;">Low Likelihood</div>
+            <div class="risk-cell" style="height: 80px; background: #22c55e; cursor: help;" onmouseover="showRisk(this)" data-msg="Low Risk: Accept and monitor.">Low</div>
+            <div class="risk-cell" style="height: 80px; background: #eab308; cursor: help;" onmouseover="showRisk(this)" data-msg="Medium Risk: Plan for mitigation.">Medium</div>
+        </div>
+        <div id="risk-display" style="text-align: center; margin-top: 1rem; font-weight: bold; color: var(--primary); height: 20px;"></div>
+    </section>
+
+    <section class="slide" data-module="Module 4: Risk Mgmt">
+        <h2>4.4 Privacy Compliance (GDPR/CCPA)</h2>
+        <div class="card">
+            <h3>Right to be Forgotten</h3>
+            <p>In Smart Homes (Alexa/Cameras), users can demand their data be deleted. This complicates IoT architecture because:</p>
+            <ul>
+                <li>Data is often distributed (Edge + Cloud).</li>
+                <li>Logs are immutable.</li>
+                <li>Raw sensor data might be mixed with other data.</li>
+            </ul>
+            <div class="analyst-note">
+                <strong>Analyst Tip:</strong> Design data retention policies into the database schema from day one.
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 4: Risk Mgmt">
+        <h2>4.5 Module 4 Scenario</h2>
+        <div class="card">
+            <h3>Scenario: The Rogue Wi-Fi Extender</h3>
+            <p>An employee brings a personal Wi-Fi extender from home and plugs it into the LAN port.</p>
+            <p><strong>Impact:</strong> It bypasses the corporate firewall, creating an open backdoor.</p>
+            <p><strong>Remediation:</strong>
+                <ol>
+                    <li><strong>Port Security:</strong> Limit MAC addresses per port on the switch.</li>
+                    <li><strong>NAC:</strong> Implement Network Access Control to profile unknown devices.</li>
+                </ol>
+            </p>
+        </div>
+    </section>
+
+    <!-- ================================================== -->
+    <!-- MODULE 5: INCIDENT RESPONSE (5 Slides) -->
+    <!-- ================================================== -->
+
+    <section class="slide" data-module="Module 5: Incident Response">
+        <h2>5.1 Challenges in IoT Forensics</h2>
+        <div class="grid-3">
+            <div class="card">
+                <h3>Volatile Memory</h3>
+                <p>Most IoT data lives in RAM. Powering off the device wipes all evidence.</p>
+            </div>
+            <div class="card">
+                <h3>Proprietary Formats</h3>
+                <p>File systems (YAFFS2, JFFS2) are not supported by standard tools like EnCase.</p>
+            </div>
+            <div class="card">
+                <h3>No Logs</h3>
+                <p>Devices often lack internal storage. Logs are streamed to cloud and lost if network is cut.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 5: Incident Response">
+        <h2>5.2 Containment: Shunning vs. Isolation</h2>
+        <div class="grid-2">
+            <div>
+                <h3>Network Shunning (Blacklisting)</h3>
+                <p>Using Firewall ACLs to drop packets from a specific device MAC/IP.</p>
+                <p><strong>Pros:</strong> Instant. <strong>Cons:</strong> Device might just change IP.</p>
+            </div>
+            <div>
+                <h3>Physical Isolation</h3>
+                <p>Disable the physical switch port or VLAN.</p>
+                <p><strong>Pros:</strong> Total containment. <strong>Cons:</strong> Service disruption.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 5: Incident Response">
+        <h2>5.3 Interactive Simulation: Handling a Botnet Node</h2>
+        <div class="card">
+            <div id="sim-terminal" class="terminal" style="height: 200px; margin-bottom: 1rem;">
+                > System Ready.<br>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="runSim('detect')">1. Detect</button>
+                <button onclick="runSim('contain')">2. Contain</button>
+                <button onclick="runSim('wipe')">3. Wipe</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 5: Incident Response">
+        <h2>5.4 Eradication & Recovery</h2>
+        <div class="grid-2">
+            <div class="card">
+                <h3>Eradication</h3>
+                <ul>
+                    <li>Reset device to factory defaults (if possible).</li>
+                    <li>Flash firmware from a trusted source.</li>
+                    <li>Change default credentials immediately.</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Recovery</h3>
+                <ul>
+                    <li>Restore secure configuration.</li>
+                    <li>Monitor logs for recurrence.</li>
+                    <li>Conduct Root Cause Analysis (RCA).</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 5: Incident Response">
+        <h2>5.5 Module 5 Quiz</h2>
+        <div class="quiz-option" onclick="checkAnswer(this, true)">Why is IoT forensics hard? (Volatile Memory)</div>
+        <div class="quiz-option" onclick="checkAnswer(this, false)">Why is IoT forensics easy? (Standard OS)</div>
+        <div id="quiz-feedback-5" style="margin-top:1rem; font-weight:bold;"></div>
+    </section>
+
+    <!-- ================================================== -->
+    <!-- MODULE 6: STANDARDS (5 Slides) -->
+    <!-- ================================================== -->
+
+    <section class="slide" data-module="Module 6: Standards">
+        <h2>6.1 NIST Framework for IoT</h2>
+        <div class="grid-4">
+            <div class="card" style="border-top: 4px solid #3b82f6"><strong>Identify</strong><br>Assets, Governance</div>
+            <div class="card" style="border-top: 4px solid #22c55e"><strong>Protect</strong><br>Identity, Security Controls</div>
+            <div class="card" style="border-top: 4px solid #f59e0b"><strong>Detect</strong><br>Anomalies, Monitoring</div>
+            <div class="card" style="border-top: 4px solid #ef4444"><strong>Respond</strong><br>Analysis, Mitigation</div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 6: Standards">
+        <h2>6.2 OWASP IoT Top 10</h2>
+        <ol style="font-size: 0.9rem; line-height: 1.6;">
+            <li>Weak, Guessable, or Hardcoded Passwords</li>
+            <li>Insecure Network Services</li>
+            <li>Insecure Ecosystem Interfaces</li>
+            <li>Lack of Secure Update Mechanism</li>
+            <li>Use of Insecure or Outdated Components</li>
+            <li>Inadequate Privacy Protection</li>
+            <li>Insecure Data Transfer and Storage</li>
+            <li>Lack of Device Management</li>
+            <li>Insecure Default Settings</li>
+            <li>Lack of Physical Hardening</li>
+        </ol>
+    </section>
+
+    <section class="slide" data-module="Module 6: Standards">
+        <h2>6.3 ETSI EN 303 645 (Consumer IoT)</h2>
+        <div class="card">
+            <h3>The Baseline Standard</h3>
+            <p>A European standard adopted globally for consumer devices.</p>
+            <ul>
+                <li><strong>Requirement 1:</strong> No universal default passwords.</li>
+                <li><strong>Requirement 2:</strong> Implement a means to manage vulnerabilities (updates).</li>
+                <li><strong>Requirement 3:</strong> Keep software updated.</li>
+                <li><strong>Requirement 4:</strong> Securely store sensitive data.</li>
+                <li><strong>Requirement 5:</strong> Communicate securely.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 6: Standards">
+        <h2>6.4 ISO/IEC 27400</h2>
+        <p>An extension of ISO 27001 specifically for IoT.</p>
+        <div class="grid-2">
+            <div class="card">
+                <h3>Focus Areas</h3>
+                <ul>
+                    <li>IoT Lifecycle Management.</li>
+                    <li>Interoperability.</li>
+                    <li>Supply Chain Security.</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Governance</h3>
+                <p>Ensuring that IoT security is integrated into the broader Information Security Management System (ISMS).</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 6: Standards">
+        <h2>6.5 MITRE ATT&CK for IoT</h2>
+        <div class="card">
+            <p>MATRIX of tactics used by adversaries against IoT.</p>
+            <div class="grid-3">
+                <div><strong>Initial Access:</strong> Exploit Public-Facing App, Replicate Hardware.</div>
+                <div><strong>Execution:</strong> System Firmware, Command Line.</div>
+                <div><strong>Persistence:</strong> Logic Corruption, Modify System Firmware.</div>
+            </div>
+            <p style="margin-top: 1rem;"><strong>Use Case:</strong> Use this matrix to map your telemetry alerts to known adversary behaviors.</p>
+        </div>
+    </section>
+
+    <!-- ================================================== -->
+    <!-- MODULE 7: PRACTICAL IMPLEMENTATION (5 Slides) -->
+    <!-- ================================================== -->
+
+    <section class="slide" data-module="Module 7: Practical">
+        <h2>7.1 Secure Deployment Checklist</h2>
+        <div class="grid-2">
+            <div style="background: #1e293b; padding: 1rem; border-radius: 8px;">
+                <h3>Pre-Deployment</h3>
+                <ul style="list-style: none;">
+                    <li>☐ Change Default Credentials</li>
+                    <li>☐ Update Firmware</li>
+                    <li>☐ Disable Telnet/HTTP</li>
+                </ul>
+            </div>
+            <div style="background: #1e293b; padding: 1rem; border-radius: 8px;">
+                <h3>Post-Deployment</h3>
+                <ul style="list-style: none;">
+                    <li>☐ Move to IoT VLAN</li>
+                    <li>☐ Configure Firewall Rules</li>
+                    <li>☐ Add to SIEM</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 7: Practical">
+        <h2>7.2 Smart Home Security Setup (Interactive)</h2>
+        <div class="grid-2">
+            <div class="svg-wrap" style="background: #111;">
+                <!-- Interactive House SVG -->
+                <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 150 L200 50 L350 150 L350 250 L50 250 Z" fill="none" stroke="#fff" stroke-width="3"/>
+                    
+                    <!-- Lock -->
+                    <g onclick="toggleDevice(this)" style="cursor: pointer;">
+                        <rect x="175" y="150" width="50" height="100" fill="#334155" stroke="#ef4444" stroke-width="2" id="door-rect"/>
+                        <circle cx="210" cy="200" r="5" fill="#ef4444" id="door-light"/>
+                        <text x="200" y="270" text-anchor="middle" fill="#94a3b8" font-size="10" id="door-text">Lock (Insecure)</text>
+                    </g>
+
+                    <!-- Camera -->
+                    <g onclick="toggleDevice(this)" style="cursor: pointer;">
+                        <circle cx="100" cy="120" r="20" fill="#334155" stroke="#22c55e" stroke-width="2" id="cam-rect"/>
+                        <circle cx="100" cy="120" r="5" fill="#22c55e" id="cam-light"/>
+                        <text x="100" y="155" text-anchor="middle" fill="#94a3b8" font-size="10" id="cam-text">Cam (Secure)</text>
+                    </g>
+                </svg>
+            </div>
+            <div>
+                <h3>Interactive Setup</h3>
+                <p>Click the Lock or Camera in the diagram above to toggle their security state.</p>
+                <div id="status-box" style="padding: 1rem; background: #0f172a; border: 1px solid #334155; border-radius: 6px;">
+                    Waiting for input...
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 7: Practical">
+        <h2>7.3 IIoT Case Study: Water Treatment Plant</h2>
+        <div class="card">
+            <h3>The Attack Vector</h3>
+            <p>Hackers gained access to a water plant via TeamViewer installed on an operator's Windows PC.</p>
+            <p>They used the TeamViewer connection to change the chemical mix levels.</p>
+            <div class="analyst-note">
+                <strong>Lesson:</strong> Never expose Remote Desktop (RDP) or VNC directly to the internet on OT networks. Use VPNs or Zero Trust.
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 7: Practical">
+        <h2>7.4 SOC Integration Playbook</h2>
+        <div class="card">
+            <h3>Trigger: IoT Device DDoS Indicator</h3>
+            <div style="display: flex; gap: 1rem; font-size: 0.9rem;">
+                <div style="border: 1px solid #334155; padding: 10px; flex: 1;">
+                    <strong>1. Detect</strong><br>Firewall: Device X > 10k UDP packets/sec.
+                </div>
+                <div style="border: 1px solid #334155; padding: 10px; flex: 1;">
+                    <strong>2. Triage</strong><br>Check IP. Is it updating firmware? No.
+                </div>
+                <div style="border: 1px solid #334155; padding: 10px; flex: 1;">
+                    <strong>3. Response</strong><br>SOAR triggers ACL to disable port.
+                </div>
+                <div style="border: 1px solid #334155; padding: 10px; flex: 1;">
+                    <strong>4. Recovery</strong><br>Technician replaces device.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide" data-module="Module 7: Practical">
+        <h2>7.5 Mini Lab: Traffic Analysis</h2>
+        <div class="card">
+            <h3>Analyze the capture below.</h3>
+            <div class="terminal" style="height: 150px; color: #fff;">
+                12:00:01 IP 192.168.1.50 > 10.0.0.1: TCP 80<br>
+                <span style="color: #ef4444">12:00:05 IP 192.168.1.50 > 103.20.XX.XX: UDP 4444 [SUSPICIOUS]</span><br>
+                12:00:06 IP 192.168.1.50 > 10.0.0.1: TCP 80<br>
+            </div>
+            <p><strong>Observation:</strong> Device 1.50 is connecting to a non-whitelisted IP (103.20.XX.XX) on Port 4444.</p>
+            <p><strong>Diagnosis:</strong> Likely C2 (Command & Control) beaconing.</p>
+        </div>
+    </section>
+
+    <!-- SUMMARY & RESOURCES -->
+    <section class="slide" data-module="Summary">
+        <h1>Course Summary & Resources</h1>
+        <div class="grid-2">
+            <div class="card">
+                <h3>Key Takeaways</h3>
+                <ul>
+                    <li>IoT expands the attack surface significantly.</li>
+                    <li>Default passwords are the #1 enemy.</li>
+                    <li>Defense requires Network Segmentation and Device Identity.</li>
+                    <li>Incident Response must account for lack of logs.</li>
+                </ul>
+            </div>
+            <div>
+                <h3>Resources</h3>
+                <button onclick="alert('Downloading Checklist...')" style="width: 100%; margin-bottom: 10px;">Download Security Checklist</button>
+                <button onclick="alert('Downloading NIST IR 8228...')" style="width: 100%;">Download NIST Framework</button>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 3rem; border-top: 1px solid #334155; padding-top: 2rem;">
+            <h2>End of Training</h2>
+            <p>Thank you.</p>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">Previous</button>
+    <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next</button>
+</footer>
+
+<script>
+    // --- STATE MANAGEMENT ---
+    let currentSlideIndex = 0;
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const slideCounter = document.getElementById('slideCounter');
+    const moduleDisplay = document.getElementById('moduleDisplay');
+
+    function updateUI() {
+        // Update Slide Visibility
+        slides.forEach((slide, index) => {
+            slide.classList.remove('active');
+            if (index === currentSlideIndex) {
+                slide.classList.add('active');
+            }
+        });
+
+        // Update Header Info
+        const currentModule = slides[currentSlideIndex].getAttribute('data-module');
+        moduleDisplay.innerText = currentModule;
+        slideCounter.innerText = `${currentSlideIndex + 1} / ${slides.length}`;
+        
+        // Update Progress Bar
+        const progress = ((currentSlideIndex + 1) / slides.length) * 100;
+        progressBar.style.width = `${progress}%`;
+
+        // Update Buttons
+        document.getElementById('prevBtn').disabled = currentSlideIndex === 0;
+        document.getElementById('nextBtn').disabled = currentSlideIndex === slides.length - 1;
+    }
+
+    function changeSlide(direction) {
+        const newIndex = currentSlideIndex + direction;
+        if (newIndex >= 0 && newIndex < slides.length) {
+            currentSlideIndex = newIndex;
+            updateUI();
+        }
+    }
+
+    // Keyboard Navigation
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') changeSlide(1);
+        if (e.key === 'ArrowLeft') changeSlide(-1);
+    });
+
+    // --- INTERACTIVE FEATURES ---
+
+    // 1. Risk Matrix Hover
+    function showRisk(element) {
+        document.getElementById('risk-display').innerText = element.getAttribute('data-msg');
+        document.getElementById('risk-display').style.color = '#fff';
+    }
+
+    // 2. Quiz Logic
+    function checkAnswer(element, isCorrect) {
+        const parent = element.parentElement;
+        // Find feedback container (assumes it's the next sibling or close by)
+        const feedback = element.nextElementSibling || parent.querySelector('div[id^="quiz-feedback"]');
+        
+        if (feedback) {
+            if (isCorrect) {
+                element.classList.add('correct');
+                feedback.innerText = "Correct!";
+                feedback.style.color = "#22c55e";
+            } else {
+                element.classList.add('wrong');
+                feedback.innerText = "Incorrect. Try again.";
+                feedback.style.color = "#ef4444";
+            }
+        }
+    }
+
+    // 3. Terminal Simulation
+    function runSim(step) {
+        const term = document.getElementById('sim-terminal');
+        if (step === 'detect') {
+            term.innerHTML += "> Detecting Anomaly...<br>> Device 10.0.0.55 sending 50k UDP packets/sec.<br>> STATUS: THREAT DETECTED.<br>";
+        } else if (step === 'contain') {
+            term.innerHTML += "> Applying ACL Block on Port 8080...<br>> Traffic stopped.<br>> STATUS: CONTAINED.<br>";
+        } else if (step === 'wipe') {
+            term.innerHTML += "> Pushing Firmware v2.4 (Secure Boot)...<br>> Device Rebooting...<br>> STATUS: SECURE.<br>";
+        }
+        term.scrollTop = term.scrollHeight;
+    }
+
+    // 4. Smart Home Toggle
+    function toggleDevice(group) {
+        const rect = group.querySelector('[id$="-rect"]');
+        const light = group.querySelector('[id$="-light"]');
+        const text = group.querySelector('[id$="-text"]');
+        const statusBox = document.getElementById('status-box');
+
+        // Check current color
+        const isSecure = rect.getAttribute('stroke') === '#22c55e';
+
+        if (!isSecure) {
+            // Make Secure
+            rect.setAttribute('stroke', '#22c55e');
+            light.setAttribute('fill', '#22c55e');
+            const newTxt = text.innerText.replace('Insecure', 'Secure');
+            text.innerText = newTxt;
+            statusBox.innerHTML = `<span style="color:#22c55e">✅ ${group.id.toUpperCase()} is now SECURE. TLS enabled.</span>`;
+        } else {
+            // Make Insecure
+            rect.setAttribute('stroke', '#ef4444');
+            light.setAttribute('fill', '#ef4444');
+            const newTxt = text.innerText.replace('Secure', 'Insecure');
+            text.innerText = newTxt;
+            statusBox.innerHTML = `<span style="color:#ef4444">⚠️ ${group.id.toUpperCase()} is now INSECURE. Default Passwords active.</span>`;
+        }
+    }
+
+    // Init
+    updateUI();
+
+</script>
+</body>
+</html>
