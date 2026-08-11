@@ -1,0 +1,2726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cryptography, Encryption & Network Security</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --text-color: #333;
+            --heading-color: #2c3e50;
+            --border-color: #ddd;
+            --code-bg: #f8f9fa;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1.5rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        nav {
+            background-color: var(--secondary-color);
+            padding: 0.8rem 0;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        nav li {
+            margin: 0.5rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        nav a:hover, nav a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        main {
+            padding: 2rem 0;
+        }
+
+        section {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            color: var(--heading-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        h3 {
+            color: var(--primary-color);
+            margin: 1.5rem 0 1rem;
+        }
+
+        h4 {
+            color: var(--secondary-color);
+            margin: 1rem 0 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        ul, ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .highlight {
+            background-color: rgba(52, 152, 219, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+        }
+
+        .definition {
+            background-color: var(--code-bg);
+            border-left: 4px solid var(--secondary-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .note {
+            background-color: rgba(243, 156, 18, 0.1);
+            border-left: 4px solid var(--warning-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .alert {
+            background-color: rgba(231, 76, 60, 0.1);
+            border-left: 4px solid var(--accent-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .success {
+            background-color: rgba(46, 204, 113, 0.1);
+            border-left: 4px solid var(--success-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .collapsible {
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            padding: 0.8rem;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .collapsible:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .collapsible.active {
+            background-color: var(--secondary-color);
+        }
+
+        .collapsible:after {
+            content: '\002B';
+            color: white;
+            font-weight: bold;
+            float: right;
+            margin-left: 5px;
+        }
+
+        .collapsible.active:after {
+            content: '\2212';
+        }
+
+        .content {
+            padding: 0 1rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: white;
+        }
+
+        .content.show {
+            max-height: 1000px;
+            padding: 1rem;
+        }
+
+        .diagram-container {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .diagram {
+            max-width: 100%;
+            height: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--code-bg);
+        }
+
+        .two-column {
+            display: flex;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .column {
+            flex: 1;
+        }
+
+        .icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .icon-lock::before { content: "🔒"; }
+        .icon-key::before { content: "🔑"; }
+        .icon-shield::before { content: "🛡️"; }
+        .icon-server::before { content: "🖥️"; }
+        .icon-user::before { content: "👤"; }
+        .icon-attacker::before { content: "👹"; }
+        .icon-network::before { content: "🌐"; }
+        .icon-warning::before { content: "⚠️"; }
+        .icon-check::before { content: "✅"; }
+        .icon-x::before { content: "❌"; }
+
+        .slide-controls {
+            display: flex;
+            justify-content: space-between;
+            margin: 2rem 0;
+        }
+
+        .slide-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .slide-btn:hover {
+            background-color: var(--primary-color);
+        }
+
+        .slide-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1.5rem 0;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .two-column {
+                flex-direction: column;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            nav li {
+                margin: 0.3rem 0;
+            }
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dotted var(--secondary-color);
+            cursor: help;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--dark-color);
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 0.5rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .tab {
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background-color: var(--code-bg);
+            border-radius: 4px 4px 0 0;
+        }
+
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 0.8rem 1rem;
+            transition: background-color 0.3s;
+            font-size: 1rem;
+        }
+
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        .tab button.active {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .tabcontent {
+            display: none;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+        }
+
+        .tabcontent.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Cryptography, Encryption & Network Security</h1>
+            <p>A comprehensive graduate-level course on modern information security principles and practices</p>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="#title-slide" class="nav-link active">Title</a></li>
+                <li><a href="#section-1" class="nav-link">Privacy & Security</a></li>
+                <li><a href="#section-2" class="nav-link">Cryptography</a></li>
+                <li><a href="#section-3" class="nav-link">PKI</a></li>
+                <li><a href="#section-4" class="nav-link">Attacks</a></li>
+                <li><a href="#section-5" class="nav-link">Network Basics</a></li>
+                <li><a href="#section-6" class="nav-link">Firewalls & IDPS</a></li>
+                <li><a href="#section-7" class="nav-link">VPNs</a></li>
+                <li><a href="#conclusion" class="nav-link">Conclusion</a></li>
+                <li><a href="#glossary" class="nav-link">Glossary</a></li>
+                <li><a href="#references" class="nav-link">References</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Title Slide -->
+        <section id="title-slide">
+            <h2>Cryptography, Encryption & Network Security</h2>
+            <p><strong>Graduate-Level Course</strong></p>
+            <p>Computer Science / Cybersecurity</p>
+            <div class="diagram-container">
+                <svg width="600" height="300" viewBox="0 0 600 300" class="diagram">
+                    <rect x="50" y="50" width="500" height="200" fill="#f0f0f0" stroke="#333" stroke-width="2" rx="10"/>
+                    <text x="300" y="90" text-anchor="middle" font-size="24" font-weight="bold" fill="#2c3e50">Cryptography</text>
+                    <text x="300" y="130" text-anchor="middle" font-size="24" font-weight="bold" fill="#2c3e50">Encryption</text>
+                    <text x="300" y="170" text-anchor="middle" font-size="24" font-weight="bold" fill="#2c3e50">Network Security</text>
+                    <circle cx="150" cy="150" r="30" fill="#3498db" opacity="0.7"/>
+                    <circle cx="300" cy="150" r="30" fill="#3498db" opacity="0.7"/>
+                    <circle cx="450" cy="150" r="30" fill="#3498db" opacity="0.7"/>
+                    <text x="150" y="230" text-anchor="middle" font-size="16" fill="#333">Confidentiality</text>
+                    <text x="300" y="230" text-anchor="middle" font-size="16" fill="#333">Integrity</text>
+                    <text x="450" y="230" text-anchor="middle" font-size="16" fill="#333">Availability</text>
+                </svg>
+            </div>
+            <p><em>Balancing theoretical rigor, technical depth, and visual clarity</em></p>
+        </section>
+
+        <!-- Section 1: Privacy Concepts & Security Foundations -->
+        <section id="section-1">
+            <h2>1. Privacy Concepts & Security Foundations</h2>
+            
+            <h3>Learning Objectives</h3>
+            <ul>
+                <li>Define core security principles (CIA Triad + Non-repudiation)</li>
+                <li>Understand privacy models across data lifecycle</li>
+                <li>Compare privacy vs. security concepts</li>
+                <li>Identify regulatory context affecting security design</li>
+            </ul>
+
+            <h3>The CIA Triad</h3>
+            <div class="diagram-container">
+                <svg width="500" height="400" viewBox="0 0 500 400" class="diagram">
+                    <!-- Triangle -->
+                    <polygon points="250,100 100,300 400,300" fill="none" stroke="#333" stroke-width="2"/>
+                    
+                    <!-- Vertices -->
+                    <circle cx="250" cy="100" r="40" fill="#3498db" opacity="0.7"/>
+                    <text x="250" y="105" text-anchor="middle" font-size="16" fill="white">Confidentiality</text>
+                    
+                    <circle cx="100" cy="300" r="40" fill="#3498db" opacity="0.7"/>
+                    <text x="100" y="305" text-anchor="middle" font-size="16" fill="white">Integrity</text>
+                    
+                    <circle cx="400" cy="300" r="40" fill="#3498db" opacity="0.7"/>
+                    <text x="400" y="305" text-anchor="middle" font-size="16" fill="white">Availability</text>
+                    
+                    <!-- Icons -->
+                    <text x="250" y="60" text-anchor="middle" font-size="30">🔒</text>
+                    <text x="100" y="350" text-anchor="middle" font-size="30">✅</text>
+                    <text x="400" y="350" text-anchor="middle" font-size="30">⏰</text>
+                    
+                    <!-- Center -->
+                    <circle cx="250" cy="220" r="30" fill="#2c3e50" opacity="0.7"/>
+                    <text x="250" y="225" text-anchor="middle" font-size="16" fill="white">Security</text>
+                </svg>
+            </div>
+            
+            <div class="two-column">
+                <div class="column">
+                    <h4>Confidentiality</h4>
+                    <p>Protection of information from unauthorized access</p>
+                    <ul>
+                        <li>Encryption</li>
+                        <li>Access controls</li>
+                        <li>Authentication</li>
+                    </ul>
+                </div>
+                <div class="column">
+                    <h4>Integrity</h4>
+                    <p>Assurance of data accuracy and completeness</p>
+                    <ul>
+                        <li>Hashing</li>
+                        <li>Digital signatures</li>
+                        <li>Checksums</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="definition">
+                <h4>Availability</h4>
+                <p>Timely and reliable access to information and resources</p>
+                <ul>
+                    <li>Redundancy</li>
+                    <li>Failover mechanisms</li>
+                    <li>DDoS protection</li>
+                </ul>
+            </div>
+
+            <button class="collapsible">Non-Repudiation: The Fourth Pillar</button>
+            <div class="content">
+                <p><strong>Non-repudiation</strong> is the assurance that someone cannot deny the validity of something.</p>
+                <p>Critical for:</p>
+                <ul>
+                    <li>Financial transactions</li>
+                    <li>Legal communications</li>
+                    <li>Audit trails</li>
+                </ul>
+                <p>Achieved through:</p>
+                <ul>
+                    <li>Digital signatures</li>
+                    <li>Cryptographic receipts</li>
+                    <li>Timestamps</li>
+                </ul>
+            </div>
+
+            <h3>Privacy Models: Data Lifecycle</h3>
+            <div class="diagram-container">
+                <svg width="700" height="400" viewBox="0 0 700 400" class="diagram">
+                    <!-- Circular lifecycle -->
+                    <circle cx="350" cy="200" r="150" fill="none" stroke="#333" stroke-width="2"/>
+                    
+                    <!-- Data-in-transit -->
+                    <rect x="250" y="50" width="200" height="60" fill="#3498db" opacity="0.7" rx="5"/>
+                    <text x="350" y="85" text-anchor="middle" font-size="16" fill="white">Data-in-transit</text>
+                    <text x="350" y="35" text-anchor="middle" font-size="14">TLS/SSL, VPNs</text>
+                    
+                    <!-- Data-at-rest -->
+                    <rect x="500" y="170" width="200" height="60" fill="#2ecc71" opacity="0.7" rx="5"/>
+                    <text x="600" y="205" text-anchor="middle" font-size="16" fill="white">Data-at-rest</text>
+                    <text x="600" y="155" text-anchor="middle" font-size="14">Full-disk encryption</text>
+                    
+                    <!-- Data-in-use -->
+                    <rect x="250" y="290" width="200" height="60" fill="#f39c12" opacity="0.7" rx="5"/>
+                    <text x="350" y="325" text-anchor="middle" font-size="16" fill="white">Data-in-use</text>
+                    <text x="350" y="375" text-anchor="middle" font-size="14">Secure enclaves</text>
+                    
+                    <!-- Arrows -->
+                    <path d="M 450 80 Q 550 80 550 170" fill="none" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 600 230 Q 600 280 450 320" fill="none" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 250 320 Q 150 320 150 230 Q 150 130 250 80" fill="none" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    
+                    <!-- Arrow marker -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <h3>Privacy vs. Security Comparison</h3>
+            <table>
+                <tr>
+                    <th>Aspect</th>
+                    <th>Privacy</th>
+                    <th>Security</th>
+                </tr>
+                <tr>
+                    <td>Focus</td>
+                    <td>Individual rights</td>
+                    <td>System protection</td>
+                </tr>
+                <tr>
+                    <td>Primary Concern</td>
+                    <td>Personal data handling</td>
+                    <td>Threat mitigation</td>
+                </tr>
+                <tr>
+                    <td>Approach</td>
+                    <td>Policy-driven</td>
+                    <td>Technical controls</td>
+                </tr>
+                <tr>
+                    <td>Example</td>
+                    <td>GDPR compliance</td>
+                    <td>Firewall implementation</td>
+                </tr>
+            </table>
+
+            <h3>Regulatory Context</h3>
+            <div class="tab">
+                <button class="tablinks active" onclick="openTab(event, 'gdpr')">GDPR</button>
+                <button class="tablinks" onclick="openTab(event, 'hipaa')">HIPAA</button>
+                <button class="tablinks" onclick="openTab(event, 'other')">Other Regulations</button>
+            </div>
+            
+            <div id="gdpr" class="tabcontent active">
+                <h4>General Data Protection Regulation (GDPR)</h4>
+                <ul>
+                    <li><strong>Scope:</strong> EU citizens' data</li>
+                    <li><strong>Key requirements:</strong>
+                        <ul>
+                            <li>Consent</li>
+                            <li>Right to be forgotten</li>
+                            <li>Breach notification (72 hours)</li>
+                            <li>Data protection by design</li>
+                        </ul>
+                    </li>
+                    <li><strong>Fines:</strong> Up to 4% of global annual revenue or €20 million</li>
+                </ul>
+            </div>
+            
+            <div id="hipaa" class="tabcontent">
+                <h4>Health Insurance Portability and Accountability Act (HIPAA)</h4>
+                <ul>
+                    <li><strong>Scope:</strong> Protected health information (PHI)</li>
+                    <li><strong>Key requirements:</strong>
+                        <ul>
+                            <li>Administrative safeguards</li>
+                            <li>Physical safeguards</li>
+                            <li>Technical safeguards</li>
+                        </ul>
+                    </li>
+                    <li><strong>Fines:</strong> Up to $1.5 million per year per violation</li>
+                </ul>
+            </div>
+            
+            <div id="other" class="tabcontent">
+                <h4>Other Important Regulations</h4>
+                <ul>
+                    <li><strong>CCPA:</strong> California Consumer Privacy Act</li>
+                    <li><strong>PCI DSS:</strong> Payment Card Industry Data Security Standard</li>
+                    <li><strong>SOX:</strong> Sarbanes-Oxley Act</li>
+                    <li><strong>FISMA:</strong> Federal Information Security Management Act</li>
+                </ul>
+            </div>
+
+            <div class="note">
+                <h4>Instructor Note:</h4>
+                <p>Explain how these three principles form the foundation of security. Ask students: "What happens if one of these pillars fails?"</p>
+            </div>
+
+            <h3>Key Takeaways</h3>
+            <ol>
+                <li>CIA Triad forms the foundation of security principles</li>
+                <li>Privacy considerations extend across the entire data lifecycle</li>
+                <li>Privacy and security are complementary but distinct concepts</li>
+                <li>Regulatory requirements drive many security implementations</li>
+            </ol>
+        </section>
+
+        <!-- Section 2: Principles of Cryptography -->
+        <section id="section-2">
+            <h2>2. Principles of Cryptography</h2>
+            
+            <h3>Learning Objectives</h3>
+            <ul>
+                <li>Differentiate symmetric vs. asymmetric cryptography</li>
+                <li>Understand key management challenges</li>
+                <li>Explain Shannon's principles of confusion and diffusion</li>
+                <li>Identify common cryptographic algorithms and their use cases</li>
+            </ul>
+
+            <h3>Symmetric vs. Asymmetric Cryptography</h3>
+            <div class="diagram-container">
+                <svg width="800" height="400" viewBox="0 0 800 400" class="diagram">
+                    <!-- Symmetric Cryptography -->
+                    <g id="symmetric">
+                        <rect x="50" y="50" width="300" height="300" fill="#f0f0f0" stroke="#333" stroke-width="2" rx="10"/>
+                        <text x="200" y="30" text-anchor="middle" font-size="18" font-weight="bold">Symmetric Cryptography</text>
+                        
+                        <!-- Sender -->
+                        <circle cx="100" cy="120" r="30" fill="#3498db"/>
+                        <text x="100" y="125" text-anchor="middle" font-size="14" fill="white">Sender</text>
+                        
+                        <!-- Receiver -->
+                        <circle cx="100" cy="280" r="30" fill="#3498db"/>
+                        <text x="100" y="285" text-anchor="middle" font-size="14" fill="white">Receiver</text>
+                        
+                        <!-- Key -->
+                        <rect x="250" y="170" width="80" height="60" fill="#f39c12" rx="5"/>
+                        <text x="290" y="195" text-anchor="middle" font-size="14" fill="white">Shared</text>
+                        <text x="290" y="210" text-anchor="middle" font-size="14" fill="white">Key</text>
+                        
+                        <!-- Encryption -->
+                        <path d="M 130 120 L 250 180" stroke="#2ecc71" stroke-width="2" marker-end="url(#arrow-green)"/>
+                        <text x="180" y="145" font-size="12">Encrypt</text>
+                        
+                        <!-- Decryption -->
+                        <path d="M 250 220 L 130 280" stroke="#2ecc71" stroke-width="2" marker-end="url(#arrow-green)"/>
+                        <text x="180" y="255" font-size="12">Decrypt</text>
+                        
+                        <!-- Message -->
+                        <path d="M 100 150 L 100 250" stroke="#333" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrow-black)"/>
+                        <text x="120" y="200" font-size="12">Message</text>
+                    </g>
+                    
+                    <!-- Asymmetric Cryptography -->
+                    <g id="asymmetric">
+                        <rect x="450" y="50" width="300" height="300" fill="#f0f0f0" stroke="#333" stroke-width="2" rx="10"/>
+                        <text x="600" y="30" text-anchor="middle" font-size="18" font-weight="bold">Asymmetric Cryptography</text>
+                        
+                        <!-- Sender -->
+                        <circle cx="500" cy="120" r="30" fill="#3498db"/>
+                        <text x="500" y="125" text-anchor="middle" font-size="14" fill="white">Sender</text>
+                        
+                        <!-- Receiver -->
+                        <circle cx="500" cy="280" r="30" fill="#3498db"/>
+                        <text x="500" y="285" text-anchor="middle" font-size="14" fill="white">Receiver</text>
+                        
+                        <!-- Public Key -->
+                        <rect x="650" y="100" width="80" height="60" fill="#2ecc71" rx="5"/>
+                        <text x="690" y="125" text-anchor="middle" font-size="14" fill="white">Public</text>
+                        <text x="690" y="140" text-anchor="middle" font-size="14" fill="white">Key</text>
+                        
+                        <!-- Private Key -->
+                        <rect x="650" y="240" width="80" height="60" fill="#e74c3c" rx="5"/>
+                        <text x="690" y="265" text-anchor="middle" font-size="14" fill="white">Private</text>
+                        <text x="690" y="280" text-anchor="middle" font-size="14" fill="white">Key</text>
+                        
+                        <!-- Encryption -->
+                        <path d="M 530 120 L 650 130" stroke="#2ecc71" stroke-width="2" marker-end="url(#arrow-green)"/>
+                        <text x="580" y="115" font-size="12">Encrypt</text>
+                        
+                        <!-- Decryption -->
+                        <path d="M 650 270 L 530 280" stroke="#2ecc71" stroke-width="2" marker-end="url(#arrow-green)"/>
+                        <text x="580" y="280" font-size="12">Decrypt</text>
+                        
+                        <!-- Message -->
+                        <path d="M 500 150 L 500 250" stroke="#333" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrow-black)"/>
+                        <text x="520" y="200" font-size="12">Message</text>
+                    </g>
+                    
+                    <!-- Arrow markers -->
+                    <defs>
+                        <marker id="arrow-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#2ecc71"/>
+                        </marker>
+                        <marker id="arrow-black" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <div class="two-column">
+                <div class="column">
+                    <h4>Symmetric Cryptography</h4>
+                    <ul>
+                        <li>Single key for encryption and decryption</li>
+                        <li>Faster processing</li>
+                        <li>Key distribution challenges</li>
+                        <li>Examples: AES, DES, 3DES</li>
+                    </ul>
+                </div>
+                <div class="column">
+                    <h4>Asymmetric Cryptography</h4>
+                    <ul>
+                        <li>Public/private key pair</li>
+                        <li>Slower processing</li>
+                        <li>Easier key distribution</li>
+                        <li>Examples: RSA, ECC, Diffie-Hellman</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Key Management Challenges</h3>
+            <div class="diagram-container">
+                <svg width="700" height="400" viewBox="0 0 700 400" class="diagram">
+                    <!-- Key lifecycle circle -->
+                    <circle cx="350" cy="200" r="150" fill="none" stroke="#333" stroke-width="2"/>
+                    
+                    <!-- Key Generation -->
+                    <rect x="250" y="50" width="200" height="60" fill="#3498db" opacity="0.7" rx="5"/>
+                    <text x="350" y="85" text-anchor="middle" font-size="16" fill="white">Key Generation</text>
+                    
+                    <!-- Key Distribution -->
+                    <rect x="500" y="170" width="200" height="60" fill="#2ecc71" opacity="0.7" rx="5"/>
+                    <text x="600" y="205" text-anchor="middle" font-size="16" fill="white">Key Distribution</text>
+                    
+                    <!-- Key Storage -->
+                    <rect x="250" y="290" width="200" height="60" fill="#f39c12" opacity="0.7" rx="5"/>
+                    <text x="350" y="325" text-anchor="middle" font-size="16" fill="white">Key Storage</text>
+                    
+                    <!-- Key Rotation -->
+                    <rect x="0" y="170" width="200" height="60" fill="#9b59b6" opacity="0.7" rx="5"/>
+                    <text x="100" y="205" text-anchor="middle" font-size="16" fill="white">Key Rotation</text>
+                    
+                    <!-- Key Revocation -->
+                    <rect x="450" y="50" width="200" height="60" fill="#e74c3c" opacity="0.7" rx="5"/>
+                    <text x="550" y="85" text-anchor="middle" font-size="16" fill="white">Key Revocation</text>
+                    
+                    <!-- Arrows -->
+                    <path d="M 450 80 Q 550 80 550 170" fill="none" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 600 230 Q 600 280 450 320" fill="none" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 250 320 Q 150 320 150 230 Q 150 130 250 80" fill="none" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 350 110 Q 350 140 350 170" fill="none" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    
+                    <!-- Arrow marker -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <h3>Shannon's Principles</h3>
+            <div class="two-column">
+                <div class="column">
+                    <h4>Confusion</h4>
+                    <p>Obscuring the relationship between ciphertext and key</p>
+                    <ul>
+                        <li>Achieved through substitution</li>
+                        <li>Makes key discovery difficult</li>
+                        <li>Example: S-boxes in AES</li>
+                    </ul>
+                </div>
+                <div class="column">
+                    <h4>Diffusion</h4>
+                    <p>Spreading the influence of plaintext across ciphertext</p>
+                    <ul>
+                        <li>Achieved through permutation/transposition</li>
+                        <li>Makes statistical analysis difficult</li>
+                        <li>Example: MixColumns in AES</li>
+                    </ul>
+                </div>
+            </div>
+
+            <button class="collapsible">Cryptographic Algorithms Overview</button>
+            <div class="content">
+                <div class="tab">
+                    <button class="tablinks active" onclick="openTab(event, 'aes')">AES</button>
+                    <button class="tablinks" onclick="openTab(event, 'rsa')">RSA</button>
+                    <button class="tablinks" onclick="openTab(event, 'ecc')">ECC</button>
+                    <button class="tablinks" onclick="openTab(event, 'hash')">Hash Functions</button>
+                </div>
+                
+                <div id="aes" class="tabcontent active">
+                    <h4>Advanced Encryption Standard (AES)</h4>
+                    <ul>
+                        <li>Block cipher with 128-bit blocks</li>
+                        <li>Key sizes: 128, 192, 256 bits</li>
+                        <li>Rounds: 10, 12, 14 respectively</li>
+                        <li>Operations: SubBytes, ShiftRows, MixColumns, AddRoundKey</li>
+                    </ul>
+                    <div class="diagram-container">
+                        <svg width="500" height="300" viewBox="0 0 500 300" class="diagram">
+                            <rect x="50" y="50" width="400" height="200" fill="#f0f0f0" stroke="#333" stroke-width="2" rx="10"/>
+                            <text x="250" y="30" text-anchor="middle" font-size="18" font-weight="bold">AES Round Function</text>
+                            
+                            <!-- SubBytes -->
+                            <rect x="80" y="80" width="80" height="40" fill="#3498db" rx="5"/>
+                            <text x="120" y="105" text-anchor="middle" font-size="14" fill="white">SubBytes</text>
+                            
+                            <!-- ShiftRows -->
+                            <rect x="210" y="80" width="80" height="40" fill="#2ecc71" rx="5"/>
+                            <text x="250" y="105" text-anchor="middle" font-size="14" fill="white">ShiftRows</text>
+                            
+                            <!-- MixColumns -->
+                            <rect x="80" y="160" width="80" height="40" fill="#f39c12" rx="5"/>
+                            <text x="120" y="185" text-anchor="middle" font-size="14" fill="white">MixColumns</text>
+                            
+                            <!-- AddRoundKey -->
+                            <rect x="210" y="160" width="80" height="40" fill="#e74c3c" rx="5"/>
+                            <text x="250" y="185" text-anchor="middle" font-size="14" fill="white">AddRoundKey</text>
+                            
+                            <!-- Arrows -->
+                            <path d="M 160 100 L 210 100" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <path d="M 250 120 L 250 160" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <path d="M 160 180 L 210 180" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            
+                            <!-- Input/Output -->
+                            <text x="30" y="105" font-size="14">Input</text>
+                            <text x="30" y="185" font-size="14">Round Key</text>
+                            <text x="320" y="105" font-size="14">Output</text>
+                            
+                            <!-- Arrow marker -->
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+                                </marker>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+                
+                <div id="rsa" class="tabcontent">
+                    <h4>Rivest-Shamir-Adleman (RSA)</h4>
+                    <ul>
+                        <li>Based on factorization difficulty</li>
+                        <li>Key generation: Choose two large primes p and q</li>
+                        <li>Public key: (n = p×q, e)</li>
+                        <li>Private key: (n = p×q, d)</li>
+                        <li>Security relies on difficulty of factoring n</li>
+                    </ul>
+                    <div class="diagram-container">
+                        <svg width="500" height="300" viewBox="0 0 500 300" class="diagram">
+                            <rect x="50" y="50" width="400" height="200" fill="#f0f0f0" stroke="#333" stroke-width="2" rx="10"/>
+                            <text x="250" y="30" text-anchor="middle" font-size="18" font-weight="bold">RSA Key Generation</text>
+                            
+                            <!-- Primes -->
+                            <rect x="80" y="80" width="80" height="40" fill="#3498db" rx="5"/>
+                            <text x="120" y="105" text-anchor="middle" font-size="14" fill="white">p (prime)</text>
+                            
+                            <rect x="210" y="80" width="80" height="40" fill="#3498db" rx="5"/>
+                            <text x="250" y="105" text-anchor="middle" font-size="14" fill="white">q (prime)</text>
+                            
+                            <!-- n = p×q -->
+                            <rect x="145" y="160" width="80" height="40" fill="#2ecc71" rx="5"/>
+                            <text x="185" y="185" text-anchor="middle" font-size="14" fill="white">n = p×q</text>
+                            
+                            <!-- φ(n) -->
+                            <rect x="275" y="160" width="80" height="40" fill="#f39c12" rx="5"/>
+                            <text x="315" y="185" text-anchor="middle" font-size="14" fill="white">φ(n)</text>
+                            
+                            <!-- Keys -->
+                            <rect x="80" y="220" width="120" height="40" fill="#e74c3c" rx="5"/>
+                            <text x="140" y="245" text-anchor="middle" font-size="14" fill="white">Public (n, e)</text>
+                            
+                            <rect x="280" y="220" width="120" height="40" fill="#9b59b6" rx="5"/>
+                            <text x="340" y="245" text-anchor="middle" font-size="14" fill="white">Private (n, d)</text>
+                            
+                            <!-- Arrows -->
+                            <path d="M 120 120 L 185 160" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <path d="M 250 120 L 185 160" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <path d="M 185 120 L 315 160" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <path d="M 185 200 L 140 220" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <path d="M 315 200 L 340 220" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            
+                            <!-- Arrow marker -->
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+                                </marker>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+                
+                <div id="ecc" class="tabcontent">
+                    <h4>Elliptic Curve Cryptography (ECC)</h4>
+                    <ul>
+                        <li><strong>Advantages:</strong>
+                            <ul>
+                                <li>Smaller key sizes for equivalent security</li>
+                                <li>Faster computations</li>
+                                <li>Lower power consumption</li>
+                            </ul>
+                        </li>
+                        <li><strong>Applications:</strong>
+                            <ul>
+                                <li>Mobile devices</li>
+                                <li>IoT</li>
+                                <li>Blockchain</li>
+                            </ul>
+                        </li>
+                        <li><strong>Security Comparison:</strong>
+                            <ul>
+                                <li>ECC 256-bit ≈ RSA 3072-bit</li>
+                                <li>ECC 384-bit ≈ RSA 7680-bit</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <div class="diagram-container">
+                        <svg width="500" height="300" viewBox="0 0 500 300" class="diagram">
+                            <!-- Elliptic curve -->
+                            <path d="M 50 250 Q 250 50 450 250" fill="none" stroke="#333" stroke-width="2"/>
+                            <text x="250" y="30" text-anchor="middle" font-size="18" font-weight="bold">Elliptic Curve</text>
+                            
+                            <!-- Points -->
+                            <circle cx="150" cy="200" r="5" fill="#3498db"/>
+                            <text x="150" y="220" text-anchor="middle" font-size="12">P</text>
+                            
+                            <circle cx="250" cy="150" r="5" fill="#3498db"/>
+                            <text x="250" y="140" text-anchor="middle" font-size="12">Q</text>
+                            
+                            <circle cx="350" cy="200" r="5" fill="#e74c3c"/>
+                            <text x="350" y="220" text-anchor="middle" font-size="12">R = P + Q</text>
+                            
+                            <!-- Line -->
+                            <line x1="150" y1="200" x2="250" y2="150" stroke="#333" stroke-width="1" stroke-dasharray="5,5"/>
+                            
+                            <!-- Reflection -->
+                            <line x1="250" y1="150" x2="350" y2="200" stroke="#333" stroke-width="1" stroke-dasharray="5,5"/>
+                            
+                            <!-- Point addition explanation -->
+                            <text x="250" y="280" text-anchor="middle" font-size="14">Point Addition: Draw line through P and Q, find third intersection, reflect across x-axis</text>
+                        </svg>
+                    </div>
+                </div>
+                
+                <div id="hash" class="tabcontent">
+                    <h4>Hash Functions</h4>
+                    <ul>
+                        <li><strong>Properties:</strong>
+                            <ul>
+                                <li>Deterministic</li>
+                                <li>Quick to compute</li>
+                                <li>Irreversible (pre-image resistance)</li>
+                                <li>Collision resistant</li>
+                            </ul>
+                        </li>
+                        <li><strong>Common Algorithms:</strong>
+                            <ul>
+                                <li>SHA-2 family (SHA-256, SHA-512)</li>
+                                <li>SHA-3</li>
+                                <li>MD5 (broken, not recommended)</li>
+                                <li>SHA-1 (deprecated)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Applications:</strong>
+                            <ul>
+                                <li>Password storage</li>
+                                <li>Data integrity verification</li>
+                                <li>Digital signatures</li>
+                                <li>Blockchain</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <div class="diagram-container">
+                        <svg width="500" height="200" viewBox="0 0 500 200" class="diagram">
+                            <!-- Input -->
+                            <rect x="50" y="80" width="100" height="40" fill="#3498db" rx="5"/>
+                            <text x="100" y="105" text-anchor="middle" font-size="14" fill="white">Input Data</text>
+                            
+                            <!-- Hash function -->
+                            <rect x="200" y="70" width="100" height="60" fill="#f39c12" rx="5"/>
+                            <text x="250" y="95" text-anchor="middle" font-size="14" fill="white">Hash</text>
+                            <text x="250" y="110" text-anchor="middle" font-size="14" fill="white">Function</text>
+                            
+                            <!-- Output -->
+                            <rect x="350" y="80" width="100" height="40" fill="#2ecc71" rx="5"/>
+                            <text x="400" y="105" text-anchor="middle" font-size="14" fill="white">Fixed Size</text>
+                            
+                            <!-- Arrows -->
+                            <path d="M 150 100 L 200 100" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <path d="M 300 100 L 350 100" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            
+                            <!-- Input sizes -->
+                            <text x="100" y="60" text-anchor="middle" font-size="12">Variable size</text>
+                            <text x="400" y="60" text-anchor="middle" font-size="12">Fixed size</text>
+                            
+                            <!-- Examples -->
+                            <text x="100" y="150" text-anchor="middle" font-size="12">"Hello World"</text>
+                            <text x="400" y="150" text-anchor="middle" font-size="12">"a591a6d40bf420404a011733cfb7b190..."</text>
+                            
+                            <text x="100" y="170" text-anchor="middle" font-size="12">"Cryptography"</text>
+                            <text x="400" y="170" text-anchor="middle" font-size="12">"f2ca1bb6c7e907d06dafe4687e579fce..."</text>
+                            
+                            <!-- Arrow marker -->
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+                                </marker>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Real-World Cryptographic Analogies</h3>
+            <div class="two-column">
+                <div class="column">
+                    <h4><span class="icon-lock"></span>Symmetric Key</h4>
+                    <p>Physical lock and key (same key opens and locks)</p>
+                </div>
+                <div class="column">
+                    <h4><span class="icon-key"></span>Asymmetric Key</h4>
+                    <p>P.O. box (public key for deposit, private key for retrieval)</p>
+                </div>
+            </div>
+            <div class="two-column">
+                <div class="column">
+                    <h4><span class="icon-shield"></span>Hash Function</h4>
+                    <p>Fingerprint (unique identifier of data)</p>
+                </div>
+                <div class="column">
+                    <h4><span class="icon-check"></span>Digital Signature</h4>
+                    <p>Sealed envelope with unique wax stamp</p>
+                </div>
+            </div>
+
+            <h3>Key Takeaways</h3>
+            <ol>
+                <li>Symmetric cryptography offers speed but key distribution challenges</li>
+                <li>Asymmetric cryptography solves key distribution but requires more resources</li>
+                <li>Shannon's principles of confusion and diffusion underpin modern ciphers</li>
+                <li>Algorithm selection depends on security requirements, performance, and use case</li>
+            </ol>
+        </section>
+
+        <!-- Section 3: Public Key Infrastructure (PKI) -->
+        <section id="section-3">
+            <h2>3. Public Key Infrastructure (PKI)</h2>
+            
+            <h3>Learning Objectives</h3>
+            <ul>
+                <li>Understand PKI components and their roles</li>
+                <li>Explain certificate lifecycle management</li>
+                <li>Analyze TLS/SSL handshake process</li>
+                <li>Identify common PKI vulnerabilities and misconfigurations</li>
+            </ul>
+
+            <h3>PKI Components Overview</h3>
+            <div class="diagram-container">
+                <svg width="800" height="500" viewBox="0 0 800 500" class="diagram">
+                    <!-- Certificate Authority (CA) -->
+                    <rect x="300" y="50" width="200" height="80" fill="#3498db" rx="10"/>
+                    <text x="400" y="85" text-anchor="middle" font-size="16" fill="white">Certificate Authority</text>
+                    <text x="400" y="105" text-anchor="middle" font-size="14" fill="white">(CA)</text>
+                    
+                    <!-- Registration Authority (RA) -->
+                    <rect x="50" y="200" width="200" height="80" fill="#2ecc71" rx="10"/>
+                    <text x="150" y="235" text-anchor="middle" font-size="16" fill="white">Registration Authority</text>
+                    <text x="150" y="255" text-anchor="middle" font-size="14" fill="white">(RA)</text>
+                    
+                    <!-- Digital Certificate -->
+                    <rect x="300" y="200" width="200" height="80" fill="#f39c12" rx="10"/>
+                    <text x="400" y="235" text-anchor="middle" font-size="16" fill="white">Digital Certificate</text>
+                    <text x="400" y="255" text-anchor="middle" font-size="14" fill="white">(X.509)</text>
+                    
+                    <!-- Certificate Repository -->
+                    <rect x="550" y="200" width="200" height="80" fill="#9b59b6" rx="10"/>
+                    <text x="650" y="235" text-anchor="middle" font-size="16" fill="white">Certificate Repository</text>
+                    <text x="650" y="255" text-anchor="middle" font-size="14" fill="white">(Directory)</text>
+                    
+                    <!-- Revocation System -->
+                    <rect x="300" y="350" width="200" height="80" fill="#e74c3c" rx="10"/>
+                    <text x="400" y="385" text-anchor="middle" font-size="16" fill="white">Revocation System</text>
+                    <text x="400" y="405" text-anchor="middle" font-size="14" fill="white">(CRL, OCSP)</text>
+                    
+                    <!-- End Entity -->
+                    <ellipse cx="150" cy="400" rx="80" ry="40" fill="#95a5a6"/>
+                    <text x="150" y="405" text-anchor="middle" font-size="16" fill="white">End Entity</text>
+                    
+                    <!-- Relying Party -->
+                    <ellipse cx="650" cy="400" rx="80" ry="40" fill="#95a5a6"/>
+                    <text x="650" y="405" text-anchor="middle" font-size="16" fill="white">Relying Party</text>
+                    
+                    <!-- Connections -->
+                    <path d="M 400 130 L 150 200" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 150 280 L 400 350" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 400 130 L 400 200" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 400 280 L 400 350" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 400 280 L 650 280" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 650 280 L 650 360" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 150 360 L 150 280" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 230 240 L 300 240" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 500 240 L 550 240" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    
+                    <!-- Arrow marker -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <h3>Certificate Authority (CA) Hierarchy</h3>
+            <div class="diagram-container">
+                <svg width="700" height="400" viewBox="0 0 700 400" class="diagram">
+                    <!-- Root CA -->
+                    <rect x="250" y="50" width="200" height="60" fill="#3498db" rx="10"/>
+                    <text x="350" y="85" text-anchor="middle" font-size="16" fill="white">Root CA</text>
+                    <text x="350" y="30" text-anchor="middle" font-size="14">Self-signed</text>
+                    
+                    <!-- Intermediate CAs -->
+                    <rect x="100" y="180" width="200" height="60" fill="#2ecc71" rx="10"/>
+                    <text x="200" y="215" text-anchor="middle" font-size="16" fill="white">Intermediate CA 1</text>
+                    
+                    <rect x="400" y="180" width="200" height="60" fill="#2ecc71" rx="10"/>
+                    <text x="500" y="215" text-anchor="middle" font-size="16" fill="white">Intermediate CA 2</text>
+                    
+                    <!-- End-entity Certificates -->
+                    <rect x="50" y="310" width="140" height="60" fill="#f39c12" rx="10"/>
+                    <text x="120" y="345" text-anchor="middle" font-size="14" fill="white">Server Cert</text>
+                    
+                    <rect x="210" y="310" width="140" height="60" fill="#f39c12" rx="10"/>
+                    <text x="280" y="345" text-anchor="middle" font-size="14" fill="white">Client Cert</text>
+                    
+                    <rect x="370" y="310" width="140" height="60" fill="#f39c12" rx="10"/>
+                    <text x="440" y="345" text-anchor="middle" font-size="14" fill="white">Code Signing</text>
+                    
+                    <rect x="530" y="310" width="140" height="60" fill="#f39c12" rx="10"/>
+                    <text x="600" y="345" text-anchor="middle" font-size="14" fill="white">Email Cert</text>
+                    
+                    <!-- Trust Chain -->
+                    <path d="M 350 110 L 200 180" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 350 110 L 500 180" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 200 240 L 120 310" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 200 240 L 280 310" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 500 240 L 440 310" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 500 240 L 600 310" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    
+                    <!-- Arrow marker -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <button class="collapsible">Digital Certificate Structure</button>
+            <div class="content">
+                <h4>X.509 Certificate Fields</h4>
+                <ul>
+                    <li><strong>Version:</strong> X.509 version (v3 most common)</li>
+                    <li><strong>Serial Number:</strong> Unique identifier issued by CA</li>
+                    <li><strong>Signature Algorithm:</strong> Algorithm used by CA to sign certificate</li>
+                    <li><strong>Issuer:</strong> Name of CA that issued certificate</li>
+                    <li><strong>Validity Period:</strong> Not before and not after dates</li>
+                    <li><strong>Subject:</strong> Identity of certificate owner</li>
+                    <li><strong>Public Key:</strong> Subject's public key</li>
+                    <li><strong>Extensions:</strong> Additional constraints and properties</li>
+                </ul>
+                <div class="diagram-container">
+                    <svg width="600" height="400" viewBox="0 0 600 400" class="diagram">
+                        <!-- Certificate -->
+                        <rect x="100" y="50" width="400" height="300" fill="#f0f0f0" stroke="#333" stroke-width="2" rx="10"/>
+                        <text x="300" y="30" text-anchor="middle" font-size="18" font-weight="bold">Digital Certificate</text>
+                        
+                        <!-- Fields -->
+                        <rect x="120" y="80" width="360" height="40" fill="#3498db" rx="5"/>
+                        <text x="300" y="105" text-anchor="middle" font-size="14" fill="white">Version: 3</text>
+                        
+                        <rect x="120" y="130" width="360" height="40" fill="#2ecc71" rx="5"/>
+                        <text x="300" y="155" text-anchor="middle" font-size="14" fill="white">Serial Number: 0x123456789ABCDEF</text>
+                        
+                        <rect x="120" y="180" width="360" height="40" fill="#f39c12" rx="5"/>
+                        <text x="300" y="205" text-anchor="middle" font-size="14" fill="white">Issuer: CN=Example CA, O=Example Corp</text>
+                        
+                        <rect x="120" y="230" width="360" height="40" fill="#9b59b6" rx="5"/>
+                        <text x="300" y="255" text-anchor="middle" font-size="14" fill="white">Subject: CN=example.com, O=Example Corp</text>
+                        
+                        <rect x="120" y="280" width="360" height="40" fill="#e74c3c" rx="5"/>
+                        <text x="300" y="305" text-anchor="middle" font-size="14" fill="white">Public Key: RSA 2048-bit</text>
+                        
+                        <!-- Signature -->
+                        <rect x="120" y="330" width="360" height="40" fill="#34495e" rx="5"/>
+                        <text x="300" y="355" text-anchor="middle" font-size="14" fill="white">Signature: 0xABCDEF123456789...</text>
+                    </svg>
+                </div>
+            </div>
+
+            <h3>TLS/SSL Handshake Process</h3>
+            <div class="diagram-container">
+                <svg width="800" height="500" viewBox="0 0 800 500" class="diagram">
+                    <!-- Client -->
+                    <rect x="50" y="50" width="150" height="60" fill="#3498db" rx="10"/>
+                    <text x="125" y="85" text-anchor="middle" font-size="16" fill="white">Client</text>
+                    
+                    <!-- Server -->
+                    <rect x="600" y="50" width="150" height="60" fill="#2ecc71" rx="10"/>
+                    <text x="675" y="85" text-anchor="middle" font-size="16" fill="white">Server</text>
+                    
+                    <!-- Handshake messages -->
+                    <g id="handshake">
+                        <!-- Client Hello -->
+                        <rect x="250" y="130" width="300" height="40" fill="#f39c12" rx="5"/>
+                        <text x="400" y="155" text-anchor="middle" font-size="14">1. Client Hello</text>
+                        <path d="M 200 150 L 250 150" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <path d="M 550 150 L 600 150" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        
+                        <!-- Server Hello -->
+                        <rect x="250" y="190" width="300" height="40" fill="#f39c12" rx="5"/>
+                        <text x="400" y="215" text-anchor="middle" font-size="14">2. Server Hello + Certificate</text>
+                        <path d="M 600 210 L 550 210" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <path d="M 250 210 L 200 210" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        
+                        <!-- Certificate Verification -->
+                        <rect x="250" y="250" width="300" height="40" fill="#9b59b6" rx="5"/>
+                        <text x="400" y="275" text-anchor="middle" font-size="14">3. Certificate Verification</text>
+                        
+                        <!-- Key Exchange -->
+                        <rect x="250" y="310" width="300" height="40" fill="#e74c3c" rx="5"/>
+                        <text x="400" y="335" text-anchor="middle" font-size="14">4. Key Exchange</text>
+                        <path d="M 200 330 L 250 330" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <path d="M 550 330 L 600 330" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        
+                        <!-- Finished -->
+                        <rect x="250" y="370" width="300" height="40" fill="#34495e" rx="5"/>
+                        <text x="400" y="395" text-anchor="middle" font-size="14">5. Finished Messages</text>
+                        <path d="M 600 390 L 550 390" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <path d="M 250 390 L 200 390" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        
+                        <!-- Secure Connection -->
+                        <rect x="250" y="430" width="300" height="40" fill="#2ecc71" rx="5"/>
+                        <text x="400" y="455" text-anchor="middle" font-size="14" fill="white">Secure Connection Established</text>
+                    </g>
+                    
+                    <!-- Arrow marker -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <h3>TLS 1.3 Improvements</h3>
+            <div class="two-column">
+                <div class="column">
+                    <h4>TLS 1.2</h4>
+                    <ul>
+                        <li>2-RTT handshake (full)</li>
+                        <li>Supports weak algorithms</li>
+                        <li>Optional forward secrecy</li>
+                        <li>Partial handshake encryption</li>
+                    </ul>
+                </div>
+                <div class="column">
+                    <h4>TLS 1.3</h4>
+                    <ul>
+                        <li>1-RTT handshake (full)</li>
+                        <li>0-RTT (with resumption)</li>
+                        <li>Removed weak algorithms</li>
+                        <li>Mandatory forward secrecy</li>
+                        <li>Encrypted handshake</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Common PKI Vulnerabilities</h3>
+            <ul>
+                <li><strong>Weak Certificate Practices:</strong>
+                    <ul>
+                        <li>Insufficient key lengths</li>
+                        <li>Overly long validity periods</li>
+                        <li>Incomplete certificate chains</li>
+                    </ul>
+                </li>
+                <li><strong>Implementation Flaws:</strong>
+                    <ul>
+                        <li>Improper certificate validation</li>
+                        <li>Lack of revocation checking</li>
+                        <li>Insecure algorithm configurations</li>
+                    </ul>
+                </li>
+                <li><strong>Infrastructure Issues:</strong>
+                    <ul>
+                        <li>Compromised CAs</li>
+                        <li>Poor key protection</li>
+                        <li>Inadequate certificate inventory</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <button class="collapsible">Case Study: DigiNotar Breach</button>
+            <div class="content">
+                <h4>2011 Dutch CA Compromise</h4>
+                <ul>
+                    <li><strong>Incident:</strong> 2011 compromise of Dutch CA DigiNotar</li>
+                    <li><strong>Impact:</strong> Fraudulent certificates for major domains (Google, CIA, etc.)</li>
+                    <li><strong>Attack Vector:</strong> Malware on CA servers</li>
+                    <li><strong>Consequences:</strong>
+                        <ul>
+                            <li>Browser vendors revoked DigiNotar certificates</li>
+                            <li>Company declared bankrupt</li>
+                            <li>Dutch government services disrupted</li>
+                        </ul>
+                    </li>
+                    <li><strong>Lessons Learned:</strong>
+                        <ul>
+                            <li>CA security is critical</li>
+                            <li>Need for certificate transparency</li>
+                            <li>Importance of rapid response</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <h3>Key Takeaways</h3>
+            <ol>
+                <li>PKI provides the framework for establishing trust in digital communications</li>
+                <li>Certificate lifecycle management is as important as the certificates themselves</li>
+                <li>TLS 1.3 significantly improves security and performance over previous versions</li>
+                <li>PKI security requires attention to both technical implementation and operational processes</li>
+            </ol>
+        </section>
+
+        <!-- Section 4: Cryptographic Attacks & Attack Vectors -->
+        <section id="section-4">
+            <h2>4. Cryptographic Attacks & Attack Vectors</h2>
+            
+            <h3>Learning Objectives</h3>
+            <ul>
+                <li>Categorize different types of cryptographic attacks</li>
+                <li>Analyze attack methodologies and their impact</li>
+                <li>Understand real-world attack scenarios</li>
+                <li>Identify mitigation strategies for each attack type</li>
+            </ul>
+
+            <h3>Attack Classification Framework</h3>
+            <div class="diagram-container">
+                <svg width="700" height="400" viewBox="0 0 700 400" class="diagram">
+                    <!-- Main categories -->
+                    <rect x="50" y="50" width="180" height="80" fill="#3498db" rx="10"/>
+                    <text x="140" y="85" text-anchor="middle" font-size="16" fill="white">Cryptanalytic</text>
+                    <text x="140" y="105" text-anchor="middle" font-size="14" fill="white">Attacks</text>
+                    
+                    <rect x="260" y="50" width="180" height="80" fill="#2ecc71" rx="10"/>
+                    <text x="350" y="85" text-anchor="middle" font-size="16" fill="white">Implementation</text>
+                    <text x="350" y="105" text-anchor="middle" font-size="14" fill="white">Attacks</text>
+                    
+                    <rect x="470" y="50" width="180" height="80" fill="#f39c12" rx="10"/>
+                    <text x="560" y="85" text-anchor="middle" font-size="16" fill="white">Social Engineering</text>
+                    <text x="560" y="105" text-anchor="middle" font-size="14" fill="white">Attacks</text>
+                    
+                    <!-- Subcategories -->
+                    <rect x="50" y="180" width="80" height="40" fill="#e74c3c" rx="5"/>
+                    <text x="90" y="205" text-anchor="middle" font-size="12" fill="white">Ciphertext-only</text>
+                    
+                    <rect x="150" y="180" width="80" height="40" fill="#e74c3c" rx="5"/>
+                    <text x="190" y="205" text-anchor="middle" font-size="12" fill="white">Known-plaintext</text>
+                    
+                    <rect x="50" y="240" width="80" height="40" fill="#e74c3c" rx="5"/>
+                    <text x="90" y="265" text-anchor="middle" font-size="12" fill="white">Chosen-plaintext</text>
+                    
+                    <rect x="150" y="240" width="80" height="40" fill="#e74c3c" rx="5"/>
+                    <text x="190" y="265" text-anchor="middle" font-size="12" fill="white">Chosen-ciphertext</text>
+                    
+                    <rect x="260" y="180" width="80" height="40" fill="#9b59b6" rx="5"/>
+                    <text x="300" y="205" text-anchor="middle" font-size="12" fill="white">Side-channel</text>
+                    
+                    <rect x="360" y="180" width="80" height="40" fill="#9b59b6" rx="5"/>
+                    <text x="400" y="205" text-anchor="middle" font-size="12" fill="white">Fault injection</text>
+                    
+                    <rect x="470" y="180" width="80" height="40" fill="#34495e" rx="5"/>
+                    <text x="510" y="205" text-anchor="middle" font-size="12" fill="white">Phishing</text>
+                    
+                    <rect x="570" y="180" width="80" height="40" fill="#34495e" rx="5"/>
+                    <text x="610" y="205" text-anchor="middle" font-size="12" fill="white">Impersonation</text>
+                    
+                    <!-- Connections -->
+                    <path d="M 140 130 L 90 180" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 140 130 L 190 180" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 140 130 L 90 240" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 140 130 L 190 240" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 350 130 L 300 180" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 350 130 L 400 180" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 560 130 L 510 180" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 560 130 L 610 180" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    
+                    <!-- Arrow marker -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <h3>Man-in-the-Middle (MITM) Attacks</h3>
+            <div class="diagram-container">
+                <svg width="800" height="400" viewBox="0 0 800 400" class="diagram">
+                    <!-- Client -->
+                    <rect x="50" y="150" width="150" height="60" fill="#3498db" rx="10"/>
+                    <text x="125" y="185" text-anchor="middle" font-size="16" fill="white">Client</text>
+                    
+                    <!-- Attacker -->
+                    <rect x="325" y="150" width="150" height="60" fill="#e74c3c" rx="10"/>
+                    <text x="400" y="185" text-anchor="middle" font-size="16" fill="white">Attacker</text>
+                    
+                    <!-- Server -->
+                    <rect x="600" y="150" width="150" height="60" fill="#2ecc71" rx="10"/>
+                    <text x="675" y="185" text-anchor="middle" font-size="16" fill="white">Server</text>
+                    
+                    <!-- MITM flow -->
+                    <path d="M 200 180 L 325 180" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 475 180 L 600 180" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    
+                    <!-- MITM description -->
+                    <text x="400" y="50" text-anchor="middle" font-size="18" font-weight="bold">Man-in-the-Middle Attack</text>
+                    <text x="400" y="80" text-anchor="middle" font-size="14">Attacker intercepts and potentially modifies communication</text>
+                    
+                    <!-- Attack steps -->
+                    <text x="125" y="250" text-anchor="middle" font-size="14">1. Sends message</text>
+                    <text x="400" y="250" text-anchor="middle" font-size="14">2. Intercepts & reads</text>
+                    <text x="400" y="270" text-anchor="middle" font-size="14">3. Forwards (modified)</text>
+                    <text x="675" y="250" text-anchor="middle" font-size="14">4. Receives message</text>
+                    
+                    <!-- Return path -->
+                    <path d="M 600 200 L 475 200" stroke="#333" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowhead)"/>
+                    <path d="M 325 200 L 200 200" stroke="#333" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowhead)"/>
+                    
+                    <!-- Return steps -->
+                    <text x="675" y="350" text-anchor="middle" font-size="14">5. Sends response</text>
+                    <text x="400" y="350" text-anchor="middle" font-size="14">6. Intercepts & reads</text>
+                    <text x="400" y="370" text-anchor="middle" font-size="14">7. Forwards (modified)</text>
+                    <text x="125" y="350" text-anchor="middle" font-size="14">8. Receives response</text>
+                    
+                    <!-- Arrow marker -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <h3>Replay Attacks</h3>
+            <div class="diagram-container">
+                <svg width="800" height="400" viewBox="0 0 800 400" class="diagram">
+                    <!-- Client -->
+                    <rect x="50" y="150" width="150" height="60" fill="#3498db" rx="10"/>
+                    <text x="125" y="185" text-anchor="middle" font-size="16" fill="white">Client</text>
+                    
+                    <!-- Server -->
+                    <rect x="600" y="150" width="150" height="60" fill="#2ecc71" rx="10"/>
+                    <text x="675" y="185" text-anchor="middle" font-size="16" fill="white">Server</text>
+                    
+                    <!-- Attacker -->
+                    <rect x="325" y="50" width="150" height="60" fill="#e74c3c" rx="10"/>
+                    <text x="400" y="85" text-anchor="middle" font-size="16" fill="white">Attacker</text>
+                    
+                    <!-- Original transmission -->
+                    <path d="M 200 180 L 600 180" stroke="#2ecc71" stroke-width="2" marker-end="url(#arrow-green)"/>
+                    <text x="400" y="170" text-anchor="middle" font-size="14">Original Message</text>
+                    
+                    <!-- Capture -->
+                    <path d="M 400 150 L 400 110" stroke="#e74c3c" stroke-width="2" marker-end="url(#arrow-red)"/>
+                    <text x="450" y="130" font-size="14">Capture</text>
+                    
+                    <!-- Replay -->
+                    <path d="M 325 80 L 200 80" stroke="#e74c3c" stroke-width="2" marker-end="url(#arrow-red)"/>
+                    <path d="M 125 80 L 125 150" stroke="#e74c3c" stroke-width="2" marker-end="url(#arrow-red)"/>
+                    <path d="M 200 220 L 600 220" stroke="#e74c3c" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrow-red)"/>
+                    <text x="400" y="240" text-anchor="middle" font-size="14">Replayed Message</text>
+                    
+                    <!-- Arrow markers -->
+                    <defs>
+                        <marker id="arrow-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#2ecc71"/>
+                        </marker>
+                        <marker id="arrow-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#e74c3c"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <h3>Side-Channel Attacks</h3>
+            <div class="diagram-container">
+                <svg width="700" height="400" viewBox="0 0 700 400" class="diagram">
+                    <!-- Cryptographic Device -->
+                    <rect x="250" y="150" width="200" height="100" fill="#3498db" rx="10"/>
+                    <text x="350" y="185" text-anchor="middle" font-size="16" fill="white">Cryptographic</text>
+                    <text x="350" y="205" text-anchor="middle" font-size="16" fill="white">Device</text>
+                    
+                    <!-- Side channels -->
+                    <g id="side-channels">
+                        <!-- Timing -->
+                        <path d="M 350 150 L 350 100" stroke="#e74c3c" stroke-width="2" marker-end="url(#arrow-red)"/>
+                        <text x="350" y="80" text-anchor="middle" font-size="14">Timing</text>
+                        
+                        <!-- Power -->
+                        <path d="M 250 200 L 150 200" stroke="#e74c3c" stroke-width="2" marker-end="url(#arrow-red)"/>
+                        <text x="100" y="205" text-anchor="middle" font-size="14">Power</text>
+                        
+                        <!-- EM -->
+                        <path d="M 450 200 L 550 200" stroke="#e74c3c" stroke-width="2" marker-end="url(#arrow-red)"/>
+                        <text x="600" y="205" text-anchor="middle" font-size="14">EM</text>
+                        
+                        <!-- Acoustic -->
+                        <path d="M 350 250 L 350 300" stroke="#e74c3c" stroke-width="2" marker-end="url(#arrow-red)"/>
+                        <text x="350" y="320" text-anchor="middle" font-size="14">Acoustic</text>
+                    </g>
+                    
+                    <!-- Attacker -->
+                    <rect x="50" y="300" width="150" height="60" fill="#e74c3c" rx="10"/>
+                    <text x="125" y="335" text-anchor="middle" font-size="16" fill="white">Attacker</text>
+                    
+                    <!-- Information leakage -->
+                    <path d="M 150 200 L 125 300" stroke="#e74c3c" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrow-red)"/>
+                    <path d="M 350 300 L 200 330" stroke="#e74c3c" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrow-red)"/>
+                    <path d="M 550 200 L 200 330" stroke="#e74c3c" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrow-red)"/>
+                    
+                    <!-- Arrow marker -->
+                    <defs>
+                        <marker id="arrow-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#e74c3c"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <button class="collapsible">Cryptographic Downgrade Attacks</button>
+            <div class="content">
+                <h4>Attack Method</h4>
+                <ul>
+                    <li>Force use of weaker cryptographic protocols</li>
+                    <li>Exploit backward compatibility</li>
+                </ul>
+                
+                <h4>Examples</h4>
+                <ul>
+                    <li><strong>POODLE:</strong> SSL 3.0 vulnerability</li>
+                    <li><strong>FREAK:</strong> Export-grade RSA</li>
+                    <li><strong>Logjam:</strong> Diffie-Hellman downgrade</li>
+                </ul>
+                
+                <h4>Mitigation</h4>
+                <ul>
+                    <li>Disable outdated protocols</li>
+                    <li>Implement protocol negotiation safeguards</li>
+                    <li>Forward secrecy</li>
+                </ul>
+            </div>
+
+            <button class="collapsible">Implementation Attacks: Heartbleed</button>
+            <div class="content">
+                <h4>Vulnerability</h4>
+                <ul>
+                    <li>Buffer over-read in OpenSSL TLS heartbeat extension</li>
+                    <li>Exposure of up to 64KB of server memory per request</li>
+                </ul>
+                
+                <h4>Information Exposed</h4>
+                <ul>
+                    <li>Private keys</li>
+                    <li>Session tokens</li>
+                    <li>User credentials</li>
+                </ul>
+                
+                <h4>Lessons</h4>
+                <ul>
+                    <li>Critical importance of memory safety</li>
+                    <li>Need for thorough code review</li>
+                    <li>Value of cryptographic agility</li>
+                </ul>
+            </div>
+
+            <h3>Attack-Defense Mapping</h3>
+            <table>
+                <tr>
+                    <th>Attack Type</th>
+                    <th>Defense Mechanism</th>
+                </tr>
+                <tr>
+                    <td>Brute Force</td>
+                    <td>Strong keys, rate limiting</td>
+                </tr>
+                <tr>
+                    <td>MITM</td>
+                    <td>Certificate verification, pinning</td>
+                </tr>
+                <tr>
+                    <td>Replay</td>
+                    <td>Nonces, timestamps</td>
+                </tr>
+                <tr>
+                    <td>Side-channel</td>
+                    <td>Constant-time implementation</td>
+                </tr>
+                <tr>
+                    <td>Downgrade</td>
+                    <td>Disable weak protocols</td>
+                </tr>
+                <tr>
+                    <td>Quantum</td>
+                    <td>Post-quantum algorithms</td>
+                </tr>
+            </table>
+
+            <h3>Key Takeaways</h3>
+            <ol>
+                <li>Cryptographic systems face threats from both mathematical analysis and implementation flaws</li>
+                <li>Defense in depth is essential—no single mitigation is sufficient</li>
+                <li>Implementation details often matter more than theoretical algorithm strength</li>
+                <li>Future-proofing requires consideration of emerging threats like quantum computing</li>
+            </ol>
+        </section>
+
+        <!-- Section 5: Network Basics & Architecture -->
+        <section id="section-5">
+            <h2>5. Network Basics & Architecture</h2>
+            
+            <h3>Learning Objectives</h3>
+            <ul>
+                <li>Understand OSI model layers and their functions</li>
+                <li>Compare OSI and TCP/IP models</li>
+                <li>Identify common network protocols and their security implications</li>
+                <li>Map security controls to appropriate network layers</li>
+            </ul>
+
+            <h3>OSI Model Overview</h3>
+            <div class="diagram-container">
+                <svg width="500" height="600" viewBox="0 0 500 600" class="diagram">
+                    <!-- OSI Model Layers -->
+                    <rect x="100" y="50" width="300" height="50" fill="#3498db" rx="5"/>
+                    <text x="250" y="80" text-anchor="middle" font-size="16" fill="white">7. Application Layer</text>
+                    <text x="50" y="80" text-anchor="middle" font-size="14">HTTP, FTP, SMTP</text>
+                    
+                    <rect x="100" y="110" width="300" height="50" fill="#2ecc71" rx="5"/>
+                    <text x="250" y="140" text-anchor="middle" font-size="16" fill="white">6. Presentation Layer</text>
+                    <text x="50" y="140" text-anchor="middle" font-size="14">Encryption, Formatting</text>
+                    
+                    <rect x="100" y="170" width="300" height="50" fill="#f39c12" rx="5"/>
+                    <text x="250" y="200" text-anchor="middle" font-size="16" fill="white">5. Session Layer</text>
+                    <text x="50" y="200" text-anchor="middle" font-size="14">Session Management</text>
+                    
+                    <rect x="100" y="230" width="300" height="50" fill="#e74c3c" rx="5"/>
+                    <text x="250" y="260" text-anchor="middle" font-size="16" fill="white">4. Transport Layer</text>
+                    <text x="50" y="260" text-anchor="middle" font-size="14">TCP, UDP</text>
+                    
+                    <rect x="100" y="290" width="300" height="50" fill="#9b59b6" rx="5"/>
+                    <text x="250" y="320" text-anchor="middle" font-size="16" fill="white">3. Network Layer</text>
+                    <text x="50" y="320" text-anchor="middle" font-size="14">IP, ICMP</text>
+                    
+                    <rect x="100" y="350" width="300" height="50" fill="#34495e" rx="5"/>
+                    <text x="250" y="380" text-anchor="middle" font-size="16" fill="white">2. Data Link Layer</text>
+                    <text x="50" y="380" text-anchor="middle" font-size="14">Ethernet, MAC</text>
+                    
+                    <rect x="100" y="410" width="300" height="50" fill="#95a5a6" rx="5"/>
+                    <text x="250" y="440" text-anchor="middle" font-size="16" fill="white">1. Physical Layer</text>
+                    <text x="50" y="440" text-anchor="middle" font-size="14">Cables, Signals</text>
+                    
+                    <!-- Data flow -->
+                    <path d="M 420 75 L 470 75" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 420 135 L 470 135" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 420 195 L 470 195" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 420 255 L 470 255" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 420 315 L 470 315" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 420 375 L 470 375" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 420 435 L 470 435" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    
+                    <text x="470" y="50" text-anchor="middle" font-size="14">Data Flow</text>
+                    
+                    <!-- Arrow marker -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <h3>OSI vs. TCP/IP Model Comparison</h3>
+            <table>
+                <tr>
+                    <th>OSI Model</th>
+                    <th>TCP/IP Model</th>
+                    <th>Examples</th>
+                </tr>
+                <tr>
+                    <td>Application</td>
+                    <td rowspan="3">Application</td>
+                    <td>HTTP, FTP, SMTP</td>
+                </tr>
+                <tr>
+                    <td>Presentation</td>
+                    <td>TLS/SSL, JPEG</td>
+                </tr>
+                <tr>
+                    <td>Session</td>
+                    <td>NetBIOS, RPC</td>
+                </tr>
+                <tr>
+                    <td>Transport</td>
+                    <td>Transport</td>
+                    <td>TCP, UDP</td>
+                </tr>
+                <tr>
+                    <td>Network</td>
+                    <td>Internet</td>
+                    <td>IP, ICMP</td>
+                </tr>
+                <tr>
+                    <td>Data Link</td>
+                    <td rowspan="2">Link</td>
+                    <td>Ethernet, Wi-Fi</td>
+                </tr>
+                <tr>
+                    <td>Physical</td>
+                    <td>Cables, Signals</td>
+                </tr>
+            </table>
+
+            <h3>Network Security Controls by Layer</h3>
+            <div class="diagram-container">
+                <svg width="700" height="500" viewBox="0 0 700 500" class="diagram">
+                    <!-- OSI Model with Security Controls -->
+                    <rect x="50" y="50" width="200" height="50" fill="#3498db" rx="5"/>
+                    <text x="150" y="80" text-anchor="middle" font-size="14" fill="white">Application</text>
+                    <rect x="300" y="50" width="350" height="50" fill="#f0f0f0" stroke="#333" stroke-width="1" rx="5"/>
+                    <text x="475" y="80" text-anchor="middle" font-size="14">Application firewalls, Content filtering</text>
+                    
+                    <rect x="50" y="110" width="200" height="50" fill="#2ecc71" rx="5"/>
+                    <text x="150" y="140" text-anchor="middle" font-size="14" fill="white">Presentation</text>
+                    <rect x="300" y="110" width="350" height="50" fill="#f0f0f0" stroke="#333" stroke-width="1" rx="5"/>
+                    <text x="475" y="140" text-anchor="middle" font-size="14">TLS/SSL encryption</text>
+                    
+                    <rect x="50" y="170" width="200" height="50" fill="#f39c12" rx="5"/>
+                    <text x="150" y="200" text-anchor="middle" font-size="14" fill="white">Session</text>
+                    <rect x="300" y="170" width="350" height="50" fill="#f0f0f0" stroke="#333" stroke-width="1" rx="5"/>
+                    <text x="475" y="200" text-anchor="middle" font-size="14">Session tokens, Authentication</text>
+                    
+                    <rect x="50" y="230" width="200" height="50" fill="#e74c3c" rx="5"/>
+                    <text x="150" y="260" text-anchor="middle" font-size="14" fill="white">Transport</text>
+                    <rect x="300" y="230" width="350" height="50" fill="#f0f0f0" stroke="#333" stroke-width="1" rx="5"/>
+                    <text x="475" y="260" text-anchor="middle" font-size="14">TCP wrappers, Port security</text>
+                    
+                    <rect x="50" y="290" width="200" height="50" fill="#9b59b6" rx="5"/>
+                    <text x="150" y="320" text-anchor="middle" font-size="14" fill="white">Network</text>
+                    <rect x="300" y="290" width="350" height="50" fill="#f0f0f0" stroke="#333" stroke-width="1" rx="5"/>
+                    <text x="475" y="320" text-anchor="middle" font-size="14">Firewalls, IPsec, IDS/IPS</text>
+                    
+                    <rect x="50" y="350" width="200" height="50" fill="#34495e" rx="5"/>
+                    <text x="150" y="380" text-anchor="middle" font-size="14" fill="white">Data Link</text>
+                    <rect x="300" y="350" width="350" height="50" fill="#f0f0f0" stroke="#333" stroke-width="1" rx="5"/>
+                    <text x="475" y="380" text-anchor="middle" font-size="14">MAC filtering, Port security</text>
+                    
+                    <rect x="50" y="410" width="200" height="50" fill="#95a5a6" rx="5"/>
+                    <text x="150" y="440" text-anchor="middle" font-size="14" fill="white">Physical</text>
+                    <rect x="300" y="410" width="350" height="50" fill="#f0f0f0" stroke="#333" stroke-width="1" rx="5"/>
+                    <text x="475" y="440" text-anchor="middle" font-size="14">Physical access control, Cable security</text>
+                </svg>
+            </div>
+
+            <h3>Common Network Attacks</h3>
+            <div class="two-column">
+                <div class="column">
+                    <h4>Layer 2 Attacks</h4>
+                    <ul>
+                        <li>MAC flooding</li>
+                        <li>ARP spoofing</li>
+                        <li>VLAN hopping</li>
+                    </ul>
+                    
+                    <h4>Layer 3 Attacks</h4>
+                    <ul>
+                        <li>IP spoofing</li>
+                        <li>ICMP attacks</li>
+                        <li>Routing attacks</li>
+                    </ul>
+                </div>
+                <div class="column">
+                    <h4>Layer 4 Attacks</h4>
+                    <ul>
+                        <li>SYN flood</li>
+                        <li>UDP amplification</li>
+                        <li>Session hijacking</li>
+                    </ul>
+                    
+                    <h4>Layer 7 Attacks</h4>
+                    <ul>
+                        <li>HTTP floods</li>
+                        <li>Application exploits</li>
+                        <li>SQL injection</li>
+                    </ul>
+                </div>
+            </div>
+
+            <button class="collapsible">Case Study: DNS Amplification Attack</button>
+            <div class="content">
+                <h4>Attack Mechanism</h4>
+                <ul>
+                    <li>Small query with spoofed source IP</li>
+                    <li>Large response sent to victim</li>
+                    <li>Uses DNS resolvers as reflectors</li>
+                </ul>
+                
+                <h4>Impact</h4>
+                <ul>
+                    <li>DDoS amplification factor up to 54x</li>
+                    <li>Overwhelms victim bandwidth</li>
+                </ul>
+                
+                <h4>Mitigation</h4>
+                <ul>
+                    <li>Disable recursion for external clients</li>
+                    <li>Rate limiting</li>
+                    <li>Response rate limiting (RRL)</li>
+                </ul>
+            </div>
+
+            <h3>Key Takeaways</h3>
+            <ol>
+                <li>Network architecture provides the foundation for implementing security controls</li>
+                <li>Different protocols have different security implications</li>
+                <li>Defense strategies must consider threats at multiple layers</li>
+                <li>Understanding network fundamentals is essential for effective security implementation</li>
+            </ol>
+        </section>
+
+        <!-- Section 6: Firewalls & Intrusion Detection/Prevention Systems (IDPS) -->
+        <section id="section-6">
+            <h2>6. Firewalls & Intrusion Detection/Prevention Systems (IDPS)</h2>
+            
+            <h3>Learning Objectives</h3>
+            <ul>
+                <li>Differentiate types of firewalls and their capabilities</li>
+                <li>Compare host-based vs. network-based IDPS</li>
+                <li>Understand signature-based vs. anomaly-based detection</li>
+                <li>Analyze deployment strategies for effective defense</li>
+            </ul>
+
+            <h3>Firewall Types Evolution</h3>
+            <div class="diagram-container">
+                <svg width="800" height="400" viewBox="0 0 800 400" class="diagram">
+                    <!-- Packet Filtering -->
+                    <rect x="50" y="50" width="200" height="150" fill="#3498db" rx="10"/>
+                    <text x="150" y="80" text-anchor="middle" font-size="16" fill="white">Packet Filtering</text>
+                    <text x="150" y="105" text-anchor="middle" font-size="14" fill="white">(Stateless)</text>
+                    <text x="150" y="130" text-anchor="middle" font-size="12">Examines individual packets</text>
+                    <text x="150" y="150" text-anchor="middle" font-size="12">Filter based on IP, port, protocol</text>
+                    <text x="150" y="170" text-anchor="middle" font-size="12">No context awareness</text>
+                    
+                    <!-- Stateful Inspection -->
+                    <rect x="300" y="50" width="200" height="150" fill="#2ecc71" rx="10"/>
+                    <text x="400" y="80" text-anchor="middle" font-size="16" fill="white">Stateful Inspection</text>
+                    <text x="400" y="105" text-anchor="middle" font-size="14" fill="white">(Stateful)</text>
+                    <text x="400" y="130" text-anchor="middle" font-size="12">Tracks connection state</text>
+                    <text x="400" y="150" text-anchor="middle" font-size="12">Context-aware decisions</text>
+                    <text x="400" y="170" text-anchor="middle" font-size="12">Better security</text>
+                    
+                    <!-- Application-Layer -->
+                    <rect x="550" y="50" width="200" height="150" fill="#f39c12" rx="10"/>
+                    <text x="650" y="80" text-anchor="middle" font-size="16" fill="white">Application-Layer</text>
+                    <text x="650" y="105" text-anchor="middle" font-size="14" fill="white">(Proxy)</text>
+                    <text x="650" y="130" text-anchor="middle" font-size="12">Deep packet inspection</text>
+                    <text x="650" y="150" text-anchor="middle" font-size="12">Application protocol awareness</text>
+                    <text x="650" y="170" text-anchor="middle" font-size="12">Highest security</text>
+                    
+                    <!-- Evolution arrow -->
+                    <path d="M 250 125 L 300 125" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 500 125 L 550 125" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    
+                    <!-- Comparison -->
+                    <rect x="50" y="250" width="700" height="100" fill="#f0f0f0" stroke="#333" stroke-width="1" rx="10"/>
+                    <text x="400" y="280" text-anchor="middle" font-size="16" font-weight="bold">Comparison</text>
+                    
+                    <text x="150" y="310" text-anchor="middle" font-size="14">Fast, Limited</text>
+                    <text x="400" y="310" text-anchor="middle" font-size="14">Balanced</text>
+                    <text x="650" y="310" text-anchor="middle" font-size="14">Secure, Slower</text>
+                    
+                    <!-- Arrow marker -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <h3>Stateful Firewall Operation</h3>
+            <div class="diagram-container">
+                <svg width="800" height="500" viewBox="0 0 800 500" class="diagram">
+                    <!-- Incoming Packet -->
+                    <rect x="50" y="200" width="150" height="60" fill="#3498db" rx="10"/>
+                    <text x="125" y="235" text-anchor="middle" font-size="16" fill="white">Incoming Packet</text>
+                    
+                    <!-- State Table Lookup -->
+                    <rect x="250" y="200" width="150" height="60" fill="#2ecc71" rx="10"/>
+                    <text x="325" y="235" text-anchor="middle" font-size="16" fill="white">State Table</text>
+                    
+                    <!-- Rule Base -->
+                    <rect x="250" y="100" width="150" height="60" fill="#f39c12" rx="10"/>
+                    <text x="325" y="135" text-anchor="middle" font-size="16" fill="white">Rule Base</text>
+                    
+                    <!-- Decision -->
+                    <rect x="450" y="200" width="150" height="60" fill="#e74c3c" rx="10"/>
+                    <text x="525" y="235" text-anchor="middle" font-size="16" fill="white">Decision</text>
+                    
+                    <!-- Allowed Packet -->
+                    <rect x="650" y="150" width="150" height="60" fill="#2ecc71" rx="10"/>
+                    <text x="725" y="185" text-anchor="middle" font-size="16" fill="white">Allowed</text>
+                    
+                    <!-- Blocked Packet -->
+                    <rect x="650" y="250" width="150" height="60" fill="#e74c3c" rx="10"/>
+                    <text x="725" y="285" text-anchor="middle" font-size="16" fill="white">Blocked</text>
+                    
+                    <!-- State Table Update -->
+                    <rect x="450" y="350" width="150" height="60" fill="#9b59b6" rx="10"/>
+                    <text x="525" y="385" text-anchor="middle" font-size="16" fill="white">State Table Update</text>
+                    
+                    <!-- Flow -->
+                    <path d="M 200 230 L 250 230" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 325 200 L 325 160" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 325 160 L 450 160" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 450 160 L 450 200" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 400 230 L 450 230" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 600 210 L 650 180" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 600 250 L 650 280" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 525 260 L 525 350" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 450 380 L 400 380" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 400 380 L 400 260" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    
+                    <!-- Arrow marker -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <h3>IDPS Fundamentals</h3>
+            <div class="diagram-container">
+                <svg width="700" height="400" viewBox="0 0 700 400" class="diagram">
+                    <!-- IDS vs IPS -->
+                    <rect x="50" y="50" width="250" height="150" fill="#3498db" rx="10"/>
+                    <text x="175" y="80" text-anchor="middle" font-size="16" fill="white">IDS</text>
+                    <text x="175" y="105" text-anchor="middle" font-size="14" fill="white">(Intrusion Detection)</text>
+                    <text x="175" y="130" text-anchor="middle" font-size="12">Detects suspicious activity</text>
+                    <text x="175" y="150" text-anchor="middle" font-size="12">Generates alerts</text>
+                    <text x="175" y="170" text-anchor="middle" font-size="12">Passive response</text>
+                    
+                    <rect x="400" y="50" width="250" height="150" fill="#2ecc71" rx="10"/>
+                    <text x="525" y="80" text-anchor="middle" font-size="16" fill="white">IPS</text>
+                    <text x="525" y="105" text-anchor="middle" font-size="14" fill="white">(Intrusion Prevention)</text>
+                    <text x="525" y="130" text-anchor="middle" font-size="12">Detects suspicious activity</text>
+                    <text x="525" y="150" text-anchor="middle" font-size="12">Blocks malicious traffic</text>
+                    <text x="525" y="170" text-anchor="middle" font-size="12">Active response</text>
+                    
+                    <!-- Network vs Host -->
+                    <rect x="50" y="250" width="250" height="100" fill="#f39c12" rx="10"/>
+                    <text x="175" y="280" text-anchor="middle" font-size="16" fill="white">Network-based</text>
+                    <text x="175" y="305" text-anchor="middle" font-size="14" fill="white">(NIDPS/NIPS)</text>
+                    <text x="175" y="330" text-anchor="middle" font-size="12">Monitors network traffic</text>
+                    
+                    <rect x="400" y="250" width="250" height="100" fill="#e74c3c" rx="10"/>
+                    <text x="525" y="280" text-anchor="middle" font-size="16" fill="white">Host-based</text>
+                    <text x="525" y="305" text-anchor="middle" font-size="14" fill="white">(HIDPS/HIPS)</text>
+                    <text x="525" y="330" text-anchor="middle" font-size="12">Monitors system activities</text>
+                </svg>
+            </div>
+
+            <h3>Detection Methodologies</h3>
+            <div class="two-column">
+                <div class="column">
+                    <h4>Signature-Based Detection</h4>
+                    <ul>
+                        <li>Matches patterns of known attacks</li>
+                        <li>Low false positives</li>
+                        <li>Cannot detect zero-day attacks</li>
+                    </ul>
+                </div>
+                <div class="column">
+                    <h4>Anomaly-Based Detection</h4>
+                    <ul>
+                        <li>Identifies deviations from baseline</li>
+                        <li>Can detect unknown attacks</li>
+                        <li>Higher false positive rate</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Evasion Techniques</h3>
+            <ul>
+                <li><strong>Fragmentation:</strong>
+                    <ul>
+                        <li>Split packets to avoid detection</li>
+                        <li>Overlapping fragments</li>
+                    </ul>
+                </li>
+                <li><strong>Encryption/Tunneling:</strong>
+                    <ul>
+                        <li>Hide malicious content</li>
+                        <li>Challenge for IDPS</li>
+                    </ul>
+                </li>
+                <li><strong>Protocol Obfuscation:</strong>
+                    <ul>
+                        <li>Manipulate protocol fields</li>
+                        <li>Unicode evasion</li>
+                    </ul>
+                </li>
+                <li><strong>Low and Slow Attacks:</strong>
+                    <ul>
+                        <li>Stay below detection thresholds</li>
+                        <li>Distributed attack sources</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <button class="collapsible">Case Study: Target Breach</button>
+            <div class="content">
+                <h4>2013 Retail Breach</h4>
+                <ul>
+                    <li><strong>Incident:</strong> 2013 breach of 40 million credit cards</li>
+                    <li><strong>Attack Vector:</strong>
+                        <ul>
+                            <li>Initial compromise via HVAC vendor</li>
+                            <li>Malware installed on POS systems</li>
+                            <li>Data exfiltrated</li>
+                        </ul>
+                    </li>
+                    <li><strong>Security Failures:</strong>
+                        <ul>
+                            <li>Firewall alerts ignored</li>
+                            <li>Malware detection missed</li>
+                            <li>Segregation insufficient</li>
+                        </ul>
+                    </li>
+                    <li><strong>Lessons:</strong>
+                        <ul>
+                            <li>Importance of alert response</li>
+                            <li>Need for defense in depth</li>
+                            <li>Value of security monitoring</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <h3>Key Takeaways</h3>
+            <ol>
+                <li>Firewalls provide essential network traffic control and perimeter defense</li>
+                <li>IDPS complement firewalls by detecting and potentially preventing attacks</li>
+                <li>Detection methodologies must balance security with operational requirements</li>
+                <li>Effective deployment requires consideration of performance, coverage, and response capabilities</li>
+            </ol>
+        </section>
+
+        <!-- Section 7: Virtual Private Networks (VPNs) -->
+        <section id="section-7">
+            <h2>7. Virtual Private Networks (VPNs)</h2>
+            
+            <h3>Learning Objectives</h3>
+            <ul>
+                <li>Understand VPN tunneling concepts and mechanisms</li>
+                <li>Compare different VPN protocols and their security properties</li>
+                <li>Analyze VPN deployment models for various use cases</li>
+                <li>Evaluate performance vs. security trade-offs in VPN implementations</li>
+            </ul>
+
+            <h3>VPN Fundamentals</h3>
+            <div class="diagram-container">
+                <svg width="800" height="400" viewBox="0 0 800 400" class="diagram">
+                    <!-- Public Network -->
+                    <rect x="50" y="150" width="700" height="100" fill="#f0f0f0" stroke="#333" stroke-width="2" rx="10"/>
+                    <text x="400" y="180" text-anchor="middle" font-size="18" font-weight="bold">Public Network (Internet)</text>
+                    
+                    <!-- VPN Tunnel -->
+                    <rect x="150" y="170" width="500" height="60" fill="#3498db" opacity="0.7" rx="30"/>
+                    <text x="400" y="205" text-anchor="middle" font-size="16" fill="white">VPN Tunnel (Encrypted)</text>
+                    
+                    <!-- Office 1 -->
+                    <rect x="50" y="50" width="150" height="80" fill="#2ecc71" rx="10"/>
+                    <text x="125" y="85" text-anchor="middle" font-size="16" fill="white">Office 1</text>
+                    <text x="125" y="105" text-anchor="middle" font-size="14" fill="white">Private Network</text>
+                    
+                    <!-- Office 2 -->
+                    <rect x="600" y="50" width="150" height="80" fill="#2ecc71" rx="10"/>
+                    <text x="675" y="85" text-anchor="middle" font-size="16" fill="white">Office 2</text>
+                    <text x="675" y="105" text-anchor="middle" font-size="14" fill="white">Private Network</text>
+                    
+                    <!-- VPN Gateways -->
+                    <rect x="100" y="160" width="50" height="80" fill="#f39c12" rx="5"/>
+                    <text x="125" y="205" text-anchor="middle" font-size="12" fill="white">VPN</text>
+                    <text x="125" y="220" text-anchor="middle" font-size="12" fill="white">GW</text>
+                    
+                    <rect x="650" y="160" width="50" height="80" fill="#f39c12" rx="5"/>
+                    <text x="675" y="205" text-anchor="middle" font-size="12" fill="white">VPN</text>
+                    <text x="675" y="220" text-anchor="middle" font-size="12" fill="white">GW</text>
+                    
+                    <!-- Connections -->
+                    <path d="M 125 130 L 125 160" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 675 130 L 675 160" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M 150 200 L 650 200" stroke="#2ecc71" stroke-width="2" marker-end="url(#arrow-green)"/>
+                    
+                    <!-- Data flow -->
+                    <text x="400" y="290" text-anchor="middle" font-size="14">Encrypted data flows through public network</text>
+                    <text x="400" y="310" text-anchor="middle" font-size="14">Appears as regular traffic to outsiders</text>
+                    
+                    <!-- Arrow markers -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+                        </marker>
+                        <marker id="arrow-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#2ecc71"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <h3>VPN Protocol Comparison</h3>
+            <table>
+                <tr>
+                    <th>Protocol</th>
+                    <th>Security</th>
+                    <th>Performance</th>
+                    <th>NAT Traversal</th>
+                    <th>Use Case</th>
+                </tr>
+                <tr>
+                    <td>IPsec</td>
+                    <td>High</td>
+                    <td>Medium</td>
+                    <td>Poor</td>
+                    <td>Site-to-site</td>
+                </tr>
+                <tr>
+                    <td>OpenVPN</td>
+                    <td>High</td>
+                    <td>Medium</td>
+                    <td>Good</td>
+                    <td>Remote access</td>
+                </tr>
+                <tr>
+                    <td>SSTP</td>
+                    <td>High</td>
+                    <td>Medium</td>
+                    <td>Excellent</td>
+                    <td>Windows environments</td>
+                </tr>
+                <tr>
+                    <td>IKEv2</td>
+                    <td>High</td>
+                    <td>High</td>
+                    <td>Good</td>
+                    <td>Mobile devices</td>
+                </tr>
+                <tr>
+                    <td>WireGuard</td>
+                    <td>High</td>
+                    <td>Very High</td>
+                    <td>Good</td>
+                    <td>Modern applications</td>
+                </tr>
+            </table>
+
+            <h3>Site-to-Site vs. Remote Access VPNs</h3>
+            <div class="two-column">
+                <div class="column">
+                    <h4>Site-to-Site VPNs</h4>
+                    <ul>
+                        <li>Purpose: Connect entire networks</li>
+                        <li>Architecture: VPN gateways at each site</li>
+                        <li>Use Cases:
+                            <ul>
+                                <li>Branch office connectivity</li>
+                                <li>Data center replication</li>
+                                <li>Hybrid cloud connections</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <div class="column">
+                    <h4>Remote Access VPNs</h4>
+                    <ul>
+                        <li>Purpose: Connect individual users</li>
+                        <li>Architecture: VPN client to corporate gateway</li>
+                        <li>Use Cases:
+                            <ul>
+                                <li>Teleworking</li>
+                                <li>Business travel</li>
+                                <li>Contractor access</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>VPN Security Challenges</h3>
+            <ul>
+                <li><strong>Authentication Issues:</strong>
+                    <ul>
+                        <li>Weak credentials</li>
+                        <li>Stolen certificates</li>
+                        <li>Lack of MFA</li>
+                    </ul>
+                </li>
+                <li><strong>Configuration Vulnerabilities:</strong>
+                    <ul>
+                        <li>Weak encryption algorithms</li>
+                        <li>Improper firewall rules</li>
+                        <li>DNS leaks</li>
+                    </ul>
+                </li>
+                <li><strong>Endpoint Security:</strong>
+                    <ul>
+                        <li>Compromised client devices</li>
+                        <li>Malware propagation through VPN</li>
+                        <li>Unsecured networks on client side</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3>Performance vs. Security Trade-offs</h3>
+            <div class="diagram-container">
+                <svg width="700" height="400" viewBox="0 0 700 400" class="diagram">
+                    <!-- Balance Scale -->
+                    <line x1="350" y1="100" x2="350" y2="250" stroke="#333" stroke-width="3"/>
+                    <line x1="200" y1="250" x2="500" y2="250" stroke="#333" stroke-width="3"/>
+                    
+                    <!-- Security Side -->
+                    <rect x="150" y="150" width="100" height="100" fill="#2ecc71" rx="10"/>
+                    <text x="200" y="185" text-anchor="middle" font-size="16" fill="white">Security</text>
+                    <text x="200" y="205" text-anchor="middle" font-size="14" fill="white">Stronger</text>
+                    <text x="200" y="225" text-anchor="middle" font-size="14" fill="white">Encryption</text>
+                    
+                    <!-- Performance Side -->
+                    <rect x="450" y="150" width="100" height="100" fill="#e74c3c" rx="10"/>
+                    <text x="500" y="185" text-anchor="middle" font-size="16" fill="white">Performance</text>
+                    <text x="500" y="205" text-anchor="middle" font-size="14" fill="white">Faster</text>
+                    <text x="500" y="225" text-anchor="middle" font-size="14" fill="white">Speed</text>
+                    
+                    <!-- Trade-offs -->
+                    <text x="200" y="300" text-anchor="middle" font-size="14">AES-256</text>
+                    <text x="200" y="320" text-anchor="middle" font-size="14">Complex protocols</text>
+                    <text x="200" y="340" text-anchor="middle" font-size="14">More overhead</text>
+                    
+                    <text x="500" y="300" text-anchor="middle" font-size="14">AES-128</text>
+                    <text x="500" y="320" text-anchor="middle" font-size="14">Simpler protocols</text>
+                    <text x="500" y="340" text-anchor="middle" font-size="14">Less overhead</text>
+                    
+                    <!-- Balance point -->
+                    <circle cx="350" cy="250" r="10" fill="#f39c12"/>
+                    <text x="350" y="280" text-anchor="middle" font-size="14">Balance</text>
+                </svg>
+            </div>
+
+            <button class="collapsible">Emerging VPN Technologies</button>
+            <div class="content">
+                <h4>WireGuard</h4>
+                <ul>
+                    <li>Modern cryptography</li>
+                    <li>Small codebase</li>
+                    <li>High performance</li>
+                </ul>
+                
+                <h4>Zero Trust Network Access (ZTNA)</h4>
+                <ul>
+                    <li>Identity-centric access</li>
+                    <li>Granular permissions</li>
+                    <li>Continuous verification</li>
+                </ul>
+                
+                <h4>SD-WAN with Integrated Security</h4>
+                <ul>
+                    <li>Application-aware routing</li>
+                    <li>Integrated security functions</li>
+                    <li>Centralized management</li>
+                </ul>
+            </div>
+
+            <button class="collapsible">Case Study: Enterprise VPN Migration</button>
+            <div class="content">
+                <h4>Challenge</h4>
+                <ul>
+                    <li>Aging IPsec infrastructure</li>
+                    <li>Performance issues</li>
+                    <li>Difficult client management</li>
+                </ul>
+                
+                <h4>Solution</h4>
+                <ul>
+                    <li>Hybrid approach with IPsec for site-to-site</li>
+                    <li>SSL VPN for remote access</li>
+                    <li>Cloud-based security services</li>
+                </ul>
+                
+                <h4>Results</h4>
+                <ul>
+                    <li>Improved user experience</li>
+                    <li>Simplified management</li>
+                    <li>Enhanced security posture</li>
+                </ul>
+                
+                <h4>Lessons</h4>
+                <ul>
+                    <li>No one-size-fits-all solution</li>
+                    <li>Migration planning is critical</li>
+                    <li>User experience drives adoption</li>
+                </ul>
+            </div>
+
+            <h3>Key Takeaways</h3>
+            <ol>
+                <li>VPNs provide essential secure connectivity over untrusted networks</li>
+                <li>Protocol selection depends on security requirements, performance needs, and use cases</li>
+                <li>Deployment models must address specific connectivity scenarios</li>
+                <li>VPN security requires attention to configuration, authentication, and endpoint security</li>
+            </ol>
+        </section>
+
+        <!-- Conclusion -->
+        <section id="conclusion">
+            <h2>Conclusion</h2>
+            
+            <h3>Course Summary</h3>
+            <ul>
+                <li><strong>Foundational Concepts:</strong>
+                    <ul>
+                        <li>Security principles (CIA Triad + Non-repudiation)</li>
+                        <li>Privacy models across data lifecycle</li>
+                    </ul>
+                </li>
+                <li><strong>Cryptographic Foundations:</strong>
+                    <ul>
+                        <li>Symmetric vs. asymmetric cryptography</li>
+                        <li>Key management challenges</li>
+                        <li>Algorithm selection criteria</li>
+                    </ul>
+                </li>
+                <li><strong>Trust Infrastructure:</strong>
+                    <ul>
+                        <li>PKI components and certificate lifecycle</li>
+                        <li>TLS/SSL implementation and vulnerabilities</li>
+                    </ul>
+                </li>
+                <li><strong>Threat Landscape:</strong>
+                    <ul>
+                        <li>Attack categories and methodologies</li>
+                        <li>Defense strategies and mitigation techniques</li>
+                    </ul>
+                </li>
+                <li><strong>Network Security Architecture:</strong>
+                    <ul>
+                        <li>Protocol security implications</li>
+                        <li>Defense in depth across network layers</li>
+                    </ul>
+                </li>
+                <li><strong>Perimeter Defense:</strong>
+                    <ul>
+                        <li>Firewall evolution and capabilities</li>
+                        <li>IDPS deployment and detection methods</li>
+                    </ul>
+                </li>
+                <li><strong>Secure Connectivity:</strong>
+                    <ul>
+                        <li>VPN technologies and use cases</li>
+                        <li>Performance vs. security considerations</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3>Future Directions</h3>
+            <ul>
+                <li><strong>Post-Quantum Cryptography:</strong>
+                    <ul>
+                        <li>Preparing for quantum computing threats</li>
+                        <li>Migration strategies and timelines</li>
+                    </ul>
+                </li>
+                <li><strong>Zero Trust Architecture:</strong>
+                    <ul>
+                        <li>Identity-centric security model</li>
+                        <li>Continuous verification and least privilege</li>
+                    </ul>
+                </li>
+                <li><strong>AI in Security:</strong>
+                    <ul>
+                        <li>Threat detection and response</li>
+                        <li>Automated vulnerability analysis</li>
+                    </ul>
+                </li>
+                <li><strong>Homomorphic Encryption:</strong>
+                    <ul>
+                        <li>Computation on encrypted data</li>
+                        <li>Privacy-preserving analytics</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3>Discussion Questions</h3>
+            <ol>
+                <li>How will quantum computing impact current cryptographic practices?</li>
+                <li>What are the trade-offs between security and usability in implementing encryption?</li>
+                <li>How can organizations balance the need for security monitoring with privacy concerns?</li>
+                <li>What role should government regulation play in establishing security standards?</li>
+                <li>How can security professionals stay current with rapidly evolving threats and technologies?</li>
+            </ol>
+        </section>
+
+        <!-- Glossary -->
+        <section id="glossary">
+            <h2>Glossary</h2>
+            
+            <div class="tab">
+                <button class="tablinks active" onclick="openTab(event, 'crypto-terms')">Cryptography Terms</button>
+                <button class="tablinks" onclick="openTab(event, 'network-terms')">Network Security Terms</button>
+                <button class="tablinks" onclick="openTab(event, 'protocol-terms')">Protocol Terms</button>
+            </div>
+            
+            <div id="crypto-terms" class="tabcontent active">
+                <h3>Cryptography Terms</h3>
+                <dl>
+                    <dt><strong>Symmetric Cryptography:</strong></dt>
+                    <dd>Encryption using the same key for both encryption and decryption</dd>
+                    
+                    <dt><strong>Asymmetric Cryptography:</strong></dt>
+                    <dd>Encryption using a public/private key pair</dd>
+                    
+                    <dt><strong>Hash Function:</strong></dt>
+                    <dd>One-way function that produces fixed-size output from variable input</dd>
+                    
+                    <dt><strong>Digital Signature:</strong></dt>
+                    <dd>Cryptographic mechanism for verifying authenticity and integrity</dd>
+                    
+                    <dt><strong>Key Exchange:</strong></dt>
+                    <dd>Process of securely sharing cryptographic keys</dd>
+                    
+                    <dt><strong>Non-repudiation:</strong></dt>
+                    <dd>Assurance that a party cannot deny the validity of a transaction</dd>
+                </dl>
+            </div>
+            
+            <div id="network-terms" class="tabcontent">
+                <h3>Network Security Terms</h3>
+                <dl>
+                    <dt><strong>Firewall:</strong></dt>
+                    <dd>Network security system that monitors and controls traffic</dd>
+                    
+                    <dt><strong>Intrusion Detection System (IDS):</strong></dt>
+                    <dd>System that monitors for malicious activities</dd>
+                    
+                    <dt><strong>Intrusion Prevention System (IPS):</strong></dt>
+                    <dd>System that detects and prevents malicious activities</dd>
+                    
+                    <dt><strong>Virtual Private Network (VPN):</strong></dt>
+                    <dd>Secure connection over untrusted network</dd>
+                    
+                    <dt><strong>Demilitarized Zone (DMZ):</strong></dt>
+                    <dd>Network segment with controlled access to internal resources</dd>
+                    
+                    <dt><strong>Stateful Inspection:</strong></dt>
+                    <dd>Firewall capability to track connection states</dd>
+                </dl>
+            </div>
+            
+            <div id="protocol-terms" class="tabcontent">
+                <h3>Protocol Terms</h3>
+                <dl>
+                    <dt><strong>TLS/SSL:</strong></dt>
+                    <dd>Protocol for secure communication over computer networks</dd>
+                    
+                    <dt><strong>IPsec:</strong></dt>
+                    <dd>Protocol suite for secure IP communications</dd>
+                    
+                    <dt><strong>DNSSEC:</strong></dt>
+                    <dd>Extensions to DNS for authenticating origin of data</dd>
+                    
+                    <dt><strong>PKI:</strong></dt>
+                    <dd>Framework for creating, managing, and revoking digital certificates</dd>
+                    
+                    <dt><strong>OCSP:</strong></dt>
+                    <dd>Protocol for checking revocation status of digital certificates</dd>
+                    
+                    <dt><strong>IKE:</strong></dt>
+                    <dd>Protocol for setting up security associations in IPsec</dd>
+                </dl>
+            </div>
+        </section>
+
+        <!-- References -->
+        <section id="references">
+            <h2>References</h2>
+            
+            <div class="tab">
+                <button class="tablinks active" onclick="openTab(event, 'academic')">Academic References</button>
+                <button class="tablinks" onclick="openTab(event, 'standards')">Standards and RFCs</button>
+                <button class="tablinks" onclick="openTab(event, 'online')">Online Resources</button>
+            </div>
+            
+            <div id="academic" class="tabcontent active">
+                <h3>Academic References</h3>
+                <ul>
+                    <li>Stallings, W. (2017). <em>Cryptography and Network Security: Principles and Practice</em>.</li>
+                    <li>Ferguson, N., Schneier, B., & Kohno, T. (2010). <em>Cryptography Engineering</em>.</li>
+                    <li>Bishop, M. (2002). <em>Computer Security: Art and Science</em>.</li>
+                    <li>Kaufman, C., Perlman, R., & Speciner, M. (2002). <em>Network Security: Private Communication in a Public World</em>.</li>
+                    <li>Anderson, R. (2008). <em>Security Engineering: A Guide to Building Dependable Distributed Systems</em>.</li>
+                </ul>
+            </div>
+            
+            <div id="standards" class="tabcontent">
+                <h3>Standards and RFCs</h3>
+                <ul>
+                    <li>NIST Special Publication 800-57: <em>Recommendation for Key Management</em></li>
+                    <li>NIST Special Publication 800-63: <em>Digital Identity Guidelines</em></li>
+                    <li>RFC 5246: <em>The Transport Layer Security (TLS) Protocol Version 1.2</em></li>
+                    <li>RFC 8446: <em>The Transport Layer Security (TLS) Protocol Version 1.3</em></li>
+                    <li>RFC 4301: <em>Security Architecture for the Internet Protocol (IPsec)</em></li>
+                    <li>ISO/IEC 27001: <em>Information Security Management</em></li>
+                </ul>
+            </div>
+            
+            <div id="online" class="tabcontent">
+                <h3>Online Resources</h3>
+                <ul>
+                    <li>OWASP (Open Web Application Security Project): <a href="https://owasp.org/" target="_blank">https://owasp.org/</a></li>
+                    <li>NIST Computer Security Resource Center: <a href="https://csrc.nist.gov/" target="_blank">https://csrc.nist.gov/</a></li>
+                    <li>IETF Datatracker: <a href="https://datatracker.ietf.org/" target="_blank">https://datatracker.ietf.org/</a></li>
+                    <li>SANS Institute: <a href="https://www.sans.org/" target="_blank">https://www.sans.org/</a></li>
+                    <li>Cryptography Stack Exchange: <a href="https://crypto.stackexchange.com/" target="_blank">https://crypto.stackexchange.com/</a></li>
+                    <li>Common Vulnerabilities and Exposures (CVE): <a href="https://cve.mitre.org/" target="_blank">https://cve.mitre.org/</a></li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <div class="slide-controls">
+        <button id="prev-slide" class="slide-btn" onclick="navigateSlides(-1)">Previous</button>
+        <button id="next-slide" class="slide-btn" onclick="navigateSlides(1)">Next</button>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Cryptography, Encryption & Network Security. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Tab functionality
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        
+        // Collapsible functionality
+        var coll = document.getElementsByClassName("collapsible");
+        var i;
+        
+        for (i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                }
+            });
+        }
+        
+        // Navigation functionality
+        var sections = document.querySelectorAll("section");
+        var navLinks = document.querySelectorAll(".nav-link");
+        var currentSection = 0;
+        
+        function updateNavigation() {
+            navLinks.forEach(function(link, index) {
+                if (index === currentSection) {
+                    link.classList.add("active");
+                } else {
+                    link.classList.remove("active");
+                }
+            });
+            
+            // Update prev/next buttons
+            document.getElementById("prev-slide").disabled = currentSection === 0;
+            document.getElementById("next-slide").disabled = currentSection === sections.length - 1;
+        }
+        
+        function navigateSlides(direction) {
+            currentSection += direction;
+            
+            if (currentSection < 0) {
+                currentSection = 0;
+            } else if (currentSection >= sections.length) {
+                currentSection = sections.length - 1;
+            }
+            
+            sections[currentSection].scrollIntoView({ behavior: "smooth" });
+            updateNavigation();
+        }
+        
+        // Add click event listeners to navigation links
+        navLinks.forEach(function(link, index) {
+            link.addEventListener("click", function(e) {
+                e.preventDefault();
+                currentSection = index;
+                sections[currentSection].scrollIntoView({ behavior: "smooth" });
+                updateNavigation();
+            });
+        });
+        
+        // Initialize navigation
+        updateNavigation();
+        
+        // Intersection Observer to update active navigation link on scroll
+        const observerOptions = {
+            root: null,
+            rootMargin: "-50% 0px",
+            threshold: 0
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute("id");
+                    navLinks.forEach(link => {
+                        link.classList.remove("active");
+                        if (link.getAttribute("href") === "#" + id) {
+                            link.classList.add("active");
+                            currentSection = Array.from(sections).indexOf(entry.target);
+                            updateNavigation();
+                        }
+                    });
+                }
+            });
+        }, observerOptions);
+        
+        sections.forEach(section => {
+            observer.observe(section);
+        });
+        
+        // Keyboard navigation
+        document.addEventListener("keydown", function(e) {
+            if (e.key === "ArrowLeft") {
+                navigateSlides(-1);
+            } else if (e.key === "ArrowRight") {
+                navigateSlides(1);
+            }
+        });
+    </script>
+</body>
+</html>
